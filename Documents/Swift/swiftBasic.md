@@ -74,7 +74,7 @@
 - nickName = 'yagom'
 - nickName = '야곰' # 변수는 차후에 다시 다른 값을 할당해도 문제가 없음
 
-## 4. 기본 데이터 타입
+## 3. 기본 데이터 타입
 
 스위프트는 데이터 타입에 굉장히 엄격한 언어.  
 다른 데이터 타입끼리 값의 교환이 불가능
@@ -109,7 +109,34 @@
 type(of: )
 ```
 
-## 5. Any, AnyObject, nil
+## 4. Any, AnyObject, nil
+
+### 생각해보기
+
+- 사람이 사용하는 숫자 0은 '없음'이라는 의미를 갖고 있다. 프로그래밍에서 0은 없음을 나타낼 수 있을까?
+- 0이 있는데 nil이라는 표현은 왜 존재하는 것일까?
+
+### Any
+
+- Swift의 모든 타입을 지칭하는 키워드
+  - var someAny: Any = 3.14
+- Any 타입에 Double 자료를 넣어두었더라도, Any는 Double 타입이 아니기 때문에 Double 타입의 변수에 할당할 수 없다.
+  - 명시적으로 타입을 변환해 주어야 한다.
+
+### AnyObject
+
+- 모든 클래스 타입을 지칭하는프로토콜
+  - class SomeClass {}
+  - var someAnyObject: AnyObject = SomeClass()
+- AnyOjbect는 클래스의 인스턴스만 수용 가능하기 때문에 클래스의 인스턴스가 아니면 할당할 수 없다.
+
+### nil
+
+- 없음을 의미하는 키워드
+- 다른 언어의 NULL, Null, null 등과 유사한 표현이다.
+  - Any와 AnyObject에는 nil을 할당할 수 없다.
+
+## 5. 컬렉션 타입(Array, Dictionary, Set)
 
 #### Array
 
