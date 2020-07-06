@@ -15,4 +15,4 @@
 
 ### Swift
 
-- [**스위프트 기초**](https://github.com/SeongjaePark/TIL/Documents/Swift/swiftBasic.md)
+- [**스위프트 기초**](https://github.com/SeongjaePark/TIL/blob/master/Documents/Swift/swiftBasic.md)
