@@ -202,23 +202,23 @@ let immutableArray: Array<Any> = Array<Any>()
 
 #### Dictionary의 선언과 생성
 
-    ```swift
-    var anyDictionary: Dictionary<String, Any> = [String: Any]()
-    var anyDictionary: Dictionary<String, Any> = Dictionary<String, Any>()
-    var anyDictionary: Dictionary<String, Any> = [:]
-    var anyDictionary: [String: Any] = Dictionary<String, Any>()
-    var anyDictionary: [String: Any] = [String: Any]()
-    var anyDictionary: [String: Any] = [:]
-    var anyDictionary: [String: Any]()
-    ```
+```swift
+var anyDictionary: Dictionary<String, Any> = [String: Any]()
+var anyDictionary: Dictionary<String, Any> = Dictionary<String, Any>()
+var anyDictionary: Dictionary<String, Any> = [:]
+var anyDictionary: [String: Any] = Dictionary<String, Any>()
+var anyDictionary: [String: Any] = [String: Any]()
+var anyDictionary: [String: Any] = [:]
+var anyDictionary: [String: Any]()
+```
 
 #### Dictionary 활용
 
 키에 해당하는 값 할당
 
 ```swift
-    aniDictionary["someKey"] = "value" # 키에 해당하는 값 할당
-    anyDictionary["anotherKey"] = 100
+aniDictionary["someKey"] = "value" # 키에 해당하는 값 할당
+anyDictionary["anotherKey"] = 100
 ```
 
 키에 해당하는 값 변경
@@ -327,7 +327,7 @@ let subtracting: Set<Int> = setA.subtracting(setB)
 
 ```swift
 func 함수이름(매개변수1이름: 매개변수1타입, 매개변수2이름: 매개변수2타입 ...) -> 반환타입 {
-/*함수 구현부*/
+  /*함수 구현부*/
 }
 
 // 예시
@@ -340,15 +340,15 @@ fnc sum(a: Int, b: Int) -> Int {
 
 ```swift
 func 함수이름(매개변수1이름: 매개변수1타입, 매개변수2이름: 매개변수2타입 ...) -> Void {
-/*함수 구현부*/
+  /*함수 구현부*/
 }
 // 예시
 func printMyName(name: String) -> Void {
-	print(name)
+  print(name)
 }
 // 반환 값이 없는 경우, 반환 타입(Void)을 생략해줄 수 있다.
 func printYourName(name: String) {
-	print(name)
+  print(name)
 }
 ```
 
@@ -356,11 +356,11 @@ func printYourName(name: String) {
 
 ```swift
 func 함수이름() -> 반환타입 {
-/*함수 구현부*/
+  /*함수 구현부*/
 }
 // 예시
 func maximumIntegerValue() -> Int {
-	return Int.max
+  return Int.max
 }
 ```
 
@@ -368,8 +368,8 @@ func maximumIntegerValue() -> Int {
 
 ```swift
 func 함수이름() -> Void {
-	/*함수 구현부*/
-	return
+  /*함수 구현부*/
+  return
 }
 
 /* 함수 구현이 짧은 경우
@@ -379,8 +379,8 @@ func hello() -> Void {print("hello")}
 
 // 반환 값이 없는 경우, 반환 타입(Void)을 생략해줄 수 있다.
 func 함수이름() {
-	/*함수 구현부*/
-	return
+  /*함수 구현부*/
+  return
 }
 
 func bye() {print("bye")}
@@ -408,7 +408,7 @@ bye() //bye
 
 ```swift
 func 함수이름(매개변수1이름: 매개변수1타입, 매개변수2이름: 매개변수2타입 ...) -> 반환타입 {
-/*함수 구현부*/
+  /*함수 구현부*/
 }
 
 // 예시
@@ -421,15 +421,15 @@ fnc sum(a: Int, b: Int) -> Int {
 
 ```swift
 func 함수이름(매개변수1이름: 매개변수1타입, 매개변수2이름: 매개변수2타입 ...) -> Void {
-/*함수 구현부*/
+  /*함수 구현부*/
 }
 // 예시
 func printMyName(name: String) -> Void {
-	print(name)
+  print(name)
 }
 // 반환 값이 없는 경우, 반환 타입(Void)을 생략해줄 수 있다.
 func printYourName(name: String) {
-	print(name)
+  print(name)
 }
 ```
 
@@ -437,11 +437,11 @@ func printYourName(name: String) {
 
 ```swift
 func 함수이름() -> 반환타입 {
-/*함수 구현부*/
+  /*함수 구현부*/
 }
 // 예시
 func maximumIntegerValue() -> Int {
-	return Int.max
+  return Int.max
 }
 ```
 
@@ -449,8 +449,8 @@ func maximumIntegerValue() -> Int {
 
 ```swift
 func 함수이름() -> Void {
-	/*함수 구현부*/
-	return
+  /*함수 구현부*/
+  return
 }
 
 /* 함수 구현이 짧은 경우
@@ -460,8 +460,8 @@ func hello() -> Void {print("hello")}
 
 // 반환 값이 없는 경우, 반환 타입(Void)을 생략해줄 수 있다.
 func 함수이름() {
-	/*함수 구현부*/
-	return
+  /*함수 구현부*/
+  return
 }
 
 func bye() {print("bye")}
@@ -500,12 +500,12 @@ bye() //bye
 
 ```swift
 if 조건 {
-	/*실행구문*/
+  /*실행구문*/
 } else if 조건 {
-	/*실행구문*/
+  /*실행구문*/
 }
 else {
-	/*실행구문*/
+  /*실행구문*/
 }
 ```
 
@@ -514,11 +514,11 @@ else {
 ```swift
 let someInteger = 100
 if someInteger < 100 {
-	print("100 미만")
+  print("100 미만")
 } else if someInteger > 100 {
- print("100 초과")
+  print("100 초과")
 } else {
-	print("100")
+  print("100")
 }
 
 /* 스위프트의 조건에는 항상 Bool 타입이 들어와야 한다.
@@ -546,9 +546,9 @@ if someInteger {}
 ```swift
 switch 비교값 {
 case 패턴:
-	/*실행구문*/
+  /*실행구문*/
 default:
-	/*실행구문*/
+  /*실행구문*/
 }
 ```
 
@@ -558,27 +558,27 @@ default:
 // 범위 연산자를 활용하면 더욱 쉽고 유용하다.
 switch someInteger {
 case 0:
-	print("zero")
+  print("zero")
 case 1..<100:
-	print("1~99")
+  print("1~99")
 case 100:
-	print("100")
+  print("100")
 case 101...Int.max:
-	print("over 100")
+  print("over 100")
 default:
-	print("unknown")
+  print("unknown")
 } //100
 
 // 정수 외의 대부분의 기본 타입을 사용할 수 있다.
 switch "yagom"{
 case "jake":
-	print("jake")
+  print("jake")
 case "mina":
-	print("mina")
+  print("mina")
 case "yagom":
-	print("yagom!!")
+  print("yagom!!")
 default:
-	print("unknown")
+  print("unknown")
 } // yagom!!
 ```
 
@@ -595,7 +595,7 @@ default:
 
 ```swift
 for item in items {
-	/*실행구문*/
+  /*실행구문*/
 }
 ```
 
@@ -606,12 +606,12 @@ var integers = [1, 2, 3]
 let people = ["yagom": 10, "eric": 15, "mike": 12]
 
 for integer in integers {
-	print(integer)
+  print(integer)
 }
 
 // Dictionary의 item은 key와 value로 구성된 튜플 타입이다.
 for (name, age) in people {
-	print("\(name): \(age)")
+  print("\(name): \(age)")
 }
 ```
 
@@ -621,7 +621,7 @@ for (name, age) in people {
 
 ```swift
 while 조건 {
-	/*실행구문*/
+  /*실행구문*/
 }
 ```
 
@@ -629,7 +629,7 @@ while 조건 {
 
 ```swift
 while integers.count > 1 {
-	integers.removeLast()
+  integers.removeLast()
 }
 ```
 
@@ -641,7 +641,7 @@ while integers.count > 1 {
 
 ```swift
 repeat {
-	/*실행구문*/
+  /*실행구문*/
 } while 조건
 ```
 
@@ -649,7 +649,7 @@ repeat {
 
 ```swift
 repeat {
-	integers.removeLast()
+  integers.removeLast()
 } while integers.count > 0
 ```
 
@@ -662,13 +662,13 @@ repeat {
 var integers = [1, 2, 3]
 
 while integers.count > 3 {
-	integers.removeLast()
+  integers.removeLast()
 }
 print(integers) // [1, 2, 3]
 
 var integers = [1, 2, 3]
 repeat {
-	integers.removeLast()
+  integers.removeLast()
 } while integers.count > 3
 print(integers) // [1, 2]
 ```
@@ -683,12 +683,12 @@ print(integers) // [1, 2]
 ```swift
 //someOptionalParam에 nil이 할당될 수 있다.
 func someFunction (someOptionalParam: Int?) {
-	// ...
+  // ...
 }
 
 //someOptionalParam에 nil이 할당될 수 없다.
 func someFunction (someOptionalParam: Int) {
-	// ...
+  // ...
 }
 
 someFunction(someOptionalParam: nil)
@@ -713,8 +713,8 @@ someFunction(someOptionalParam: nil)
 
 ```swift
 enum Optional<Wrapped>: ExpressibleByNiliteral {
-	case none
-	case some(Wrapped)
+  case none
+  case some(Wrapped)
 }
 
 let optionalValue: Optional<Int> = nil
@@ -731,9 +731,9 @@ var implicitlyUnwrappedOptionalValue: Int! = 100
 
 switch implicitlyUnwrappedOptionalValue {
 case .none:
-print("This Optional variable is nil")
+  print("This Optional variable is nil")
 case .some(let value):
-print("Value is \(value)")
+  print("Value is \(value)")
 }
 
 // 기존 변수처럼 사용 가능
@@ -754,9 +754,9 @@ var optionalValue: Int? = 100
 
 switch optionalValue {
 case .none:
-print("This Optional variable is nil")
+  print("This Optional variable is nil")
 case .some(let value):
-print("Value is \(value)")
+  print("Value is \(value)")
 }
 
 // 기존 변수처럼 사용불가 - 옵셔널과 일반 값은 다른 타입이므로 연산불가
@@ -782,7 +782,7 @@ optionalValue = nil
 
   ```swift
   func printName(_ name: String) {
-  	print(name)
+    print(name)
   }
 
   var myName: String? = nil
@@ -791,17 +791,17 @@ optionalValue = nil
   //전달되는 값의 타입이 다르기 때문에 컴파일 오류발생
 
   if let name: String = myName {
-  	printName(name)
+    printName(name)
   } else {
-  	print("myName == nil")
+    print("myName == nil")
   }
 
   var yourName: String! = nil
 
   if let name: String = yourName {
-  	printName(name)
+    printName(name)
   } else {
-  	print("yourName == nil")
+    print("yourName == nil")
   }
 
   //name 상수는 if-let 구문 내에서만 사용 가능하다.
@@ -814,13 +814,13 @@ optionalValue = nil
   yourName = nil
 
   if let name = myName, friend = yourName {
-  	print("\(name) and \(friend)")
+    print("\(name) and \(friend)")
   }
   //yourName이 nil이기 때문에 실행되지 않는다.
   yourName = "haha"
 
   if let name = myName, friend = yourName {
-  	print("\(name) and \(friend)")
+    print("\(name) and \(friend)")
   }
   // yagom and haha
   ```
@@ -863,7 +863,7 @@ optionalValue = nil
 
 ```swift
 struct Name {
-	/*구현부*/
+  /*구현부*/
 }
 ```
 
@@ -878,24 +878,24 @@ struct Name {
 
 ```swift
 struct Sample {
-	//가변 프로퍼티(값 변경 가능)
-	var mutableProperty: Int = 100
+  //가변 프로퍼티(값 변경 가능)
+  var mutableProperty: Int = 100
 
-	//불변 프로퍼티(값 변경 불가능)
-	let immutableProperty: Int = 100
+  //불변 프로퍼티(값 변경 불가능)
+  let immutableProperty: Int = 100
 
-	//타입 프로퍼티(static 키워드 사용: 타입 자체가 사용하는 프로퍼티)
-	static var typeProperty: Int = 100
+  //타입 프로퍼티(static 키워드 사용: 타입 자체가 사용하는 프로퍼티)
+  static var typeProperty: Int = 100
 
-	//인스턴스 메서드(인스턴스가 사용하는 메서드)
-	func instanceMethod() {
-		print("instance method")
-	}
+  //인스턴스 메서드(인스턴스가 사용하는 메서드)
+  func instanceMethod() {
+    print("instance method")
+  }
 
-	//타입 메서드(static 키워드 사용: 타입 자체가 사용하는 메서드)
-	static func typeMethod() {
-		print("type method")
-	}
+  //타입 메서드(static 키워드 사용: 타입 자체가 사용하는 메서드)
+  static func typeMethod() {
+    print("type method")
+  }
 }
 ```
 
@@ -936,22 +936,22 @@ Sample.typeMethod() // type method
 ```swift
 //구조체 만들기
 struct Student {
-	//가변 프로퍼티
-	var name: String = "unknown"
+  //가변 프로퍼티
+  var name: String = "unknown"
 
-	//class와 같은 키워드로 `(백틱)로 묶어주면 이름으로 사용할 수 있다.
-	var 'class':String = "Swift"
+  //class와 같은 키워드로 `(백틱)로 묶어주면 이름으로 사용할 수 있다.
+  var 'class':String = "Swift"
 
-	//타입 메서드
-	static func.selfIntroduce() {
-		print("학생타입입니다")
-	}
+  //타입 메서드
+  static func.selfIntroduce() {
+    print("학생타입입니다")
+  }
 
-	//인스턴스 메서드
-	//self는 인스턴스 자신을 지칭하며, 몇몇 경우를 제외하고 사용은 선택사항이다.
-	func selfIntroduce() {
-		print("저는 \(self.class)반 \(name)입니다."
-	}
+  //인스턴스 메서드
+  //self는 인스턴스 자신을 지칭하며, 몇몇 경우를 제외하고 사용은 선택사항이다.
+  func selfIntroduce() {
+    print("저는 \(self.class)반 \(name)입니다."
+  }
 }
 
 //타입 메서드 사용
@@ -971,7 +971,7 @@ var mina: Student = Student()
 컴파일 오류 발생
 */
 //mina.name = "mina"
-	mina.selfIntroduce() //저는 Swift반 unknown입니다
+mina.selfIntroduce() //저는 Swift반 unknown입니다
 ```
 
 ## 13. 클래스
@@ -988,7 +988,7 @@ var mina: Student = Student()
 
 ```swift
 class Name {
-	/*구현부*/
+  /*구현부*/
 }
 ```
 
@@ -996,30 +996,30 @@ class Name {
 
 ```swift
 class Sample {
-	//가변 프로퍼티
-	var mutableProperty: Int = 100
+  //가변 프로퍼티
+  var mutableProperty: Int = 100
 
-	//불변 프로퍼티
-	let immutableProperty: Int = 10
+  //불변 프로퍼티
+  let immutableProperty: Int = 10
 
-	//타입 프로퍼티
-	var typeProperty: Int = 100
+  //타입 프로퍼티
+  var typeProperty: Int = 100
 
-	//인스턴스 메서드
-	func instanceMethod() {
-		print("instance method")
-	}
+  //인스턴스 메서드
+  func instanceMethod() {
+    print("instance method")
+  }
 
-	//타입 메서드
-	//상속 시 재정의 불가 타입 메서드 - static
-	static func typeMethod() {
-		print("type method - static")
-	}
+  //타입 메서드
+  //상속 시 재정의 불가 타입 메서드 - static
+  static func typeMethod() {
+    print("type method - static")
+  }
 
-	//상속 시 재정의 가능 타입 메서드 - class
-	class func classMethod() {
-		print("type method - class")
-	}
+  //상속 시 재정의 가능 타입 메서드 - class
+  class func classMethod() {
+    print("type method - class")
+  }
 }
 ```
 
@@ -1067,22 +1067,22 @@ Sample.classMethod() // type method - class
 
 ```swift
 class Student: {
-	//가변 프로퍼티
-	var name: String = "unknown"
+  //가변 프로퍼티
+  var name: String = "unknown"
 
-	//키워드도 `(백틱)로 묶어주면 이름으로 사용할 수 있다.
-	var `class`: String = "Swift"
+  //키워드도 `(백틱)로 묶어주면 이름으로 사용할 수 있다.
+  var `class`: String = "Swift"
 
-	//타입 메서드
-	class func selfIntroduce() {
-		print("학생타입입니다")
-	}
+  //타입 메서드
+  class func selfIntroduce() {
+    print("학생타입입니다")
+  }
 
-	//인스턴스 메서드
-	//self는 인스턴스 자신을 지칭하며, 몇몇 경우를 제외하고 사용은 선택사항이다.
-	func selfIntroduce() {
-		print("저는 \(self.calss)반 \(self.name)입니다")
-	}
+  //인스턴스 메서드
+  //self는 인스턴스 자신을 지칭하며, 몇몇 경우를 제외하고 사용은 선택사항이다.
+  func selfIntroduce() {
+    print("저는 \(self.calss)반 \(self.name)입니다")
+  }
 }
 
 //타입 메서드 사용
@@ -1108,26 +1108,26 @@ jiho.selfIntroduce() // 저는 Swift반 jiho입니다
 
 ```swift
 class Human {
-    var name: String = "unknown"
-    var age: Int = 0
+  var name: String = "unknown"
+  var age: Int = 0
 
-    let species: String = "Human Being"
+  let species: String = "Human Being"
 
-    class func selfIntroduce() {
-        print("사람타입입니다.")
-    }
+  class func selfIntroduce() {
+    print("사람타입입니다.")
+  }
 
-    func selfIntroduce() {
-        print("안녕하세요 저는 \(self.name)입니다. 제 나이는 \(self.age)세입니다.")
-    }
+  func selfIntroduce() {
+    print("안녕하세요 저는 \(self.name)입니다. 제 나이는 \(self.age)세입니다.")
+  }
 
-    func sayHi() {
-        print("안녕하세요!")
-    }
+  func sayHi() {
+    print("안녕하세요!")
+  }
 
-    func sayBye() {
-        print("안녕히 가세요!")
-    }
+  func sayBye() {
+    print("안녕히 가세요!")
+  }
 }
 
 var sjpark: Human = Human()
