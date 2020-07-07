@@ -1582,3 +1582,126 @@ result = calcualte(a: 10, b: 10) { $0 + $1 }
 - 라이브러리 혹은 다른 사람의 스위프트 코드를 보면서 클로저의 축약표현 때문에 당황했던 적은 없나?
 
   아직 다른 사람의 스위프트 코드를 볼 일이 없었지만, 낯선 라이브러리나 코드에서 반환타입 생략, 단축 인자이름 생략 등이 적용된 코드를 본다면 그 의미를 빠르게 파악하기 힘들 것 같다는 생각이 들었다.
+
+## 18. 프로퍼티
+
+### 프로퍼티의 종류
+
+- **인스턴스 저장 프로퍼티**
+- **타입 저장 프로퍼티**
+- **인스턴스 연산 프로퍼티**
+- **타입 연산 프로퍼티**
+- 지연 저장 프로퍼티
+
+### 정의와 사용
+
+```swift
+struct Student {
+  //인스턴스 저장 프로퍼티
+  var name: String = ""
+  var `class`: String = "Swift"
+  var koreanAge: Int = 0
+
+  //인스턴스 연산 프로퍼티
+  var westernAge: Int {
+    get {
+      return koreanAge - 1
+      }
+
+    set(inputValue) {
+      koreanAge = inputValue + 1
+    }
+  }
+
+  //타입 저장 프로퍼티
+  static var typeDescription: String = "학생"
+
+  /*
+   //인스턴스 메서드
+   func selfIntroduce() {
+    print("저는 \(self.class)반 \(name)입니다")
+   }
+   */
+
+  //읽기전용 인스턴스 연산 프로퍼티
+  //간단히 위의 selfIntroduce() 메서드를 대체할 수 있다.
+  var selfIntroduction: String {
+    get {
+      return "저는 \(self.class)반 \(name)입니다"
+    }
+  }
+
+  /*
+   //타입 메서드
+   static func selfIntroduce() {
+    print("학생다입입니다")
+   }
+   */
+
+  //읽기전용 타입 연산 프로퍼티
+  //읽기전용에서는 get을 생략할 수 있다.
+  static var selfIntroduction: String {
+    return "학생타입입니다"
+  }
+}
+
+//타입 연산 프로퍼티 사용
+print(Student.selfIntroduction) // 학생타입입니다
+
+//인스턴스 생성
+var sjpark: Student = Student()
+sjpark.koreanAge = 27
+
+//인스턴스 저장 프로퍼티 사용
+sjpark.name = "sjpark"
+print(sjpark.name) //sjpark
+
+//인스턴스 연산 프로퍼티 사용
+print(sjpark.selfIntroduction) //저는 Swift반 sjpark입니다
+
+print("제 한국나이는 \(sjpark.koreanAge)살이고, 미쿡나이는 \(sjpark.westernAge)살입니다.")
+//제 한국나이는 27살이고, 미쿡나이는 26살입니다.
+```
+
+### 응용
+
+```swift
+struct Money {
+  var currencyRate: Double = 1100
+  var dollar: Double = 0
+  var won: Double {
+    get {
+      return dollar * currencyRate
+    }
+
+    set {
+      dollar = newValue / currencyRate
+      // set에 매개변수를 넘겨주지 않으면 그 값이 자동으로 newValue에 입력됨
+    }
+  }
+}
+
+var moneyInMyPocket = Money()
+
+moneyInMyPocket.won = 11000
+
+print(moneyInMyPocket.won) // 11000.0
+
+moneyInMyPocket.dollar = 10
+
+print(moneyInMyPocket.won) // 11000.0
+```
+
+### 지역변수 및 전역변수
+
+저장 프로퍼티와 연산 프로퍼티의 기능은 함수, 메서드, 클로저, 타입 등의 외부에 위치한 지역/전역 변수에도 모두 사용 가능하다.
+
+```swift
+var a: Int = 100
+var b: Int = 200
+var sum: Int {
+  return a + b
+}
+
+print(sum) // 300
+```
