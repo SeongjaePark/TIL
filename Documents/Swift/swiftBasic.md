@@ -913,6 +913,9 @@ mutable.mutableProperty = 200
 */
 //mutable.immutableProperty = 200
 
+//불면 인스턴스
+let immutable: Sample = Sample()
+
 /*
 불변 인스턴스는 아무리 가변 프로퍼티라도
 인스턴스 생성 후에 수정할 수 없다.
