@@ -844,3 +844,132 @@ optionalValue = nil
   //printName(yourName)
   // nil이 전달되기 때문에 런타임 오류발생
   ```
+
+## 12. 구조체 (struct)
+
+### 생각해보기
+
+- 내가 알고 있는 프로그래밍 언어의 구조체와 스위프트의 구조체가 어떤 점에서 다른지 비교해보기
+
+### 구조체란?
+
+- 스위프트의 대부분 타입은 구조체로 이루어져 있다.
+- 구조체는 **값(value) 타입**이다.
+- 타입이름은 대문자 카멜케이스를 사용해서 정의한다.
+
+### 구조체 문법
+
+#### 구조체 정의: "struct" 키워드 사용
+
+```swift
+struct Name {
+	/*구현부*/
+}
+```
+
+#### 구조체 프로퍼티 및 메서드 구현
+
+- 프로퍼티란?: 클래스나 구조체 혹은 열거체의 객체 (인스턴스)가 그 내부에 가지고 있는, 객체의 상태에 관한 정보를 말한다.
+- 메서드란?: 객체 (인스턴스) 내부에 정의된 함수라고 볼 수 있다.
+
+[Properties - The Swift Programming Language (Swift 5.3)](https://docs.swift.org/swift-book/LanguageGuide/Properties.html)
+
+[Methods - The Swift Programming Language (Swift 5.3)](https://docs.swift.org/swift-book/LanguageGuide/Methods.html)
+
+```swift
+struct Sample {
+	//가변 프로퍼티(값 변경 가능)
+	var mutableProperty: Int = 100
+
+	//불변 프로퍼티(값 변경 불가능)
+	let immutableProperty: Int = 100
+
+	//타입 프로퍼티(static 키워드 사용: 타입 자체가 사용하는 프로퍼티)
+	static var typeProperty: Int = 100
+
+	//인스턴스 메서드(인스턴스가 사용하는 메서드)
+	func instanceMethod() {
+		print("instance method")
+	}
+
+	//타입 메서드(static 키워드 사용: 타입 자체가 사용하는 메서드)
+	static func typeMethod() {
+		print("type method")
+	}
+}
+```
+
+#### 구조체 사용
+
+```swift
+//가변 인스턴스 생성
+var mutable: Sample = Sample()
+
+mutable.mutableProperty = 200
+
+/*
+불변 프로퍼티는 인스턴스 생성 후 수정할 수 없다.
+컴파일오류 발생
+*/
+//mutable.immutableProperty = 200
+
+/*
+불변 인스턴스는 아무리 가변 프로퍼티라도
+인스턴스 생성 후에 수정할 수 없다.
+컴파일 오류 발생
+*/
+//immutable.mutableProperty = 200
+//immutable.immutableProperty = 200
+
+//타입 프로퍼티 및 메서드
+Sample.typeProperty = 300
+Sample.typeMethod() // type method
+
+/* 인스턴스는 타입 프로퍼티나 타입 메서드를 사용할 수 없다.
+컴파일 오류 발생*/
+//mutable.typeProperty = 400
+//mutable .typeMethod()
+```
+
+#### 학생 구조체 만들어보기
+
+```swift
+//구조체 만들기
+struct Student {
+	//가변 프로퍼티
+	var name: String = "unknown"
+
+	//class와 같은 키워드로 `(백틱)로 묶어주면 이름으로 사용할 수 있다.
+	var 'class':String = "Swift"
+
+	//타입 메서드
+	static func.selfIntroduce() {
+		print("학생타입입니다")
+	}
+
+	//인스턴스 메서드
+	//self는 인스턴스 자신을 지칭하며, 몇몇 경우를 제외하고 사용은 선택사항이다.
+	func selfIntroduce() {
+		print("저는 \(self.class)반 \(name)입니다."
+	}
+}
+
+//타입 메서드 사용
+Student.selfIntroduce() //학생타입입니다.
+
+//가변 인스턴스 생성 & 가변 프로퍼티 값 바꿔주기
+var sjpark: Student = Student()
+sjpark.name = "sjpark"
+sjpark.class = "스위프트"
+sjpark.selfIntroduce() //저는 스위프트반 sjpark입니다
+
+//불변 인스턴스 생성
+var mina: Student = Student()
+
+/*
+불변 인스턴스이므로 프로퍼티 값 변경 불가
+컴파일 오류 발생
+*/
+//mina.name = "mina"
+	mina.selfIntroduce() //저는 Swift반 unknown입니다
+```
