@@ -1069,7 +1069,7 @@ Sample.classMethod() // type method - class
 ### 학생 클래스 만들어 보기
 
 ```swift
-class Student: {
+class Student {
   //가변 프로퍼티
   var name: String = "unknown"
 
@@ -1515,7 +1515,7 @@ print(result) // 20
 
 ### 반환타입 생략
 
-calculate(a:b:method:) 함수의 method 매개변수는 Int 타입을 반환할 것이라는 사실을 컴파일러도 알기 때문에 굳이 클로저에서 반환타입을 명시해 주지 않아도 된다. 대신 in 키워드는 생략할 수 없다.
+`calculate(a:b:method:)` 함수의 method 매개변수는 Int 타입을 반환할 것이라는 사실을 컴파일러도 알기 때문에 굳이 클로저에서 반환타입을 명시해 주지 않아도 된다. 대신 in 키워드는 생략할 수 없다.
 
 ```swift
 result = calcualte(a: 10, b: 10, method: { (left: Int, right: Int) in
