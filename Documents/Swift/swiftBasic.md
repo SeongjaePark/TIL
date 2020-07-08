@@ -2119,6 +2119,10 @@ donald = nil// donald 인스턴스가 더 이상 필요없으므로 메모리에
 
 ### 옵셔널 체이닝
 
+[Optional Chaining - The Swift Programming Language (Swift 5.3)](https://docs.swift.org/swift-book/LanguageGuide/OptionalChaining.html)
+
+[Basic Operators - The Swift Programming Language (Swift 5.3)](https://docs.swift.org/swift-book/LanguageGuide/BasicOperators.html)
+
 - 옵셔널 체이닝은 옵셔널의 내부의 내부의 내부로 옵셔널이 연결되어 있을 때 유용하게 활용할 수 있다.
 - 매번 **nil** 확인을 하지 않고 최종적으로 원하는 값이 있는지 없는지 확인할 수 있다.
 
