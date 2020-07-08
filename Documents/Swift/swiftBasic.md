@@ -1775,3 +1775,130 @@ moneyInMyPocket.dollar = 10
 print(moneyInMyPocket.won)
 //11500.0
 ```
+
+## 20. 상속
+
+### 스위프트 상속
+
+- 상속은 클래스, 프로토콜 등에서 가능하다.
+- 열거형, 구조체는 상속이 불가능하다.
+- 스위프트의 클래스는 단일상속으로, 다중상속을 지원하지 않는다.
+
+### 문법
+
+```swift
+class 이름: 상속받을 클래스 이름 {
+	/*구현부*/
+}
+```
+
+### 사용
+
+- **final** 키워드를 사용하면 재정의(**override**)를 방지할 수 있다.
+- **static** 키워드를 사용해 타입 메서드를 만들면 재정의가 불가능하다.
+- **class** 키워드를 사용해 타입 메서드를 만들면 재정의가 가능하다.
+- **class** 앞에 **final**을 붙이면 **static** 키워드를 사용한 것과 동일하게 동작한다.
+- **override** 키워드를 사용해 부모 클래스의 메서드를 재정의할 수 있다.
+
+```swift
+// 기반 클래스 Person
+class Person {
+  var name: String = ""
+
+  func selfIntroduce() {
+    print("저는 \(name)입니다")
+  }
+
+  // final 키워드를 사용해서 재정의를 방지할 수 있다.
+  final func sayHello() {
+    print("hello")
+  }
+
+  //타입 메서드
+  //재정의 불가 타입 메서드 - static
+  static func typeMethod() {
+    print("type method - static")
+  }
+
+  //재정의 가능 타입 메서드 - class
+  class func classMethod() {
+    print("type method - class")
+  }
+
+  /*
+   재정의 가능한 class 메서드라도, final 키워드를 사용하면 재정의할 수 없다.
+   메서드 앞의 'static'과 'final class'는 똑같은 역할을 한다.
+   */
+  final class func finalClassMethod() {
+    print("type method - final class")
+  }
+}
+
+//Person을 상속받는 Student
+class Student: Person {
+  var major: String = ""
+
+  override func selfIntroduce() {
+    print("저는 \(name)이고, 전공은 \(major)입니다")
+  }
+
+  override class func classMethod() {
+    print("overriden type method - class")
+  }
+
+  //static을 사용한 타입 메서드는ㄴ 재정의할 수 없다.
+  //override static func typeMethod() { }
+
+  //final 키워드를 사용한 메서드, 프로퍼티는 재정의할 수 없다.
+  //override func sayHello() { }
+  //override class func finalClassMethod() { }
+
+}
+```
+
+### 구동 확인
+
+```swift
+let sjpark: Person = Person()
+let hana: Student = Student()
+
+sjpark.name = "sjpark"
+hana.name = "hana"
+hana.major = "Swift"
+
+sjpark.selfIntroduce()
+//저는 sjpark입니다
+
+hana.selfIntroduce()
+//저는 hana이고, 전공은 Swift입니다
+
+Person.classMethod()
+//type method - clas
+
+Person.typeMethod()
+//type method - static
+
+Person.finalClassMethod()
+//type method - final class
+
+Student.classMethod()
+//overriden type method - class
+
+Student.typeMethod()
+//type method - static
+
+Student.finalClassMethod()
+//type method - final class
+```
+
+### 생각해보기
+
+동물을 주제로 클래스의 상속관계를 만들어보자. 어떤 기준으로 동물을 분류할 수 있을까?
+
+개구리는 헤엄도 칠 수 있고, 뛸 수도 있다.
+
+오리는 헤엄도 치고 날 수도 있다.
+
+동물을 클래스 상속관계로 나타냈을 때 발생할 수 있는 문제점은 무엇이 있을까?
+
+- 동물의 가능한 행동을 기준으로 분류하면, 한 동물이 여러 클래스 중 어느 것에 속하는 지 결정하는 데에 어려움이 있을 것 같다.
