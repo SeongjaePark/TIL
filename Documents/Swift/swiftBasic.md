@@ -2383,3 +2383,92 @@ forcedCasted = mike as! UniversityStudent
 
 - as 연산자는 실제로 대상 객체의 타입을 변경하는 것일까?
   - 업 캐스팅을 진행한 이후에 `type(of:)` 를 통해 타입을 확인해 보아도 기존의 인스턴스의 타입을 반환하는 것으로 보아 실제로 대상 객체의 타입을 변경하는 것은 아닌 것 같다.
+
+## 24. assert / guard
+
+[The Basics - The Swift Programming Language (Swift 5.3)](https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html#//apple_ref/doc/uid/TP40014097-CH5-ID335)
+
+[Control Flow - The Swift Programming Language (Swift 5.3)](https://docs.swift.org/swift-book/LanguageGuide/ControlFlow.html#//apple_ref/doc/uid/TP40014097-CH9-ID525)
+
+assert와 guard를 잘 활용하면 애플리케이션이 동작 도중에 생성하는 다양한 연산 결과값을 동적으로 확인하고 안전하게 처리할 수 있도록 확인하고 빠르게 처리할 수 있다.
+
+### Assertion
+
+- **assert(_:_:file:line:)** 함수를 사용한다.
+- **assert** 함수는 **디버깅 모드에서만** 동작한다.
+- 배포하는 애플리케이션에서는 제외된다.
+- 예상했던 **조건의 검증을 위하여** 사용한다.
+
+```swift
+var someInt: Int = 0
+
+//검증 조건과 실패시 나타날 문구를 작성해 준다.
+//검증 조건에 부합하므로 지나간다.
+assert(someInt == 0, "someInt != 0")
+
+someInt = 1
+//assert(someInt == 0) //동작 중지, 검증 실패
+//assert(someInt == 0, "someInt != 0") //동작 중지, 검증 실패
+//Assertion failed: someInt != 0: file swiftBasic.playground, line 9
+
+func functionWithAssert(age: Int?) {
+
+  assert(age != nil, "age == nil")
+
+  assert((age! >= 0) && (age! <= 130), "나이값 입력이 잘못되었습니다")
+  print("당신의 나이는 \(age!)세입니다")
+}
+
+functionWithAssert(age: 50) //당신의 나이는 50세입니다
+//functionWithAssert(age: -1) //동작 중지, 검증 실패
+//Assertion failed: 나이값 입력이 잘못되었습니다: file swiftBasic.playground, line 17
+
+//functionWithAssert(age: nil) //동작 중지, 검증 실패
+//Assertion failed: age == nil: file swiftBasic.playground, line 15
+```
+
+- **assert(_:_:file:line:)**와 같은 역할을 하지만 실제 배포 환경에서도 동작하는 **precondition(_:_:file:line:)** 함수도 있다.
+
+  [Swift - Assertion과 컴파일 최적화](http://seorenn.blogspot.com/2016/05/swift-assertion.html)
+
+### guard(빠른종료 - Early Exit)
+
+- **guard**를 사용해서 잘못된 값의 전달 시 특정 실행구문을 빠르게 종료한다.
+- 디버깅 모드 뿐만 아니라 어떤 조건에서도 동작한다.
+- **guard**의 **else** 블럭 내부에는 특정 **코드블럭을 종료하는 지시어(return, break 등)가 꼭 있어야 한다.**
+- 타입 캐스팅, 옵셔널과도 자주 사용된다.
+- 그 외에도 단순 조건 판단 후 빠르게 종료할 때도 용이하다.
+
+```swift
+func functionWithGuard(age: Int?) {
+
+  guard let unWrappedAge = age, unWrappedAge < 130, unWrappedAge >= 0 else {
+    print("나이값 입력이 잘못되었습니다")
+    return
+  }
+
+  print("당신의 나이는 \(unWrappedAge)세입니다")
+}
+
+functionWithGuard(age: 130) //나이값 입력이 잘못되었습니다
+functionWithGuard(age: 27) //당신의 나이는 27세입니다.
+
+func someFunction(info: [String: Any]) {
+  guard let name = info["name"] as? String else {
+    return
+  }
+
+  guard let age = info["age"] as? Int, age >= 0 else {
+    return
+  }
+
+  print("\(name): \(age)")
+}
+
+someFunction(info: ["name": "jenny", "age": "10"]) //출력x
+someFunction(info: ["name": "mike"]) //출력x
+```
+
+#### if let / guard 를 이용한 옵셔널 바인딩 비교
+
+if let은 if 구문 외부에서는 옵셔널 바인딩을 통해 할당한 값을 사용할 수 없지만, guard let은 guard 구문 이후에도 사용 가능하다.
