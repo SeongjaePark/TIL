@@ -2231,3 +2231,155 @@ sjpark?.home?.guard?.nickName = nil
 guardNickName = sjpark?.home?.guard?.nickName ?? "배트맨"
 print(guardNickName) // 배트맨
 ```
+
+## 23. 타입 캐스팅
+
+### 스위프트 타입 캐스팅
+
+- **인스턴스의 타입을 확인**하는 용도
+- 클래스의 인스턴스를 **부모 혹은 자식 클래스의 타입으로 사용할 수 있는지 확인**하는 용도
+- **is, as**를 사용한다.
+- 형변환(ex `let someDouble = Double(2)`)은 타입캐스팅이 아니라 새로운 값을 생성하는 것이다.
+
+### 타입 캐스팅의 정의
+
+[https://docs.swift.org/swift-book/LanguageGuide/TypeCasting.html](https://docs.swift.org/swift-book/LanguageGuide/TypeCasting.html)
+
+> _Type casting_ is a way to check the type of an instance, or to treat that instance as a different superclass or subclass from somewhere else in its own class hierarchy
+
+### 예제 클래스
+
+```swift
+class Person {
+  var name: String = ""
+  func breath() {
+    print("숨을 쉽니다")
+  }
+}
+
+class Student: Person {
+  var school: String = ""
+  func goToSchool() {
+    print("등교를 합니다")
+  }
+}
+
+class UniversityStudent: Student {
+  var major: String = ""
+  func goToMT() {
+    print("멤버쉽 트레이닝을 갑니다 신남!")
+  }
+}
+
+//인스턴스 생성
+var sjpark: Person = Person()
+var hana: Student = Student()
+var jason: UniversityStudent = UniversityStudent()
+```
+
+### 타입 확인
+
+**is**를 사용해서 타입을 확인한다.
+
+```swift
+var result: Bool
+
+result = sjpark is Person // true
+result = sjpark is Student // false
+result = sjpark is UniversityStudent // false
+
+result = hana is Person // true
+result = hana is Student // true
+result = hana is UniversityStudent // false
+
+result = jason is Person // true
+result = jason is Student // true
+result = jason is UniversityStudent // true
+
+if sjpark is UniversityStudent {
+  print("sjpark은 대학생입니다")
+} else if sjpark is Student {
+  print("sjpark은 학생입니다")
+} else if sjpark is Person {
+  print("sjpark은 사람입니다")
+} // sjpark은 사람입니다.
+
+switch jason {
+case is Person:
+  print("jason은 사람입니다")
+case is Student:
+  print("jason은 학생입니다")
+case is UniversityStudent:
+  print("jason은 대학생입니다")
+default:
+  print("jason은 사람도, 학생도, 대학생도 아닙니다")
+} // jason은 사람입니다
+
+switch jason {
+case is UniversityStudent:
+  print("jason은 대학생입니다")
+case is Student:
+  print("jason은 학생입니다")
+case is Person:
+  print("jason은 사람입니다")
+default:
+  print("jason은 사람도, 학생도, 대학생도 아닙니다")
+} //jason은 대학생입니다
+```
+
+### 업 캐스팅(Up Casting)
+
+- **as**를 사용해서 **부모클래스의 인스턴스**로 사용할 수 있도록 컴파일러에게 타입정보를 전환해준다.
+- **Any** 혹은 **AnyObject**로도 타입정보를 변환할 수 있다
+- 암시적으로 처리되므로 꼭 필요한 경우가 아니라면 생략해도 무방하다
+
+```swift
+//UniversityStudent 인스턴스를 생성하여 Person 행세를 할 수 있도록 업 캐스팅
+var mike: Person = UniversityStudent() as Person
+
+var jenny: Student = Student()
+//var jina: UniversityStudent = Person() as UniversityStudent // 컴파일 오류
+
+//UniversityStudent 인스턴스를 생성하여 Any 행세를 할 수 있도록 업 캐스팅
+var jina: Any = Person() // as Any 생략 가능
+```
+
+### 다운 캐스팅(Down Casting)
+
+as? 또는 as!를 사용해서 **자식 클래스의 인스턴스**로 사용할 수 있도록 컴파일러에게 인스턴스의 타입정보를 전환해준다.
+
+#### 조건부 다운 캐스팅
+
+- as?를 사용한다
+- 캐스팅에 실패하면, 즉 캐스팅하려는 타입에 부합하지 않는 인스턴스라면 nil을 반환하기 때문에 결과의 타입은 옵셔널 타입이다.
+
+```swift
+var optionalCasted: Student?
+
+optionalCasted = mike as? UniversityStudent
+optionalCasted = jenny as? UniversityStudent // nil
+optionalCasted = jina as? UniversityStudent // nil
+optionalCasted = jina as? Student // nil
+```
+
+#### 강제 다운 캐스팅
+
+- as!를 사용한다
+- 캐스팅에 실패하면, 즉 캐스팅하려는 타입에 부합하지 않는 인스턴스라면 **런타임 오류**가 발생한다.
+- 캐스팅에 성공하면 옵셔널이 아닌 일반 타입을 반환한다.
+
+### 활용
+
+```swift
+var forcedCasted: Student
+
+forcedCasted = mike as! UniversityStudent
+//forcedCasted = jenny as! UniversityStudent //런타임 오류
+//forcedCasted = jina as! UniversityStudent //런타임 오류
+//forcedCasted = jina as! Student //런타임오류
+```
+
+### 생각해보기
+
+- as 연산자는 실제로 대상 객체의 타입을 변경하는 것일까?
+  - 업 캐스팅을 진행한 이후에 `type(of:)` 를 통해 타입을 확인해 보아도 기존의 인스턴스의 타입을 반환하는 것으로 보아 실제로 대상 객체의 타입을 변경하는 것은 아닌 것 같다.
