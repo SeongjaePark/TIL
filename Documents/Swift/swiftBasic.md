@@ -2114,3 +2114,116 @@ donald = nil// donald 인스턴스가 더 이상 필요없으므로 메모리에
 > ARC automatically frees up the memory used by class instances when those instances are no longer needed.
 
 > Reference counting applies only to instances of classes. Structures and enumerations are value types, not reference types, and are not stored and passed by reference.
+
+## 22. 옵셔널 체이닝과 nil 병합
+
+### 옵셔널 체이닝
+
+- 옵셔널 체이닝은 옵셔널의 내부의 내부의 내부로 옵셔널이 연결되어 있을 때 유용하게 활용할 수 있다.
+- 매번 **nil** 확인을 하지 않고 최종적으로 원하는 값이 있는지 없는지 확인할 수 있다.
+
+```swift
+//예제 클래스
+//사람 클래스
+class Person {
+  var name: String
+  var nickName: String?
+  var home: Apartment?
+
+  init(name: String) {
+    self.name = name
+  }
+}
+
+//사람이 사는 집 클래스
+class Apartment {
+  var buildingNumber: String
+  var roomNumber: String
+  var `guard`: Person?
+  var owner: Person?
+
+  init(dong: String, ho: String) {
+    buildingNumber = dong
+    roomNumber = ho
+  }
+}
+
+//옵셔널 체이닝 사용
+let sjpark: Person? = Person(name: "sjpark")
+let apart: Apartment? = Apartment(dong: "101", ho: "202")
+let superman: Person? = Person(name: "superman")
+
+//옵셔널 체이닝 실행 후 결과값이 nil일 수 있으므로
+//결과 타입도 옵셔널이다
+
+//만약 우리 집의 경비원의 별명이 궁금하다면..?
+
+//옵셔널 체이닝을 사용하지 않는다면...
+func guardNickName(owner: Person?) {
+  if let owner = owner {
+    if let home = owner.home {
+      if let `guard` = home.guard {
+        if let guardNickName = `guard`.nickName {
+          print("우리집 경비원의 별멍은 \(guardNickName)입니다")
+        } else {
+          print("우리집 경비원은 별명이 없어요")
+        }
+      }
+    }
+  }
+}
+
+guardNickName(owner: sjpark) // 두번째 if let 구문의 condition을 충족시키지 않아 출력값이 없다.
+
+//옵셔널 체이닝을 사용한다면
+func guardNickNameWithOptionalChaining(owner: Person?) {
+  if let guardNickName = owner?.home?.guard?.nickName {
+    print("우리집 경비원의 별명은 \(guardNickName)입니다")
+  } else {
+    print("우리집 경비원은 별명이 없어요")
+  }
+}
+
+guardNickNameWithOptionalChaining(owner: sjpark)
+//우리집 경비원은 별명이 없어요
+
+sjpark?.home?.guard?.nickName // nil
+
+//집 할당
+sjpark?.home = apart
+sjpark?.home // Optional(Apartment)
+
+sjpark?.home?.guard // nil
+
+//경비원 할당
+sjpark?.home?.guard = superman
+sjpark?.home?.guard // Optional(Person)
+
+sjpark?.home?.guard?.name // superman
+sjpark?.home?.guard?.nickName // nil
+
+sjpark?.home?.guard?.nickName = "슈퍼맨"
+
+guardNickName(owner: sjpark) // 우리집 경비원의 별명은 슈퍼맨입니다
+guardNickNameWithOptionalChaining(owner: sjpark) // 우리집 경비원으 별멍은 슈퍼맨입니다.
+```
+
+### nil 병합 연산자
+
+- 중위 연산자이다. **??**
+  - 중위 연산자란?: 연산자가 두 피연산자 사이에 위치하는 연산자
+  - 예시: `Optional ?? Value`
+- 옵셔널 값이 **nil**일 경우, 우측의 값을 반환한다.
+- **띄어쓰기에 주의해야 한다**
+
+```swift
+var guardNickName: String
+
+guardNickName = sjpark?.home?.guard?.nickName ?? "배트맨"
+print(guardNickName) // 슈퍼맨
+
+sjpark?.home?.guard?.nickName = nil
+
+guardNickName = sjpark?.home?.guard?.nickName ?? "배트맨"
+print(guardNickName) // 배트맨
+```
