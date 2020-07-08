@@ -2053,7 +2053,7 @@ class PersonD {
       return nil
     }
 
-    //
+    //Swift 4에서부터는 String 타입에 characters 프로퍼티가 존재하지 않는다.
     //if name.characters.count == 0 {
     if name.count == 0 {
       return nil
