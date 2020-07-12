@@ -2,7 +2,8 @@
 
 > 참조: 네이버 [부스트코스] iOS 프로그래밍을 위한 스위프트 기초. by yagom님  
 > [네이버 부스트코스 링크](https://www.edwith.org/boostcamp_ios/joinLectures/38564)  
-> [야곰 닷넷 링크](https://yagom.net/courses/swift-basic/)
+> [야곰 닷넷 링크](https://yagom.net/courses/swift-basic/)  
+> [스위프트 프로그래밍 관련 야곰님 저서](https://book.naver.com/bookdb/book_detail.nhn?bid=15479573)
 
 ---
 
@@ -3180,3 +3181,17 @@ print(multiplyFromThree) // 720
   - map과 reduce 사용이 적절해 보인다.
 - 이름, 국어성적, 영어성적, 수학성적이 담겨있는 구조체의 배열을 성적평균이 70점 이상인 사람의 이름, 성적평균이 담겨있는 구조체의 배열로 변환할 때
   - map과 reduce와 filter 사용이 적절해 보인다.
+
+## 29. 더 알아보기
+
+### 추가적으로 알아가야 할 문법과 개념들
+
+- 제네릭(Generics)
+- 서브스크립트(Subscript)
+- 접근수준(Access Control)
+- ARC(Automatic Reference Counting)
+- 중첩타입(Nested types)
+- 사용자정의 연산자(Custom Operators)
+- 오류 처리(Error Handling)
+- 불명확 타입(Opaque Types)
+- 프로토콜 지향 프로그래밍(Protocol Oriented Programming)
