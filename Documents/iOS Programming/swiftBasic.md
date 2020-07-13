@@ -11,6 +11,9 @@
 
 ---
 
+<details>
+  <summary>1. 명명볍 / 콘솔로그 / 문자열 보간법</summary>
+
 ## 1. 명명법 / 콘솔로그 / 문자열 보간법
 
 ### 이름짓기 규칙
@@ -42,6 +45,10 @@
 - String Interpolation
 - 프로그램 실행 중 문자열 내에 변수 또는 상수의 실질적인 값을 표현하기 위해 사용
 - \()
+</details>
+
+<details>
+  <summary>2. 상수와 변수</summary>
 
 ## 2. 상수와 변수
 
@@ -74,6 +81,11 @@
 - var nickName: String
 - nickName = 'yagom'
 - nickName = '야곰' # 변수는 차후에 다시 다른 값을 할당해도 문제가 없음
+
+</details>
+
+<details>
+  <summary>3. 기본 데이터 타입</summary>
 
 ## 3. 기본 데이터 타입
 
@@ -110,6 +122,12 @@
 type(of: )
 ```
 
+</details>
+
+<details>
+  <summary> 4. Any, AnyObject, nil
+  </summary>
+
 ## 4. Any, AnyObject, nil
 
 ### 생각해보기
@@ -136,6 +154,12 @@ type(of: )
 - 없음을 의미하는 키워드
 - 다른 언어의 NULL, Null, null 등과 유사한 표현이다.
   - Any와 AnyObject에는 nil을 할당할 수 없다.
+
+</details>
+
+<details>
+  <summary>5. 컬렉션 타입(Array, Dictionary, Set)
+  </summary>
 
 ## 5. 컬렉션 타입(Array, Dictionary, Set)
 
@@ -322,6 +346,12 @@ let intersection: Set<Int> = setA.intersection(setB)
 let subtracting: Set<Int> = setA.subtracting(setB)
 ```
 
+</details>
+
+<details>
+  <summary>6. 함수 기본
+  </summary>
+
 ## 6. 함수 기본
 
 ### 함수 선언의 기본 형태
@@ -403,6 +433,12 @@ hello() //hello
 bye() //bye
 ```
 
+</details>
+
+<details>
+  <summary>7. 함수 고급
+  </summary>
+
 ## 7. 함수 고급
 
 ### 함수 선언의 기본 형태
@@ -483,6 +519,12 @@ hello() //hello
 
 bye() //bye
 ```
+
+</details>
+
+<details>
+  <summary>8. 조건문
+  </summary>
 
 ## 8. 조건문
 
@@ -583,6 +625,12 @@ default:
 } // yagom!!
 ```
 
+</details>
+
+<details>
+  <summary>9. 반복문
+  </summary>
+
 ## 9. 반복문
 
 ### or-in 구문
@@ -673,6 +721,12 @@ repeat {
 } while integers.count > 3
 print(integers) // [1, 2]
 ```
+
+</details>
+
+<details>
+  <summary>10. 옵셔널
+  </summary>
 
 ## 10. 옵셔널
 
@@ -767,6 +821,12 @@ case .some(let value):
 optionalValue = nil
 ```
 
+</details>
+
+<details>
+  <summary>11. 옵셔널 추출
+  </summary>
+
 ## 11. 옵셔널 추출
 
 ### 옵셔널 추출이란?
@@ -845,6 +905,12 @@ optionalValue = nil
   //printName(yourName)
   // nil이 전달되기 때문에 런타임 오류발생
   ```
+
+  </details>
+
+<details>
+  <summary>12. 구조체 (struct)
+  </summary>
 
 ## 12. 구조체 (struct)
 
@@ -977,6 +1043,12 @@ var mina: Student = Student()
 //mina.name = "mina"
 mina.selfIntroduce() //저는 Swift반 unknown입니다
 ```
+
+</details>
+
+<details>
+  <summary>13. 클래스
+  </summary>
 
 ## 13. 클래스
 
@@ -1146,6 +1218,12 @@ sjpark.sayHi() // 안녕하세요!
 sjpark.sayBye() // 안녕히 가세요!
 ```
 
+</details>
+
+<details>
+  <summary>14. 열거형
+  </summary>
+
 ## 14. 열거형
 
 ### 열거형
@@ -1309,6 +1387,11 @@ Month.mar.printMessage() //따스한 봄
 
 - 본문 예시의 BoostCamp, Weekday, School, Fruit, Month 는 각각 열거형이 예로 적합한가?
 - 그렇게 생각한 이유는?
+</details>
+
+<details>
+  <summary>15. 클래스 vs 구조체 / 열거형
+  </summary>
 
 ## 15. 클래스 vs 구조체 / 열거형
 
@@ -1377,6 +1460,11 @@ print("second class reference property: \(secondClassReference.property)") // 2
 - 스위프트는 구조체와 열거형 사용을 선호한다.
 - Apple 프레임워크는 대부분 클래스를 사용한다.
 - 구조체 / 클래스 선택과 사용은 개발자의 몫이다.
+</details>
+
+<details>
+  <summary>16. 클로저 기본
+  </summary>
 
 ## 16. 클로저 기본
 
@@ -1482,6 +1570,11 @@ print(calculated) // 500
   2. 모든 요소는 함수의 반환값이 될 수 있다.
   3. 모든 요소는 할당 명령문의 대상이 될 수 있다.
   4. 모든 요소는 동일 비교의 대상이 될 수 있다.
+  </details>
+
+<details>
+  <summary>17. 클로저 고급
+  </summary>
 
 ## 17. 클로저 고급
 
@@ -1583,6 +1676,11 @@ result = calcualte(a: 10, b: 10) { $0 + $1 }
 - 라이브러리 혹은 다른 사람의 스위프트 코드를 보면서 클로저의 축약표현 때문에 당황했던 적은 없나?
 
   아직 다른 사람의 스위프트 코드를 볼 일이 없었지만, 낯선 라이브러리나 코드에서 반환타입 생략, 단축 인자이름 생략 등이 적용된 코드를 본다면 그 의미를 빠르게 파악하기 힘들 것 같다는 생각이 들었다.
+  </details>
+
+<details>
+  <summary>18. 프로퍼티
+  </summary>
 
 ## 18. 프로퍼티
 
@@ -1707,6 +1805,12 @@ var sum: Int {
 print(sum) // 300
 ```
 
+</details>
+
+<details>
+  <summary>19. 프로퍼티 감시자
+  </summary>
+
 ## 19. 프로퍼티 감시자
 
 ### 프로퍼티 감시자
@@ -1776,6 +1880,12 @@ moneyInMyPocket.dollar = 10
 print(moneyInMyPocket.won)
 //11500.0
 ```
+
+</details>
+
+<details>
+  <summary>20. 상속
+  </summary>
 
 ## 20. 상속
 
@@ -1903,6 +2013,11 @@ Student.finalClassMethod()
 동물을 클래스 상속관계로 나타냈을 때 발생할 수 있는 문제점은 무엇이 있을까?
 
 - 동물의 가능한 행동을 기준으로 분류하면, 한 동물이 여러 클래스 중 어느 것에 속하는 지 결정하는 데에 어려움이 있을 것 같다.
+</details>
+
+<details>
+  <summary>21. 인스턴스 생성 / 소멸 (init / deinit)
+  </summary>
 
 ## 21. 인스턴스 생성 / 소멸 (init / deinit)
 
@@ -2116,6 +2231,12 @@ donald = nil// donald 인스턴스가 더 이상 필요없으므로 메모리에
 
 > Reference counting applies only to instances of classes. Structures and enumerations are value types, not reference types, and are not stored and passed by reference.
 
+</details>
+
+<details>
+  <summary>22. 옵셔널 체이닝과 nil 병합
+  </summary>
+
 ## 22. 옵셔널 체이닝과 nil 병합
 
 ### 옵셔널 체이닝
@@ -2232,6 +2353,12 @@ sjpark?.home?.guard?.nickName = nil
 guardNickName = sjpark?.home?.guard?.nickName ?? "배트맨"
 print(guardNickName) // 배트맨
 ```
+
+</details>
+
+<details>
+  <summary>23. 타입 캐스팅
+  </summary>
 
 ## 23. 타입 캐스팅
 
@@ -2384,6 +2511,11 @@ forcedCasted = mike as! UniversityStudent
 
 - as 연산자는 실제로 대상 객체의 타입을 변경하는 것일까?
   - 업 캐스팅을 진행한 이후에 `type(of:)` 를 통해 타입을 확인해 보아도 기존의 인스턴스의 타입을 반환하는 것으로 보아 실제로 대상 객체의 타입을 변경하는 것은 아닌 것 같다.
+  </details>
+
+<details>
+  <summary>24. assert / guard
+  </summary>
 
 ## 24. assert / guard
 
@@ -2487,6 +2619,11 @@ if 구문과 guard 구문은 어떤점이 다른가?
 if 구문이 있는데 굳이 왜 guard 구문을 사용할까?
 
 - guard 구문은 if {} else {}와 같이 구문 2개를 함께 써주지 않아도 되어서 더 편한 것 같고, 또한 코드블럭을 종료하는 지시어를 꼭 구문 안에 포함시켜야 하므로 조건을 확인하고 조건이 맞지 않으면 바로 early exit 시켜야 하는 상황에 더 적절한 것으로 보인다.
+</details>
+
+<details>
+  <summary>25. 프로토콜
+  </summary>
 
 ## 25. 프로토콜
 
@@ -2691,6 +2828,12 @@ if let someReadSpeakable: ReadSpeakable = someAny as? ReadSpeakable {
 
 다른 언어의 추상 클래스와 스위프트의 프로토콜은 어떤 점이 유사하고 어떤 점이 다른가?
 
+</details>
+
+<details>
+  <summary>26. 익스텐션
+  </summary>
+
 ## 26. 익스텐션
 
 [Extensions - The Swift Programming Language (Swift 5.3)](https://docs.swift.org/swift-book/LanguageGuide/Extensions.html)
@@ -2853,6 +2996,12 @@ let stringFromDouble: String = String(double: 100.0)
 ```
 
 익스텐션을 활용하면 다양하고 강력한 기능을 구현할 수 있지만, **해당 타입에 적합**한 익스텐션을 구현하도록 주의해야 한다
+
+</details>
+
+<details>
+  <summary>27. 오류 처리
+  </summary>
 
 ## 27. 오류 처리
 
@@ -3032,6 +3181,11 @@ result//  1개 제공함
 
 - rethrows
 - defer
+</details>
+
+<details>
+  <summary>28. 고차함수
+  </summary>
 
 ## 28. 고차함수
 
@@ -3181,6 +3335,11 @@ print(multiplyFromThree) // 720
   - map과 reduce 사용이 적절해 보인다.
 - 이름, 국어성적, 영어성적, 수학성적이 담겨있는 구조체의 배열을 성적평균이 70점 이상인 사람의 이름, 성적평균이 담겨있는 구조체의 배열로 변환할 때
   - map과 reduce와 filter 사용이 적절해 보인다.
+  </details>
+
+<details>
+  <summary>더 알아보기
+  </summary>
 
 ## 29. 더 알아보기
 
@@ -3195,3 +3354,4 @@ print(multiplyFromThree) // 720
 - 오류 처리(Error Handling)
 - 불명확 타입(Opaque Types)
 - 프로토콜 지향 프로그래밍(Protocol Oriented Programming)
+</details>
