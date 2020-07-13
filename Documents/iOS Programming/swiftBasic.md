@@ -1,4 +1,4 @@
-# 스위프트 기초
+# Naver BoostCourse iOS 프로그래밍을 위한 스위프트 기초
 
 > 참조: 네이버 [부스트코스] iOS 프로그래밍을 위한 스위프트 기초. by yagom님  
 > [네이버 부스트코스 링크](https://www.edwith.org/boostcamp_ios/joinLectures/38564)  
