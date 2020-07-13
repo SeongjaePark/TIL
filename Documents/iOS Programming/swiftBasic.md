@@ -125,7 +125,7 @@ type(of: )
 </details>
 
 <details>
-  <summary> 4. Any, AnyObject, nil
+  <summary>4. Any, AnyObject, nil
   </summary>
 
 ## 4. Any, AnyObject, nil
