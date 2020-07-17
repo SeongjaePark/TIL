@@ -4,8 +4,9 @@
 
 <details>
   <summary>1. 애플리케이션 만들기</summary>
+
   <details>
-  <summary>1-1. 프로젝트에 이미지 추가하기</summary>
+    <summary>1-1. 프로젝트에 이미지 추가하기 </summary>
   
   ### 에셋 카탈로그란?
 
@@ -70,35 +71,404 @@
 - 사용자가 애플리케이션을 설치할 때 전체 버전이 아닌 슬라이싱된 조각들 중 사용자의 디바이스에 가장 적합한 조각이 다운로드 되어 설치된다.
 - 에셋 카탈로그에서 관리하는 이미지들은 자동으로 적용이 된다. (슬라이싱은 iOS 9.0 버전 이상만 지원한다.)
 - - iTunes Connect란 개발자가 앱 스토어에 판매할 애플리케이션을 제출하고 관리할 수 있도록 도와주는 웹 기반 도구임
-  </details>
+    </details>
     <details>
-    <summary>1-2. 인터페이스 빌더로 화면 구성하기</summary>
-  </details>
+      <summary>1-2. 인터페이스 빌더로 화면 구성하기</summary>
+      
+      [Apple Documentation](https://help.apple.com/xcode/mac/current/#/dev9ffcd0c51)
+    </details>
     <details>
-    <summary>1-3. 인터페이스 빌더의 객체를 코드와 연결(IBOutlet)</summary>
-  </details>
+      <summary>1-3. 인터페이스 빌더의 객체를 코드와 연결(IBOutlet)</summary>
+      
+      ### 강의 정리
+
+[Apple Documentation](https://help.apple.com/xcode/mac/current/#/devc06f7ee11)
+
+[Swift.org](https://swift.org/documentation/api-design-guidelines/#naming)
+
+[Menu Command Shortcuts (By Menu)](https://developer.apple.com/library/archive/documentation/IDEs/Conceptual/xcode_help-command_shortcuts/MenuCommands/MenuCommands014.html)
+
+- 코드로 먼저 IBOutlet을 생성한 후 인터페이스 빌더의 Outlet Inspector를 통해 연결
+- 코드로 먼저 IBOutlet을 생성한 후 일터페이스 빌더에서 View Controller 우클릭(control + 좌클릭) 팝업에서 연결
+- 인터페이스 빌더에서 코드로 끌어당겨 연결
+
+**<<변수명 변경 시 주의사항>>**
+
+- 인터페이스 빌더의 객체와 코드를 연결한 후 변수명 수정 시, 기존의 연결을 끊고 새로운 코드와 객체를 다시 연결해주거나,
+- 코드의 변수명에 우클릭 후 refactor > rename 을 통해 이름을 변경해주어야 앱 실행 시 오류가 나지 않는다.
+    </details>
     <details>
-    <summary>1-4. 인터페이스 빌더의 객체를 코드와 연결(IBAction)</summary>
+      <summary>1-4. 인터페이스 빌더의 객체를 코드와 연결(IBAction)</summary>
+
+[Apple Developer Documentation](https://developer.apple.com/documentation/uikit/uicontrol/event)
+
+[Target-Action](https://developer.apple.com/library/archive/documentation/General/Conceptual/CocoaEncyclopedia/Target-Action/Target-Action.html)
+
+[Apple Documentation](https://help.apple.com/xcode/mac/current/#/dev9662c7670)
+
+## 학습 목표
+
+1. 인터페이스 빌더에서 생성한 객체가 전달하는 이벤트를 코드의 액션과 연결한다.
+2. 객체에서 발생한 액션이 제대로 동작하는지 확인한다.
+3. 액션의 타입에 여러 종류가 있음을 이해하고 다양하게 테스트해본다.
+
+## 학습하기
+
+### 컨트롤 이벤트와 액션과의 관계
+
+UIKit 에는 UIButton, UISwitch, UIStepper 등 UIControl을 상속받은 다양한 컨트롤 클래스가 있다. 그런 컨트롤 객체에 발생한 다양한 이벤트 종류를 특정 액션 메서드에 연결할 수 있다. 즉, 컨트롤 객체에서 특정 이벤트가 발생하면, 미리 지정해 둔 타겟의 액션을 호출하게 된다.
+
+### 컨트롤 이벤트의 종류
+
+컨트롤 이벤트는 UIControl에 Event라는 타입으로 정의되어 있다. 아래는 컨트롤 객체에 발생할 수 있는 이벤트의 종류이다. 다양한 이벤트 종류를 실제로 Xcode에서 테스트해보면 이해하는 데에 도움이 될 것이다.
+
+<details><summary>컨트롤 이벤트 종류와 설명</summary>
+
+**touchDown**
+
+    컨트롤을 터치했을 때 발생하는 이벤트
+
+    UIControl.Event.touchDown
+
+**touchDownRepeat**
+
+    컨트롤을 연속 터치할 때 발생하는 이벤트
+
+    UIControl.Event.touchDownRepeat
+
+**touchDragOutside**
+
+    터치 영역이 컨트롤의 바깥쪽에서 드래그할 때 발생하는 이벤트
+
+    UIControl.Event.touchDragOutside
+
+**touchDragInside**
+
+    컨트롤 범위 내에서 터치한 영역을 드래그할 때 발생하는 이벤트
+
+    UIControl.Event.touchDragInside
+
+**touchDragEnter**
+
+    터치 영역이 컨트롤의 일정 영역 바깥쪽으로 나갔다가 다시 들어왔을 때 발생하는 이벤트
+
+    UIControl.Event.touchDragEnter
+
+**touchDragExit**
+
+    터치 영역이 컨트롤의 일정 영역 바깥쪽으로 나갔을 때 발생하는 이벤트
+
+    UIControl.Event.touchDragExit
+
+**touchUpInside**
+
+    컨트롤 영역 안쪽에서 터치 후 뗐을 때
+
+    UIControl.Event.tochUpInside
+
+**touchUpOutside**
+
+    컨트롤 영역 안쪽에서 터치 후 컨트롤 밖에서 뗐을 때 이벤트
+
+    UIControl.Event.touchUpOutside
+
+**touchCancel**
+
+    터치를 취소하는 이벤트 (touchUp 이벤트가 발생하지 않음)
+
+    UIControl.Event.touchCancel
+
+**valueChanged**
+
+    터치를 드래그 및 다른 방법으로 조작하여 값이 변경되었을 때 발생하는 이벤트
+
+    UIControl.Event.valueChanged
+
+**primaryActionTriggered**
+
+    버튼이 눌릴 때 발생하는 이벤트 (iOS보다는 tvOS에서 사용)
+
+    UIControl.Event.primaryActionTriggered
+
+**editingDidBegin**
+
+    UITextField에서 편집이 시작될 때 호출되는 이벤트
+
+    UIControl.Event.eiditingDidBegin
+
+**editingChanged**
+
+    UITextField에서 값이 바뀔 때마다 호출되는 이벤트
+
+    UIControl.Event.editingChanged
+
+**editingDidEnd**
+
+    UITextField에서 외부객체와의 상호작용으로 인해 편집이 종료되었을 때 발생하는 이벤트
+
+    UIControl.Event.editingDidEnd
+
+**editingDidEndOnExist**
+
+    UITextField의 편집상태에서 키보드의 return 키를 터치했을 때 발생하는 이벤트
+
+    UIControl.Event.editingDidEndOnExit
+
+**allTouchEvents**
+
+    모든 터치 이벤트
+
+    UIControl.Event.allTouchEvents
+
+**allEditingEvents**
+
+    UITextField에서 편집작업의 이벤트
+
+    UIControl.Event.allEditingEvents
+
+**applicationReserved**
+
+    각각의 애플리케이션에서 프로그래머가 임의로 지정할 수 있는 이벤트 값의 범위
+
+    UIControl.Event.applicationReserved
+
+**allEvents**
+
+    시스템 이벤트를 포함한 모든 이벤트
+
+    UIControl.Event.allEvents
+
   </details>
-    <details>
-    <summary>1-5. UIButton, UISlider, UILable</summary>
+
+### 강의 정리
+
+인터페이스 빌더의 객체에서 발생한 액션을 코드의 메서드와 연결
+
+- 코드로 먼저 IBAction을 생성한 후 인터페이스 빌더의 Outlet Inspector를 통해 연결
+- 코드로 먼저 IBAction을 생성한 후 인터페이스 빌더에서 View Controller 우클릭 후 팝업에서 연결
+- 인터페이스 빌더에서 코드로 끌어당겨 연결 / 생성
+
+print 로그를 통해 액션이 제대로 동작하는지 확인
+
+</details>
+<details>
+<summary>1-5. UIButton, UISlider, UILable</summary>
+
+## UIButton, UISlider, UILabel
+
+## 학습 목표
+
+1. UIButton 생성 방법, 모양 설정 및 사용자 상호작용에 대응하는 방법을 이해한다.
+2. UILabel 생성 방법, 레이블에 입력되는 문구를 설정하는 방법을 이해한다.
+3. UISlider 생성 방법, 구성요소 및 관련 메서드를 이해한다.
+
+## 학습하기
+
+### UIButton
+
+[Apple Developer Documentation](https://developer.apple.com/documentation/uikit/uibutton)
+
+UIButton 클래스는 사용자의 상호 작용(터치/탭 등의 이벤트)에 반응해 미리 지정된 코드를 실행하는 컨트롤 요소이다.
+
+#### 버튼 생성 3단계
+
+1. 버튼을 생성하고 버튼의 유형을 선택
+2. 버튼을 나타내기 위한 문자(타이틀)을 입력하거나, 이미지를 설정한 뒤 크기 조정
+3. 버튼에 특정 이벤트가 발생할 때 작동할 하나 이상의 메서드를 연결
+
+#### 버튼과 메서드를 연결하는 방법
+
+1. addTarget(\_:action:for:) 메서드 사용
+2. 인터페이스 빌더에서 연결(@IBAction)
+
+#### 버튼과 연결되는 메서드 방식
+
+버튼을 탭했을 때 필요한 정보에 따라 아래 세 가지 중 한 가지를 선택해 사용해보기
+
+```swift
+func doSomething()
+func doSomething(sender: UIButton)
+func doSomething(sender: UIButton, forEvent event: UIEvent)
+```
+
+#### 버튼의 상태
+
+- 버튼의 상태는 다섯가지로 표현한다.
+  - default, highlighted, focused, selected, disabled
+  - 버튼의 상태는 조합된 상태일 수 있다.
+  - 예) [default + highlighted], [selected _ disabled] 등
+- 버튼 생성 시 기본 상태 값은 default
+- 사용자가 버튼과 상호작용을 하면 상태 값이 변하게 된다.
+- 프로그래밍 방식 혹은 인터페이스 빌더를 이용해 버튼의 각 상태에 대한 속성을 별도로 지정할 수 있다.
+  - 별도로 속성을 지정하지 않으면 UIButton 클래스에서 제공하는 기본 동작을 사용하게 된다.
+  - [예] disabled 버튼은 일반적으로 흐리게 표시되며 사용자가 탭 해도 highlighted 되지 않는다.
+
+#### 버튼 주요 프로퍼티
+
+버튼의 프로퍼티 값을 설정하는 방식에는 코드를 이용하는 방법과 스토리보드의 인스펙터를 이용하는 방법이 있다.
+
+- enum UIButtonType: 버튼의 유형
+  - 버튼의 유형에 따라 버튼의 기본적인 외형과 동작이 달라진다.
+  - 처음 버튼을 생성할 때 init(type:) 메서드를 이용하거나, 인터페이스 빌더의 "Attribute Inspector"에서 버튼 유형을 지정할 수 있다.
+  - 한번 생성된 버튼의 유형은 이후 변경할 수 없다.
+  - 가장 많이 사용하는 유형은 Custom과 System이지만 필요에 따라 다른 유형(Detail Disclosure, Info Light, Info Dark, Add Contact)를 사용할 수 있다.
+- var titleLabel: UILabel?: 버튼 타이틀 레이블
+- var imageView: UIImageView?: 버튼의 이미지 뷰
+- var tintColor: UIColor!: 버튼 타이틀과 이미지의 틴트 컬러
+
+#### 버튼의 주요 메서드
+
+```swift
+//특정 상태의 버튼의 문자열 설정
+func setTitle(String?, for: UIControlState)
+//특정 상태의 버튼의 문자열 반환
+func title(for: UIControlState) -> String?
+
+//특정 상태의 버튼 이미지 설정
+func setImage(UIImage?, for:UIControlState)
+//특정 상태의 버튼 이미지 반환
+func image(for: UIControlState) -> UIImage?
+
+//특정 상태의 백그라운드 이미지 설정
+func setBackgroundImage(UIImage?, for: UIControlState)
+//특정 상태의 백그라운드 이미지 반환
+func backgroundImage(for: UIControlState) -? UIImage?
+
+//특정 상태의 문자열 색상 설정
+func setTitleColor(UIColor?, for: UIControlState)
+//특정 상태의 attributed 문자열 설정
+func setAttributedTitle(NSAttributedString?, for: UIControlState)
+```
+
+### UILabel
+
+[Apple Developer Documentation](https://developer.apple.com/documentation/uikit/uilabel)
+
+UILable은 한 줄 또는 여러 줄의 텍스트를 보여주는 뷰로, UIButton 등의 컨트롤의 목적을 설명하기 위해 사용하는 경우가 많다.
+
+#### 레이블 생성 3단계
+
+1. 레이블 생성
+2. 레이블이 표시할 문자열 제공
+3. 레이블의 모양 및 특성 설정
+
+#### 레이블 주요 프로퍼티
+
+레이블의 프로퍼티에 접근해 나타내려는 문자의 내용, 색상, 폰트, 문자정렬방식, 라인 수 등을 조정할 수 있다.
+
+레이블의 프로퍼티의 값을 설정하는 방식에는 프로그래밍 방식과 스토리보드의 인스펙터를 이용한 방법이 있다.
+
+- var text: String? : 레이블이 표시할 문자열
+  - 문자열이 모두 동일한 속성(폰트, 색상, 기울임꼴 등)으로 표시된다.
+  - text 프로퍼티에 값을 할당하면 attributedText 프로퍼티에도 똑같은 내용의 문자열이 할당된다.
+- var attributedText: NSAttributedString? : 레이블이 표시할 속성 문자열
+  - NSAttributed 클래스를 사용한 속성 문자열 중 특정 부분의 속성을 변경할 수 있다. ([예] 일부 글자 색상 변경/일부 글자 폰트 변경)
+  - attributedText 프로퍼티에 값을 할당하면 text 프로퍼티에도 똑같은 내용의 문자열이 할당된다.
+- var textColor: UIColor! : 문자 색상
+- var font: UIFont!: 문자 폰트
+- var textAlignment: NSTextAlignment : 문자열의 가로 정렬 방식
+  - left, right, center, justified, natural 중 하나 선택 가능
+- var numberOfLines: Int : 문자를 나타내는 최대 라인 수
+  - 문자열을 모두 표시하는 데 필요한 만큼 행을 사용하려면 0으로 설정. 기본 값은 1임
+  - 설정한 문자열이 최대 라인 수를 초과하면 lineBreakMode 프로퍼티의 값에 따라 적절히 잘라서 표현한다.
+  - adjustsFontSizeToFitWidth 프로퍼티를 활용하면 폰트 사이즈를 레이블의 넓이에 따라 자동으로 조절해준다.
+- var baselineAdjustment: UIBaselineAdjustment : 문자열이 Autoshrink 되었을 때의 수직 정렬 방식
+  - Align Baseline: 문자가 작아졌을 때 기존 문자열의 기준선에 맞춤
+  - Align Center: 문자가 작아졌을 때 작아진 문자의 중앙선에 맞춤
+  - None: 문자가 작아졌을 때 기존 문자열의 위쪽 선에 맞춤
+- var lineBreakMode: NSLineBreakMode : 레이블의 경계선을 벗어나는 문자열에 대응하는 방식
+  - Character wrap : 여러 줄 레이블에 주로 적용되며, 글자 단위로 줄 바꿈을 결정한다.
+  - Word wrap : 여러 줄 레이블에 주로 적용되며, 단어 단위로 줄 바꿈을 결정한다.
+  - Truncate head : 한 줄 레이블에 주로 적용되며, 앞쪽 텍스트를 자르고 ...으로 표시한다.
+  - Truncate middle : 한 줄 레이블에 주로 적용되며, 중간 텍스트를 자르고 ...으로 표시한다.
+  - Truncate tail : 한줄 레이블에 주로 적용되며, 끝쪽 텍스트를 자르고 ...으로 표시한다. **기본 설정 값**이다.
+
+### UISlider
+
+[Apple Developer Documentation](https://developer.apple.com/documentation/uikit/uislider)
+
+UISlider는 연속된 값 중에서 특정 값을 선택하는데 사용되는 컨트롤이다.
+
+#### 슬라이더 생성 3단계
+
+1. 슬라이더를 생성하고, 슬라이더가 나타내는 값의 범위 지정
+2. 적절한 색상과 이미지를 이용해 슬라이더의 모양 구성
+3. 하나 이상의 메서드를 슬라이더와 연결
+
+#### 사용자 상호작용에 반응하기
+
+사용자가 슬라이더의 값을 변경하면 슬라이더에 연결된 메서드가 호출되어 원하는 작업이 실행된다.
+
+기본적으로는 사용자가 슬라이더의 Thumb를 이동시키면 연속적으로 이벤트를 호출하지만, isContinuous 프로퍼티 값을 false로 설정하면 슬라이더의 Thumb에서 손을 떼는 동시에 이벤트를 호출한다.
+
+#### 슬라이더와 메서드 연결하는 방법
+
+1. addTarget(\_:action:for) 메서드 사용
+2. 인터페이스 빌더에서 연결 (@IBAction)
+
+#### 슬라이더와 연결하는 메서드 형식
+
+슬라이더의 값을 변경했을 때 필요한 정보에 따라 아래 세 가지 중 한 가지를 선택해서 사용
+
+```swift
+func doSomething()
+func doSomething(sender: UISlider)
+func doSomething(sender: UISlider, forEvent event: UIEvent)
+
+```
+
+#### 슬라이더 주요 프로퍼티
+
+슬라이더의 프로퍼티 값을 설정하는 방식에는 프로그래밍 방식과, 스토리보드의 인스펙터를 이용하는 방법이 있다.
+
+- var minimumValue: Float, var maximumValue: Float : 슬라이더의 양끝단의 값
+- var value: Float : 슬라이더의 현재 값
+- var isContinuous: Bool :슬라이더의 연속적인 값 변화에 따라 이벤트 역시 연속적으로 호출할 것인지의 여부
+- var minimumValueImage: UIImage?, var maximumValueImage: UIImage? : 슬라이더 양끝단의 이미지
+- var thumbTintColor: UIColor? : thumb의 틴트 색상
+- var minimumTrackTintCOlor: UIColor?, var maximumTrackTintColor: UIColor? : thumb를 기준으로 앞쪽 트랙과 뒤쪽 트랙의 틴트 색상
+
+#### 슬라이더 주요 메서드
+
+```swift
+//슬라이더의 현재 값 설정
+func setValue(Float, animated: Bool)
+
+//특정 상태의 minimumTrackImage 반환
+func minimumTrackImage(for: UIControlState) -> UIImage?
+//특정 상태의 minimumTrackImage 설정
+func setMinimumTrackImage(UIImage?, for: UIControlState)
+
+//특정 상태의 maximumTrackImage 반환
+func maximumTrackImage(for: UIControlState) -> UIImage?
+//특정 상태의 maximumTrackImage 설정
+func setMaximumTrackImage(UIImage?, for: UIControlState)
+
+//특정 상태의 thumbImage 반환
+func thumbImage(for: UIControlState) -> UIImage?
+//특정 상태의 thumbImage 설정
+func setThumbImage(UIImage?, for UIControlState)
+```
+
+</details>
+
   </details>
-  </details>
-  <details>
-    <summary>2. Foundation과 UIKit 그리고 Cocoa Touch</summary>
-  </details>
-  <details>
-    <summary>3. 오토 레이아웃</summary>
-  </details>
-  <details>
-    <summary>4. iOS View의 체계</summary>
-  </details>
-  <details>
-    <summary>5. MVC (Model-View-Controller)</summary>
-  </details>
-  <details>
-    <summary>6. Apple Developer Documentation</summary>
-  </details>
-  <details>
-    <summary>7. Summary</summary>
-  </details>
+
+<details>
+  <summary>2. Foundation과 UIKit 그리고 Cocoa Touch</summary>
+</details>
+<details>
+  <summary>3. 오토 레이아웃</summary>
+</details>
+<details>
+  <summary>4. iOS View의 체계</summary>
+</details>
+<details>
+  <summary>5. MVC (Model-View-Controller)</summary>
+</details>
+<details>
+  <summary>6. Apple Developer Documentation</summary>
+</details>
+<details>
+  <summary>7. Summary</summary>
+</details>
