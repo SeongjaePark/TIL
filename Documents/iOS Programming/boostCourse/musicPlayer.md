@@ -6,7 +6,7 @@
   <summary>1. 애플리케이션 만들기</summary>
 
   <details>
-    <summary>1-1. 프로젝트에 이미지 추가하기 </summary>
+    <summary>1-1. 프로젝트에 이미지 추가하기</summary>
   
   ### 에셋 카탈로그란?
 
@@ -98,7 +98,7 @@
 - 코드의 변수명에 우클릭 후 refactor > rename 을 통해 이름을 변경해주어야 앱 실행 시 오류가 나지 않는다.
     </details>
     <details>
-      <summary>1-4. 인터페이스 빌더의 객체를 코드와 연결(IBAction)</summary>
+      <summary>1-4. 인터페이스 빌더의 객체를 코드와 연결(IBAction)</summary>
 
 [Apple Developer Documentation](https://developer.apple.com/documentation/uikit/uicontrol/event)
 
