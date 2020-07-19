@@ -702,12 +702,30 @@ Foundation에서 제공하는 데이터 타입 및 컬렉션 타입의 대부분
 </details>
 <details>
   <summary>3. 오토 레이아웃</summary>
+  <details>
+    <summary>3-1. 오토 레이아웃이란?</summary>
+  </details>
+    <details>
+    <summary>3-2. 오토 레이아웃 구현하기(코드)</summary>
+  </details>
+    <details>
+    <summary>3-3. 오토 레이아웃 구현하기(인터페이스 빌더)</summary>
+  </details>
 </details>
 <details>
   <summary>4. iOS View의 체계</summary>
 </details>
 <details>
   <summary>5. MVC (Model-View-Controller)</summary>
+    <details>
+    <summary>5-1. 프로그래밍 디자인 패턴이란?</summary>
+  </details>
+    <details>
+    <summary>5-2. Model-View-Controller</summary>
+  </details>
+    <details>
+    <summary>5-3. 직접 찾아보기</summary>
+  </details>
 </details>
 <details>
   <summary>6. Apple Developer Documentation</summary>
