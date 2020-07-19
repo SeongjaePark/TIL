@@ -879,29 +879,387 @@ var widthAnchor: NSLayoutDimension { get }
   </details>
     <details>
     <summary>3-2. 오토 레이아웃 구현하기(코드)</summary>
+
+# 오토 레이아웃 구현하기(코드)
+
+[Apple Documentation - Auto Layout Guide(코드)](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/AutolayoutPG/ProgrammaticallyCreatingConstraints.html#//apple_ref/doc/uid/TP40010853-CH16-SW1)
+
+[Apple Documentation - Auto Layout Guide(Visual Format Language)](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/AutolayoutPG/VisualFormatLanguage.html#//apple_ref/doc/uid/TP40010853-CH27-SW1)
+
+## 학습 목표
+
+1. Layout Anchor를 이용해 오토레이아웃을 구현할 수 있다.
+2. NSLayoutConstraint와 Visual Format Language를 이용한 다른 방법에 대해서 이해한다.
+
+## 학습하기
+
+### NSLayoutConstraint
+
+NSLayoutConstraint 인스턴스 생성을 사용하여 제약조건을 지정하는 방법에 대해 알아보자
+
+#### NSLayoutConstraint 인스턴스 생성 제약조건
+
+오토레이아웃 방정식
+
+- view1.attr1 = view2.attr2 \* multiplier + constant
+- item.attribute = toItem.attribute \* multiplier + constant
+
+매개변수 설명
+
+**item**
+
+- 제약조건을 받는 뷰(왼쪽)이다.
+
+**relatedBy**
+
+- 제약조건을 받는 뷰 간의 관계
+- `NSLayoutRelation` 열거형 값을 가진다. (`.lessThanOrEqual, .equal, .greaterThanOrEqual`)
+
+**attribute**
+
+- 뷰(왼쪽)의 제약조건의 속성이다.
+- `NSLayoutAttribute` 열거형 값을 가진다. (`.left, .right, .top, .bottom, .leading, .trailing, .width, .height, .centerX, .centerY, .lastBaseline, .notAnAttribute` 등)
+
+**toItem**
+
+- 뷰(왼쪽)가 제약조건을 받을 뷰(오른쪽)이다.
+- 없을 경우 `nil`이 가능하다.
+
+**attribute**
+
+- 뷰(오른쪽)의 제약 조건의 속성이다.
+- `NSLayoutAttribute` 열거형 값을 가진다. (`.left, .right, .top, .bottom, .leading, .trailing, .width, .height, .centerX, .centerY, .lastBaseline, .notAnAttribute` 등)
+
+**multiplier**
+
+- 뷰(왼쪽)의 속성값을 얻기 위해 뷰(오른쪽)의 속성값을 곱한다.
+- 이 값을 이용해 비율로 크기를 설정할 수 있고, 위치 지정에도 활용할 수 있다.
+
+**constant**
+
+- 상수 값이다.
+- 비율(multiplier)의 값이 아닌 상수의 값이 필요한 경우에 사용한다.
+
+#### 코드와 예시
+
+- button과 textField에 기본 간격(Standard Space, iOS 11 8포인트)에 제약을 주기 위해 `NSLayoutConstraint` 인스턴스를 생성하는 코드
+
+  ```swift
+  NSLayoutConstraint(item: button,
+          attribute: .right,
+          relatedBy: .equal,
+          toItem: textField,
+          attribute: .left,
+          multiplier: 1.0,
+          constant: 8.0)
+  ```
+
+  ![ex1](./img/OL2_ex1.png)
+
+- button의 너비가 50보다 크거나 같도록 너비 제약(Width Constraint)을 줄 수 있는 `NSLayoutConstraint` 인스턴스 생성 코드
+
+  ```swift
+  NSLayoutConstraint(item: button,
+          attribute: .width,
+          relatedBy: .greaterThanOrEqual,
+          toItem: nil,
+          attribute: .notAnAttribute,
+          multiplier: 1.0,
+          constant: 50.0)
+  ```
+
+  ![ex2](./img/OL2_ex2.png)
+
+- purpleBox가 superView를 기준으로 왼쪽(Leading) 간격은 50포인트, 오른쪽(Trailing) 간격은 50포인트로 설정한다. (Connection to Superview)
+
+  ```swift
+  NSLayoutConstraint(item: purpleBox,
+          attribute: .left,
+          relatedBy: .equal,
+          toItem: self.view,
+          attribute: .left,
+          multiplier: 1.0,
+          constant: 50.0)
+
+    NSLayoutConstraint(item: purpleBox,
+          attribute: .right,
+          relatedBy: .equal,
+          toItem: self.view,
+          attribute: .right,
+          multiplier: 1.0,
+          constant: -50.0)
+  ```
+
+  ![ex3](./img/OL2_ex3.png)
+
+- topField와 bottomField의 세로 사이의 간격을 10포인트로 설정한다. (Vertical Layout)
+
+  ```swift
+  NSLayoutConstraint(item: topField,
+          attribute: .bottom,
+          relatedBy: .equal,
+          toItem: bottomField,
+          attribute: .top,
+          multiplier: 1.0,
+          constant: -10.0)
+  ```
+
+  ![ex4](./img/OL2_ex4.png)
+
+- marronView와 blueView의 간격이 없다. (Flush Views)
+
+  ```swift
+  NSLayoutConstraint(item: maroonView,
+          attribute: .right,
+          relatedBy: .equal,
+          toItem: blueView,
+          attribute: .left,
+          multiplier: 1.0,
+          constant: 0.0)
+  ```
+
+  ![ex5](./img/OL2_ex5.png)
+
+- button의 너비는 100포인트이고 우선도는 20으로 설정한다. (Priority)
+
+  ```swift
+  NSLayoutConstraint(item: button,
+          attribute: .width,
+          relatedBy: .equal,
+          toItem: nil,
+          attribute: .notAnAttribute,
+          multiplier: 1.0,
+          constant: 100.0).priority = UILayoutPriority(rawValue: 20)
+  ```
+
+  ![ex6](./img/OL2_ex6.png)
+
+  Tip: 오토 레이아웃에서는 뷰에 제약을 적용할 때, 어떤 제약을 우선시해야 하는지를 우선도로 결정한다. 만약, 하나의 속성(attribute)에 적용할 수 있는 두 개 이상의 제약이 있다면 그 중 우선도가 높은 제약이 적용된다. 우선도는 1부터 1000까지의 정수로 표현할 수 있다.
+
+- button1과 button2의 너비 값이 같도록 제약을 생성한다. Equal Widths)
+
+  ```swift
+  NSLayoutConstraint(item: button1,
+          attribute: .width,
+          relatedBy: .equal,
+          toItem: button2,
+          attribute: .width,
+          multiplier: 1.0,
+          constant: 0.0)
+  ```
+
+  ![ex7](./img/OL2_ex7.png)
+
+- flexibleButton의 너비 값이 70포인트보다 크거나 같고 100포인트보다 작거나 같도록 제약을 생성한다. (Multiple Predicates)
+
+  ```swift
+  NSLayoutConstraint(item: flexibleButton,
+          attribute: .width,
+          relatedBy: .greaterThanOrEqual,
+          toItem: nil,
+          attribute: .notAnAttribute,
+          multiplier: 1.0,
+          constant: 70.0)
+
+    NSLayoutConstraint(item: flexibleButton,
+          attribute: .width,
+          relatedBy: .lessThanOrEqual,
+          toItem: nil,
+          attribute: .notAnAttribute,
+          multiplier: 1.0,
+          constant: 100.0)
+  ```
+
+  ![ex8](./img/OL2_ex8.png)
+
+- button1, button2, textField와 superView의 간격은 표준 간격(8포인트)이며 textField의 너비 값은 20포인트보다 크거나 같도록 제약을 생성한다. (A Complete Line of Layout)
+
+  ```swift
+  // button1
+    NSLayoutConstraint(item: button1,
+          attribute: .left,
+          relatedBy: .equal,
+          toItem: self.view,
+          attribute: .left,
+          multiplier: 1.0,
+          constant: 8.0)
+
+    // button2
+    NSLayoutConstraint(item: button2,
+          attribute: .left,
+          relatedBy: .equal,
+          toItem: button1,
+          attribute: .right,
+          multiplier: 1.0,
+          constant: 8.0)
+
+    // textField
+    NSLayoutConstraint(item: textField,
+          attribute: .left,
+          relatedBy: .equal,
+          toItem: button2,
+          attribute: .right,
+          multiplier: 1.0,
+          constant: 8.0)
+
+    NSLayoutConstraint(item: textField,
+          attribute: .width,
+          relatedBy: .greaterThanOrEqual,
+          toItem: nil,
+          attribute: .notAnAttribute,
+          multiplier: 1.0,
+          constant: 20.0)
+
+    NSLayoutConstraint(item: textField,
+          attribute: .right,
+          relatedBy: .equal,
+          toItem: self.view,
+          attribute: .right,
+          multiplier: 1.0,
+          constant: -8.0)
+  ```
+
+  ![ex9](./img/OL2_ex9.png)
+
+### Visual Format Language
+
+Visual Format Language를 사용하여 제약조건을 지정하는 방법에 대해 알아보고, 위에서 `NSLayoutConstraint`를 이용해 만들었던 동일한 제약조건을 Visual Format Language를 이용해 만들어보자.
+
+#### 사용 가능한 기호 및 문자열
+
+**|**
+
+- superview이다.
+
+**-**
+
+- 표준 간격이다. 기본은 8포인트
+
+**==**
+
+- 같은 너비이다.
+
+**-10-**
+
+- 사이의 간격이 10포인트이다.
+
+**<=50**
+
+- 50보다 작거나 같다.
+
+**>=50**
+
+- 50보다 크거나 같다.
+
+**@750**
+
+- 우선도를 지정할 수 있다.
+
+**H**
+
+- 수평 방향이다(가로)
+
+**V**
+
+- 수직 방향이다(세로)
+
+#### 코드 및 예시
+
+- button과 textField에 기본간격(Standard Space, iOS 11 8포인트)의 제약을 준다.
+
+  ```swift
+  H:[button]-8-[textField] 또는 H:[button]-[textField]
+  ```
+
+  ![ex1](./img/OL2_ex1.png)
+
+- button의 너비가 50포인트보다 크거나 같도록 너비 제약(Width Constraint)을 준다.
+
+  ```swift
+  H:[button(>=50)]
+  ```
+
+  ![ex2](./img/OL2_ex2.png)
+
+- purpleBox가 superView를 기준으로 왼쪽(Leading) 간격은 50포인트, 오른쪽(Trailing) 간격은 50포인트로 설정한다. (Connection to Superview)
+
+  ```swift
+  H:|-50-[purpleBox]-50-|
+  ```
+
+  ![ex3](./img/OL2_ex3.png)
+
+- topField와 bottomField의 세로 사이의 간격을 10포인트로 설정한다. (Vertical Layout)
+
+  ```swift
+  V:[topField]-10-[bottomField]
+  ```
+
+  ![ex4](./img/OL2_ex4.png)
+
+- marronView와 blueView의 간격이 없다. (Flush Views)
+
+  ```swift
+  H:[marronView][blueView]
+  ```
+
+  ![ex5](./img/OL2_ex5.png)
+
+- button의 너비는 100포인트이고 우선도는 20으로 설정한다. (Priority)
+
+  ```swift
+  H: [button(100@20)]
+  ```
+
+  ![ex6](./img/OL2_ex6.png)
+
+- button1과 button2의 너비 값이 같도록 제약을 생성한다. (Equal Widths)
+
+  ```swift
+  H:[button1(==button2)]
+  ```
+
+  ![ex7](./img/OL2_ex7.png)
+
+- flexibleButton의 너비 값이 70포인트보다 크거나 같고 100포인트보다 작거나 같도록 제약을 생성한다. (Multiple Predicates)
+
+  ```swift
+  H:[flexibleButton(>=70,<=100)]
+  ```
+
+  ![ex8](./img/OL2_ex8.png)
+
+- find, findNext, findField와 superView의 간격은 표준 간격(8포인트)이며 findFIeld의 너비 값은 20포인트보다 크거나 같도록 제약을 생성한다.
+
+  ```swift
+  H: |-[find]-[findNext]-[findField(>=20)]-|
+  ```
+
+  ![ex9](./img/OL2_ex9.png)
+
+    </details>
+      <details>
+      <summary>3-3. 오토 레이아웃 구현하기(인터페이스 빌더)</summary>
+    </details>
   </details>
-    <details>
-    <summary>3-3. 오토 레이아웃 구현하기(인터페이스 빌더)</summary>
+  <details>
+    <summary>4. iOS View의 체계</summary>
   </details>
-</details>
-<details>
-  <summary>4. iOS View의 체계</summary>
-</details>
-<details>
-  <summary>5. MVC (Model-View-Controller)</summary>
-    <details>
-    <summary>5-1. 프로그래밍 디자인 패턴이란?</summary>
+  <details>
+    <summary>5. MVC (Model-View-Controller)</summary>
+      <details>
+      <summary>5-1. 프로그래밍 디자인 패턴이란?</summary>
+    </details>
+      <details>
+      <summary>5-2. Model-View-Controller</summary>
+    </details>
+      <details>
+      <summary>5-3. 직접 찾아보기</summary>
+    </details>
   </details>
-    <details>
-    <summary>5-2. Model-View-Controller</summary>
+  <details>
+    <summary>6. Apple Developer Documentation</summary>
   </details>
-    <details>
-    <summary>5-3. 직접 찾아보기</summary>
+  <details>
+    <summary>7. Summary</summary>
   </details>
-</details>
-<details>
-  <summary>6. Apple Developer Documentation</summary>
-</details>
-<details>
-  <summary>7. Summary</summary>
-</details>
