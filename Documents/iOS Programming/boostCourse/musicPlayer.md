@@ -581,6 +581,25 @@ func stop()
 </details>
 <details>
   <summary>2. Foundation과 UIKit 그리고 Cocoa Touch</summary>
+  
+  <details>
+    <summary>2-1. Cocoa Touch 프레임워크란?</summary>
+
+# Cocoa Touch 프레임워크란?
+
+## 학습하기
+
+'코코아 터치' 프레임워크는 iOS 애플리케이션 개발 환경으로, 애플리케이션의 다양한 기능 구현에 필요한 여러 프레임워크를 포함하는 최상위 레벨의 프레임워크이다. 참고로 '코코아' 프레임워크는 macOS 애플리케이션 제작에 사용하는 프레임워크이다.
+
+- '코코아'라는 단어는 Objective-C 런타임을 기반으로 하고, NSObject를 상속받는 모든 클래스 또는 객체를 가리킬 때 사용한다.
+- '코코아' 또는 '코코아 터치'는 macOS 또는 iOS의 전반적인 기능을 활용해 애플리케이션을 제작할 때 사용하는 프레임워크이다.
+- '코코아 터치'는 핵심 프레임워크인 UIKit과 Foundation을 포함한다.
+
+[애플 공식 문서 - Cocoa (Touch)](https://developer.apple.com/library/archive/documentation/General/Conceptual/DevPedia-CocoaCore/Cocoa.html)
+
+[위키피디아 - Cocoa (API)](<https://en.wikipedia.org/wiki/Cocoa_(API)>)
+
+  </details>
 </details>
 <details>
   <summary>3. 오토 레이아웃</summary>
