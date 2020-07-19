@@ -600,6 +600,50 @@ func stop()
 [위키피디아 - Cocoa (API)](<https://en.wikipedia.org/wiki/Cocoa_(API)>)
 
   </details>
+  <details>
+  <summary>2-2. UIKit이란?</summary>
+
+# UIKit이란?
+
+[Apple Documentation - UIKit](https://developer.apple.com/documentation/uikit)
+
+## 학습하기
+
+### UIKit 소개
+
+UIKit은 iOS 애플리케이션의 사용자 인터페이스를 구현하고 이벤트를 관리하는 프레임워크이다.
+
+- UIKit 프레임워크는 제스처 처리, 애니메이션, 그림 그리기, 이미지 처리, 텍스트 처리 등 사용자 이벤트 처리를 위한 클래스를 포함한다.
+- 또한 테이블뷰, 슬라이더, 버튼, 텍스트 필드, 얼럿 창 등 애플리케이션의 화면을 구성하는 요소를 포함한다.
+- UIKit 클래스 중 UIResponder에서 파생된 클래스나 사용자 인터페이스에 관련된 클래스는 애플리케이션의 메인 스레드(혹은 메인 디스패치 큐)에서만 사용하자.
+- UIKit은 iOS와 tvOS 플랫폼에서 사용한다.
+
+### UIKit 기능별 요소
+
+#### 사용자 인터페이스
+
+- View and Control: 화면에 콘텐츠 표시
+- View Controller: 사용자 인터페이스 관리
+- Animation and Haptics: 애니메이션과 햅틱을 통한 피드백 제공
+- Window and Screen: 뷰 계층을 위한 윈도우 제공
+
+#### 사용자 액션
+
+- Touch, Press, Gesture: 제스처 인식기를 통한 이벤트 처리 로직
+- Drag and Drop: 화면 위에서 드래그 앤 드롭 기능
+- Peek and Pop: 3D 터치에 대응한 미리 보기 기능
+- Keyboard and Menu: 키보드 입력을 처리 및 사용자 정의 메뉴 표시
+
+## 생각해보기
+
+새롭게 ViewController를 생성하면 상단에 'improt UIKit'이 기본적으로 명시되어 있다. 왜 ViewController와 UIKit는 단짝일까?
+
+- ViewControlle는 UIViewController 클래스를 상속받는데, 이 UIViewController 클래스는 UIKit 프레임워크에 정의된 클래스이기 때문에
+- UIKit 을 import 해주어야 컴파일러가 UIViewController가 무엇인지 알 수 있다.
+  </details>
+  <details>
+  <summary>2-3. Foundation이란?</summary>
+  </details>
 </details>
 <details>
   <summary>3. 오토 레이아웃</summary>
