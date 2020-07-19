@@ -707,6 +707,10 @@ Foundation에서 제공하는 데이터 타입 및 컬렉션 타입의 대부분
 
   # 오토 레이아웃이란?
 
+[Apple Documentation - Auto Layout Guide](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/AutolayoutPG/index.html#//apple_ref/doc/uid/TP40010853-CH7-SW1)
+
+[iOS H.I.G - Adaptivity and Layout](https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/)
+
 ## 학습 목표
 
 1. 오토 레이아웃의 개념에 대해 이해한다.
@@ -761,7 +765,7 @@ Foundation에서 제공하는 데이터 타입 및 컬렉션 타입의 대부분
 
 오토레이아웃의 속성은 정렬 사각형을 기반으로 한다.
 
-![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/65d22633-aa2d-498e-9b6d-41f18f7784ec/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/65d22633-aa2d-498e-9b6d-41f18f7784ec/Untitled.png)
+![square](./img/square.png)
 
 - width: 정렬 사각형의 너비
 - height: 정렬 사각형의 높이
@@ -788,7 +792,7 @@ Foundation에서 제공하는 데이터 타입 및 컬렉션 타입의 대부분
 
 제약은 뷰 스스로 또는 뷰 사이의 관계를 속성을 통하여 정의한다. 제약은 방정식으로 나타낼 수 있다.
 
-![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/13673fbf-e96d-4b33-a42c-fc4a5050478d/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/13673fbf-e96d-4b33-a42c-fc4a5050478d/Untitled.png)
+![constraintEquation](./img/constraintEquation.png)
 
 - Item 1: 방정식이 있는 첫번째 아이템(B View)이다. 첫번째 아이템은 반드시 뷰 또는 레이아웃 가이드여야 한다.
 - Attribute1: 첫번째 아이템에 대한 속성이다. 이 경우, B View의 리딩이다.
@@ -810,7 +814,7 @@ Foundation에서 제공하는 데이터 타입 및 컬렉션 타입의 대부분
 1. 콘텐츠 허깅 우선도(Content hugging priority): 콘텐츠 고유 사이즈보다 뷰가 커지지 않도록 제한한다. 다른 제약사항보다 우선도가 높으면 뷰가 콘텐츠 사이즈보다 커지지 않는다.
 2. 콘텐츠 축소 방지 우선도(Content compression resistance priority): 콘텐츠 고유 사이즈보다 뷰가 작아지지 않도록 제한한다. 다른 제약사항보다 우선도가 높으면 콘텐츠 사이즈보다 작아지지 않는다.
 
-![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/19190ac4-64dc-4582-ac04-a510927593ae/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/19190ac4-64dc-4582-ac04-a510927593ae/Untitled.png)
+![constraintPriorities](./img/constraintPriorities.png)
 
 ### 레이아웃 마진
 
@@ -826,7 +830,7 @@ Foundation에서 제공하는 데이터 타입 및 컬렉션 타입의 대부분
 
 중앙에 버튼을 배치하고 버튼의 top anchor를 사용해서 레이블의 버튼의 상단으로부터 10만큼 떨어지도록 배치해보자.
 
-![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/3d1bd515-a67e-4738-9f45-c37c404671ac/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/3d1bd515-a67e-4738-9f45-c37c404671ac/Untitled.png)
+![beforeConstraint](./img/beforeConstraint.png)
 
 1. 객체 라이브러리에서 버튼과 레이블을 추가한다.
 2. `@IBOutlet`을 활용해서 인터페이스 빌더에서 ViewController.swift 파일로 버튼과 레이블을 연결해준다.
@@ -834,15 +838,15 @@ Foundation에서 제공하는 데이터 타입 및 컬렉션 타입의 대부분
 
    `translatesAutoresizingMaskIntoConstraints`: 오토레이아웃이 도입되기 전 뷰를 유연하게 표현할 수 있도록 오토리사이징 마스크를 사용하였다. 오토레이아웃을 사용하게 되면 기존이 오토리사이징 마스크가 가지고 있던 제약조건이 자동으로 추가되기 때문에 충돌하게 될 가능성이 발생한다. 그래서 `translatesAutoresizingMaskIntoConstraints`의 값을 false로 지정한 뒤 오토레이아웃을 적용해준다. 참고로 인터페이스 빌더에서 오토레이아웃을 적용한 경우에는 자동으로 값이 false로 설정된다. (참조: [translatesAutoresizingMaskIntoConstraints](https://developer.apple.com/documentation/uikit/uiview/1622572-translatesautoresizingmaskintoco))
 
-   ![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/d24fa3ee-a321-41de-96f0-6c2395ddc08a/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/d24fa3ee-a321-41de-96f0-6c2395ddc08a/Untitled.png)
+   ![buttonConstraintCode](./img/buttonConstraintCode.png)
 
 4. 레이블의 수평 중앙을 버튼의 수평 중앙 앵커를 기준으로 제약을 생성한 후, 레이블의 하단 앵커를 버튼 상단 앵커로부터 10만큼의 거리를 두도록 한다(상단 앵커기준으로 위로의 거리는 부호가 - 라는 점에 주의). 생성된 제약을 적용하기 위해 isActive 프로퍼티를 true로 설정해준다. 그림과 같이 레이블이 버튼의 상단에 자리 잡고 있는 것을 볼 수 있다
 
-   ![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/acdae1d0-9561-4efc-a979-299cb641bbf0/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/acdae1d0-9561-4efc-a979-299cb641bbf0/Untitled.png)
+   ![afterConstraint](./img/afterConstraint.png)
 
    속성에 곱해지는 multiplier를 활용해 보자. 앵커를 활용하여 레이블의 너비가 버튼의 너비의 2배가 되도록 제약을 만들어 보자.
 
-   ![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/33eea31d-728f-4ece-9596-7ffa46031336/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/33eea31d-728f-4ece-9596-7ffa46031336/Untitled.png)
+   ![multiplier](./img/multiplier.png)
 
 ### 앵커와 관련된 프로퍼티
 
