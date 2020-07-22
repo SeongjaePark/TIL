@@ -1561,7 +1561,8 @@ CGPoint의 x, y와 CGSize의 width, height는 모두 부동소수점 타입인 C
     <summary>5. MVC (Model-View-Controller)</summary>
       <details>
       <summary>5-1. 프로그래밍 디자인 패턴이란?</summary>
-      # 프로그래밍 디자인 패턴이란?
+
+# 프로그래밍 디자인 패턴이란?
 
 [위키피디아 - Software Design Pattern](https://en.wikipedia.org/wiki/Software_design_pattern)
 
