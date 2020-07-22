@@ -1720,7 +1720,7 @@ CGPoint의 x, y와 CGSize의 width, height는 모두 부동소수점 타입인 C
       <details>
       <summary>5-2. Model-View-Controller</summary>
 
-      # Model-View-Controller
+# Model-View-Controller
 
 [Apple Documentation - Model-View-Controller (Cocoa Core Competencies)](https://developer.apple.com/library/archive/documentation/General/Conceptual/DevPedia-CocoaCore/MVC.html)
 
