@@ -1926,7 +1926,3 @@ MVC 모델 외에도 MVP(Model-View-Presenter), MVVM(Model-View-ViewModel) 등 �
    <center><img src="./img/AppleDoc_ex3.png" width="500"></center>
 
 </details>
-
-<details>
-  <summary>7. Summary</summary>
-</details>
