@@ -1719,10 +1719,148 @@ CGPoint의 x, y와 CGSize의 width, height는 모두 부동소수점 타입인 C
     </details>
       <details>
       <summary>5-2. Model-View-Controller</summary>
+
+      # Model-View-Controller
+
+[Apple Documentation - Model-View-Controller (Cocoa Core Competencies)](https://developer.apple.com/library/archive/documentation/General/Conceptual/DevPedia-CocoaCore/MVC.html)
+
+[Apple Documentation - Model-View-Controller (Concepts in Objective-C Programming)](https://developer.apple.com/library/archive/documentation/General/Conceptual/CocoaEncyclopedia/Model-View-Controller/Model-View-Controller.html)
+
+# 학습 목표
+
+1. MVC 디자인 패턴의 개념을 이해한다.
+2. 각 객체의 역할과 사용되는 클래스를 이해한다.
+
+# 학습하기
+
+## Model-View-Controller
+
+MVC 디자인 패턴은 애플리케이션의 **객체를 모델, 뷰, 컨트롤러의 세 가지 역할 중 하나의 역할로 할당**한다. 이 패턴은 애플리케이션 내에서 객체가 수행하는 역할 뿐만 아니라 **객체가 서로 통신하는 방식을 정의**한다.
+
+세 가지 유형의 객체는 각각 추상적인 경계에 의해 다른 객체와 구분되며, 그 경계를 넘어 다른 객체와 통신한다. 애플리케이션 내의 **특정 MVC 유형을 한데 모아 레이어**(예: 모델 레이어)라고도 한다.
+
+<center><img src="./img/MVC_ex1.png" width="350"></center>
+
+## 모델 객체 (Model Object)
+
+모델 객체는 애플리케이션과 관련된 데이터를 캡슐화하고, 해당 데이터를 조작하고 처리하는 로직과 계산을 정의한다.
+
+하나의 모델 객체는 다른 모델 객체와 일대일 또는 일대다 대응 관계를 맺을 수 있다. 예를 들면 게임 속 캐릭터를 나타내거나 주소록의 연락처를 나타낼 수도 있다.
+
+**모델 객체는** 데이터를 사용자에게 제공하거나 사용자가 이를 편집할 수 있는 **뷰 객체에 명시적으로 연결되어서는 안 된다.** 즉, 사용자 인터페이스나 표시 문제와 관련이 있어서는 안 된다.
+
+### 잘 설계된 모델 클래스
+
+모델 클래스, 즉 모델 객체를 생성하는 클래스는 Core Data Technology를 사용하고 있는 경우 NSManagerObject 서브 클래스를 많이 사용한다. Objective-C 언어를 사용하는 경우 일반적으로 NSObject의 서브클래스이다.
+
+스위프트 언어를 사용하는 경우에는 특별한 경우가 아니라면 NSObject를 상속받지 않는다. 또, 값 타입의 모델이 필요한 경우 클래스 대신에 구조체를 활용하기도 한다.
+
+### 모델 서브클래스를 구현할 때 클래스 디자인에서 고려할 점
+
+**인스턴스 변수**
+
+- 애플리케이션 내에 캡슐화된 데이터를 유지하기 위한 인스턴스 변수를 선언한다. 인스턴스 변수는 객체, 스칼라 값, 또는 NSRange와 같은 구조체일 수 있다.
+- 비객체형 대신 객체형을 사용하는 데에는 장단점이 있으므로, 객체 상호 관계(object mutuality)를 고려해야 한다.
+
+**접근자 메서드 (Accessor methods)와 프로퍼티**
+
+- 접근자 메서드는 일반적으로 인스턴스 변숫값을 획득 및 설정하며, 흔히 획득자 및 설정자 메서드 (getter and setter method)라고도 알려져 있다.
+- 스위프트 언어를 사용하는 경우, 인스턴스 변수를 private 또는 fileprivate 등으로 접근을 제한한 경우, 인스턴스 외부에서(fileprivate의 경우는 다른 소스파일에서) 접근하려면 접근자 메서드가 필요하다.
+
+**키-값 (Key-Value) 코딩**
+
+- 키-값 코딩은 클라이언트가 프로퍼티 이름을 키로 사용하여 객체의 프로퍼티에 접근할 수 있게 하는 메커니즘이다.
+- Core Data에서 사용하고 있으며 Cocoa의 다른 곳에서도 사용하고 있다.
+- 접근자 메서드의 이름 지정 (또한, 암시적으로는 선언된 프로퍼티의 이름 지정)이 이 메커니즘의 요소가 된다.
+
+**초기화 및 할당 해제(Initialization and deallocation)**
+
+- 대부분 모델 클래스는 인스턴스 변수를 적절한 초깃값으로 설정하는 이니셜라이저 메서드를 구현한다.
+- 여기서 초기화는 이니셜라이저 메서드의 표준 형식을 따라야 하며, deinit 메서드에서 객체 값을 가지는 모든 인스턴스 변수를 해제해야 한다.
+
+**객체 인코딩**
+
+- 모델 클래스의 객체를 보관하려는 경우, 해당 객체의 인스턴스 변수를 인코딩 및 디코딩할 수 있어야 한다.
+
+**객체 복제**
+
+- 클라이언트가 모델 객체를 복제할 것으로 예상하는 경우, 클래스에서 객체 복제를 구현해야 한다.
+
+## 뷰 객체 (View Objects)
+
+뷰 객체는 애플리케이션 내에서 사용자가 볼 수 있는 객체를 말한다. 자신이 보이는 방법을 알고 있고 사용자 동작에 응답할 수 있다.
+
+뷰 객체의 주된 목적은 애플리케이션의 모델 객체의 데이터를 보여주고 해당 데이터를 편집할 수 있도록 하는 것이다.그럼에도 불구하고, 뷰 객체는 MVC 애플리케이션의 모델 객체와는 일반적으로 분리된다.
+
+주소록으로 예를 들면 전화번호 및 정보가 보이는 화면들을 말한다.
+
+## 컨트롤러 객체 (Controller Objects)
+
+컨트롤러 객체는 하나 이상의 애플리케이션 뷰 객체와 하나 이상의 모델 객체 사이의 코디네이터 또는 **중개자 역할**을 한다.
+
+모델-뷰-컨트롤러 디자인 패턴에서 컨트롤러 객체(또는 컨트롤러)는 사용자가 버튼을 탭/클릭하거나 텍스트 필드에서 텍스트를 입력하는 것처럼, 뷰 객체에서 이루어진 사용자 동작 및 의도를 해석하며, 신규 혹은 변경된 데이터를 모델 객체에 전달한다. 따라서 **컨트롤러 객체는 뷰 객체로 하여금 모델 객체의 변경사항을 인지하거나, 그 반대의 경우가 가능하도록 하는 매개체**가 된다.
+
+컨트롤러 객체는 애플리케이션의 설정 및 조정 작업을 수행할 수도 있으며, **다른 객체들의 생애주기(life cycle)를 관리**하기도 한다.
+
+iOS 환경의 Cocoa Touch 프레임워크는 **코디네이팅 컨트롤러**, **뷰 컨트롤러**의 두 가지 기본 컨트롤러 유형을 제공한다.
+
+<center><img src="./img/MVC_ex2.png" width="350"></center>
+
+### 코디네이팅 컨트롤러 (Coordinating Controllers)
+
+코디네이팅 컨트롤러는 애플리케이션 전체 혹은 일부 기능을 감독하고 관리한다. 애플리케이션별로 다른 로직이 각 애플리케이션에 주입(injected)되는 장소라고 할 수 있으며, 그 기능은 다음과 같다.
+
+- 델리게이션(delegation) 메시지에 응답하고 알림(notifications)을 관리
+- 사용자가 버튼과 같은 컨트롤을 탭 하거나 클릭함에 따라 전송되는 동작 메시지(action message)에 응답
+- 객체 간의 연결을 확립하거나 기타 설정 작업을 수행 (예: 애플리케이션을 시작하는 경우)
+- 소유한(owned) 객체의 생명 주기 관리.
+
+\*iOS 애플리케이션에서는 뷰 컨트롤러가 코디네이팅 컨트롤러의 역할을 겸하는 경우가 많다.
+
+### 뷰 컨트롤러 (View Controller)
+
+UIKit에서 뷰 컨트롤러는 콘텐츠를 화면에 표시하는 뷰를 관리하며, 해당 뷰에 대한 참조(reference)를 유지하고, 이 뷰의 프레젠테이션(presentation) 및 후속 뷰로의 전환(transition)을 관리한다.
+
+이와 관련된 모든 프레젠테이션 동작이 뷰 컨트롤러 객체에 의해 관리되고 구현된다. 또한, 모달뷰를 표시하고 메모리 부족 경고에 응답하며 기기의 방향(orientation)이 바뀔 때 뷰를 회전시킨다
+
+iOS의 뷰 컨트롤러는 UIViewController 서브클래스의 인스턴스이다. UIKit은 UITableViewController와 같은, UIViewController의 여러 특수 목적 서브클래스를 제공한다. 컨트롤러가 모델과 뷰 간에 데이터를 중개하도록 반드시 프레임워크의 뷰-콘트롤러 클래스(예: UIViewController, UITableViewController 등)을 확장해야 한다. 뷰 콘트롤러는 여러 가지 프레임워크 객체에 대한 델리게이트 혹은 데이터 소스 객체인 경우가 많다.
+
+## 생각해보기
+
+MVC 모델 외에도 MVP(Model-View-Presenter), MVVM(Model-View-ViewModel) 등 다양한 디자인 패턴에 대해서도 알아보자
+
+[블로그 - MVC, MVP, MVVM](https://beomy.tistory.com/43)
+
+**MVC**
+
+<center><img src="./img/MVC_ex3.png" width="350"></center>
+
+- 특징: Controller는 여러개의 View를 선택할 수 있는 1:n 구조이다. Controller는 View를 선택할 뿐 직접 업데이트하지 않는다. (View는 Controller를 알지 못한다.)
+- 장점: 널리 사용되고 있는 패턴이라는 점에 걸맞게 가장 단순하다. 단순하다 보니 보편적으로 많이 사용되는 디자인 패턴이다.
+- 단점: View와 Model 사이의 의존성이 높다. View와 Model의 높은 의존성은 애플리케이션이 커질수록 복잡해지고 유지보수가 어렵게 만들 수 있다.
+
+**MVP**
+
+<center><img src="./img/MVC_ex4.png" width="350"></center>
+
+- 특징: Presenter는 View와 Model의 인스턴스를 가지고 있어 둘을 연결하는 접착제 역할을 한다. Presenter와 View는 1:1 관계다.
+- 장점: MVP 패턴은 MVC 패턴의 단점이었던 View와 Model의 의존성을 해결하였다. (Presenter를 통해서만 데이터를 전달 받기 때문에)
+- 단점: View와 Presenter 사이의 의존성을 가지게 된다. 애플리케이션이 복잡해 질 수록 View와 Presenter 사이의 의존성이 강해지는 단점이 있다.
+
+**MVVM**
+
+<center><img src="./img/MVC_ex5.png" width="350"></center>
+
+- 특징: MVVM 패턴은 [Command 패턴](https://ko.wikipedia.org/wiki/%EC%BB%A4%EB%A7%A8%EB%93%9C_%ED%8C%A8%ED%84%B4)과 [Data Binding](https://en.wikipedia.org/wiki/Data_binding) 두 가지 패턴을 사용하여 구현되었다. Command 패턴과 Data Binding을 이용하여 View와 View Model 사이의 의존성을 없앴다. View Model과 View는 1:n 관계이다.
+- 장점: View와 Model 사이의 의존성이 없다. 또한 Command 패턴과 Data Binding을 사용하여 View와 View Model 사이의 의존성 또한 없앤 디자인패턴이다. 각각의 부분은 독립적이기 때문에 모듈화하여 개발할 수 있다.
+- 단점: MMVM 패턴의 단점은 View Model의 설계가 쉽지 않다는 점이다.
+
+
     </details>
       <details>
       <summary>5-3. 직접 찾아보기</summary>
     </details>
+
   </details>
   <details>
     <summary>6. Apple Developer Documentation</summary>
