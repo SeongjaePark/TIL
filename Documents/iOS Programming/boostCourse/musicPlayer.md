@@ -1857,15 +1857,76 @@ MVC 모델 외에도 MVP(Model-View-Presenter), MVVM(Model-View-ViewModel) 등 �
 
 
     </details>
-      <details>
-      <summary>5-3. 직접 찾아보기</summary>
-    </details>
 
   </details>
-  <details>
-    <summary>6. Apple Developer Documentation</summary>
-  </details>
+<details>
+  <summary>6. Apple Developer Documentation</summary>
 
-  <details>
-    <summary>7. Summary</summary>
-  </details>
+# 애플 개발자 문서 읽기
+
+# 학습 목표
+
+1. 애플 문서 구성에 대해 알아보자
+2. 애플 문서를 읽을 때 유용한 팁에 대해 알아보자
+3. 애플 문서 접근 방법에 대해 알아보자
+
+# 학습하기
+
+## 애플 개발자 문서
+
+애플에서 제공하는 개발 문서에 익숙해지고, 문서에게 필요한 정보를 습득하는 일은 iOS 개발에 있어 매우 중요하다.
+
+문서를 숙지해 프레임워크와 클래스의 구동 방식을 이해하고 적절한 메서드/프로퍼티를 찾아 애플리케이션에 올바르게 적용할 수 있다. 또, 오류가 발생했을 때 적절한 해결방안을 찾을 수 있으며 새롭게 등장하는 기술을 빠르게 이해하고 응용할 수 있다.
+
+하지만 영어로 되어있는 방대한 문서를 모두 읽는 것은 불가능하다. 애플 문서가 어떻게 구성되어있는지를 알아보고, 필요한 정보를 효과적으로 찾을 수 있는 팁에 대해 알아보자.
+
+## 애플 문서 구성
+
+[애플 개발 사이트의 문서](https://developer.apple.com/documentation/)는 크게 3가지로 나누어져 있다.
+
+### 1. 참조 자료 (API Reference)
+
+- 클래스의 메서드와 프로퍼티에 대한 기술적인 세부사항에 관해 설명한다. 코딩을 계획하거나 코딩을 하는 중에 살펴보는 말 그대로 참조용 자료이다.
+
+### 2. 가이드 (Guide)
+
+- 가이드는 특정 분야에 대해 상세히 소개하고, 내부적으로 어떻게 구동되는지에 대해 설명한다. 관심 있는 부분만 골라서 읽어도 되지만, 모든 부분을 읽으면 예상치 못한 부분을 배우게 될 것이다. 또, 짤막한 예제코드를 제공하는 경우도 있기 때문에 올바른 코딩에도 많은 도움이 된다.
+
+### 3. 샘플 코드(Sample Code)
+
+- 샘플 코드는 실제로 API를 어떻게 사용하는지에 대한 예시이다. 동일한 기능을 애플의 프로그래머는 어떻게 구현하는지, 코드를 어떻게 작성하는지 살펴볼 좋은 기회이다.
+
+## 애플 문서 읽기 팁
+
+### 문서 읽기 팁
+
+먼저 사용하려는 클래스의 가이드를 읽어 개략적인 기능에 대해 이해하는 것이 좋다. 그런 다음 참조 자료를 살펴보면서 애플리케이션에 구현할 기능(프로퍼티)이나 작동방법(메서드)을 숙지하는 것이 추천된다.
+
+**UITextField**를 사용하는 예
+
+1. [Text Programming Guide for iOS](https://developer.apple.com/library/archive/documentation/StringsTextFonts/Conceptual/TextAndWebiPhoneOS/Introduction/Introduction.html) 가이드 문서의 개요를 통해 UIKit 중 문자를 보여주거나 관리하는 주요 구성요소와 기능에 대해 살펴본다. UITextField 외에 문자를 다루는 다른 클래스(UITextLabel, UITextView)에는 무엇이 있는지도 함께 살펴보고 차이에 대해 이해하면 좋다.
+2. [UITextField 참조 문서](https://developer.apple.com/documentation/uikit/uitextfield)를 통해 기본적인 객체를 어떻게 생성할 수 있는지 알아본다.
+3. 텍스트 필드의 문자 색상/폰트/정렬 방법을 수정하고 싶다면 프로퍼티 부분을 살펴본다.
+4. 텍스트 필드의 모양과 위치를 재정의하고 싶으면 메서드 부분을 살펴본다.
+5. 만약 원하는 프로퍼티나 메서드를 찾을 수 없다면 부모클래스의 문서로 이동하여 원하는 기능을 찾아본다.
+6. 텍스트 필드에 특정 이벤트가 발생하는 것을 감지하고 싶으면 델리게이트가 있는지 살펴본다. 델리게이트가 있다면 해당 프로토콜 문서를 찾아가 살펴본다.
+
+## 문서 접근 방법
+
+1. [애플 개발자 사이트](https://developer.apple.com/documentation/)에서 문서 보기
+
+   <center><img src="./img/AppleDOC_ex1.png" width="350"></center>
+
+2. Xcode '클래스 위 커서 + Alt(Option) + 클릭' 또는 오른쪽 Inspector Area의 '퀵헬프'
+
+   <center><img src="./img/AppleDOC_ex2.png" width="350"></center>
+
+3. Xcode 메뉴 > Help > Developer Documentation
+
+   <center><img src="./img/AppleDOC_ex3.png" width="350"></center>
+
+</details>
+
+<details>
+  <summary>7. Summary</summary>
+</details>
