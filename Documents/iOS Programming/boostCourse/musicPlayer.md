@@ -1915,15 +1915,15 @@ MVC 모델 외에도 MVP(Model-View-Presenter), MVVM(Model-View-ViewModel) 등 �
 
 1. [애플 개발자 사이트](https://developer.apple.com/documentation/)에서 문서 보기
 
-   <center><img src="./img/AppleDOC_ex1.png" width="350"></center>
+   <center><img src="./img/AppleDoc_ex1.png" width="350"></center>
 
 2. Xcode '클래스 위 커서 + Alt(Option) + 클릭' 또는 오른쪽 Inspector Area의 '퀵헬프'
 
-   <center><img src="./img/AppleDOC_ex2.png" width="350"></center>
+   <center><img src="./img/AppleDoc_ex2.png" width="350"></center>
 
 3. Xcode 메뉴 > Help > Developer Documentation
 
-   <center><img src="./img/AppleDOC_ex3.png" width="350"></center>
+   <center><img src="./img/AppleDoc_ex3.png" width="350"></center>
 
 </details>
 
