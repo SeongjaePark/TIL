@@ -72,11 +72,13 @@
 - 에셋 카탈로그에서 관리하는 이미지들은 자동으로 적용이 된다. (슬라이싱은 iOS 9.0 버전 이상만 지원한다.)
 - - iTunes Connect란 개발자가 앱 스토어에 판매할 애플리케이션을 제출하고 관리할 수 있도록 도와주는 웹 기반 도구임
     </details>
+
     <details>
       <summary>1-2. 인터페이스 빌더로 화면 구성하기</summary>
       
       [Apple Documentation](https://help.apple.com/xcode/mac/current/#/dev9ffcd0c51)
     </details>
+
     <details>
       <summary>1-3. 인터페이스 빌더의 객체를 코드와 연결(IBOutlet)</summary>
       
@@ -97,6 +99,7 @@
 - 인터페이스 빌더의 객체와 코드를 연결한 후 변수명 수정 시, 기존의 연결을 끊고 새로운 코드와 객체를 다시 연결해주거나,
 - 코드의 변수명에 우클릭 후 refactor > rename 을 통해 이름을 변경해주어야 앱 실행 시 오류가 나지 않는다.
     </details>
+
     <details>
       <summary>1-4. 인터페이스 빌더의 객체를 코드와 연결(IBAction)</summary>
 
@@ -122,7 +125,8 @@ UIKit 에는 UIButton, UISwitch, UIStepper 등 UIControl을 상속받은 다양�
 
 컨트롤 이벤트는 UIControl에 Event라는 타입으로 정의되어 있다. 아래는 컨트롤 객체에 발생할 수 있는 이벤트의 종류이다. 다양한 이벤트 종류를 실제로 Xcode에서 테스트해보면 이해하는 데에 도움이 될 것이다.
 
-<details><summary>컨트롤 이벤트 종류와 설명</summary>
+<details>
+<summary>컨트롤 이벤트 종류와 설명</summary>
 
 **touchDown**
 
@@ -251,6 +255,7 @@ UIKit 에는 UIButton, UISwitch, UIStepper 등 UIControl을 상속받은 다양�
 print 로그를 통해 액션이 제대로 동작하는지 확인
 
 </details>
+
 <details>
 <summary>1-5. UIButton, UISlider, UILable</summary>
 
@@ -451,6 +456,7 @@ func setThumbImage(UIImage?, for UIControlState)
 ```
 
 </details>
+
 <details>
 <summary>1-6. 구현 코드 작성하기</summary>
   
@@ -578,7 +584,9 @@ func stop()
 [Xcode Help - Write Code](https://help.apple.com/xcode/mac/current/#/dev8716704af)
 
   </details>
+
 </details>
+
 <details>
   <summary>2. Foundation과 UIKit 그리고 Cocoa Touch</summary>
   
@@ -600,6 +608,7 @@ func stop()
 [위키피디아 - Cocoa (API)](<https://en.wikipedia.org/wiki/Cocoa_(API)>)
 
   </details>
+
   <details>
   <summary>2-2. UIKit이란?</summary>
 
@@ -641,6 +650,7 @@ UIKit은 iOS 애플리케이션의 사용자 인터페이스를 구현하고 이
 - ViewControlle는 UIViewController 클래스를 상속받는데, 이 UIViewController 클래스는 UIKit 프레임워크에 정의된 클래스이기 때문에
 - UIKit 을 import 해주어야 컴파일러가 UIViewController가 무엇인지 알 수 있다.
   </details>
+
   <details>
   <summary>2-3. Foundation이란?</summary>
 
@@ -699,10 +709,12 @@ Foundation에서 제공하는 데이터 타입 및 컬렉션 타입의 대부분
 - ViewController 파일을 생성하면 UIKIt을 자동적으로 import 하게 되어있는데, UIKit에 들어가 보면 import Foundation 명시되어 있다.
 - 따라서 ViewController 파일을 생성하면 UIKit을 import 하게 됨으로써 자동적으로 Foundation 또한 import 하게 된다.
     </details>
+
   </details>
 
   <details>
     <summary>3. 오토 레이아웃</summary>
+
     <details>
       <summary>3-1. 오토 레이아웃이란?</summary>
 
@@ -878,7 +890,8 @@ var widthAnchor: NSLayoutDimension { get }
 ```
 
   </details>
-    <details>
+
+  <details>
     <summary>3-2. 오토 레이아웃 구현하기(코드)</summary>
 
 # 오토 레이아웃 구현하기(코드)
@@ -1239,6 +1252,7 @@ Visual Format Language를 사용하여 제약조건을 지정하는 방법에 �
   ![ex9](./img/OL2_ex9.png)
 
     </details>
+
     <details>
     <summary>3-3. 오토 레이아웃 구현하기(인터페이스 빌더)</summary>
 
@@ -1557,9 +1571,11 @@ CGPoint의 x, y와 CGSize의 width, height는 모두 부동소수점 타입인 C
 <center><img src="./img/View_ex12.png" width="350"></center>
 
   </details>
+
   <details>
-    <summary>5. MVC (Model-View-Controller)</summary>
-      <details>
+   <summary>5. MVC (Model-View-Controller)</summary>
+      
+   <details>
       <summary>5-1. 프로그래밍 디자인 패턴이란?</summary>
 
 # 프로그래밍 디자인 패턴이란?
@@ -1717,13 +1733,19 @@ CGPoint의 x, y와 CGSize의 width, height는 모두 부동소수점 타입인 C
 - 싱글턴 인스턴스를 리턴해주는 factory 메서드의 이름은 관례 상 shared"ClassType" 의 형식을 취한다. 예를 들어 코코아 프레임워크에는 sharedFileManager, sharedColorPanel, sharedWorkspace 등이 있다.
 
     </details>
+
       <details>
       <summary>5-2. Model-View-Controller</summary>
+
     </details>
+
       <details>
       <summary>5-3. 직접 찾아보기</summary>
+
     </details>
+
   </details>
+
   <details>
     <summary>6. Apple Developer Documentation</summary>
   </details>
