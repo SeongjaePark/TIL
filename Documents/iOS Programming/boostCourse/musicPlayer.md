@@ -701,7 +701,7 @@ Foundation에서 제공하는 데이터 타입 및 컬렉션 타입의 대부분
     </details>
   </details>
   <details>
-    <summary>3. 오토 레이아웃 </summary>
+    <summary>3. 오토 레이아웃</summary>
     <details>
       <summary>3-1. 오토 레이아웃이란?</summary>
 
