@@ -1438,6 +1438,122 @@ Visual Format Language를 사용하여 제약조건을 지정하는 방법에 �
   </details>
   <details>
     <summary>4. iOS View의 체계</summary>
+
+# iOS View 체계
+
+[Apple Documentation - Windows and Views](https://developer.apple.com/library/archive/documentation/WindowsViews/Conceptual/ViewPG_iPhoneOS/Introduction/Introduction.html)
+
+[Apple Documentation - Creating and Managing a View Hierarchy](https://developer.apple.com/library/archive/documentation/WindowsViews/Conceptual/ViewPG_iPhoneOS/CreatingViews/CreatingViews.html#//apple_ref/doc/uid/TP40009503-CH5-SW47)
+
+## 학습목표
+
+1. 뷰 계층(view hierarchy) 구조와 계층에 포함된 뷰가 어떻게 행동하는지를 이해한다.
+2. 뷰 계층을 생성하고 관리하는 방법을 이해한다.
+3. 뷰의 좌표계를 이해한다.
+
+## 학습하기
+
+## 뷰의 기본적인 역할
+
+iOS에서 화면에 애플리케이션의 콘텐츠를 나타내기 위해 윈도우와 뷰를 사용한다. 윈도우는 그 자체로 콘텐츠를 표현할 수 없지만 애플리케이션의 뷰를 위한 컨테이너 역할을 한다. 뷰는 UIView 클래스 또는 UIView 클래스의 하위 클래스(Subclass)의 인스턴스로 윈도우의 한 영역에서 콘텐츠를 보여준다. 뷰가 나타날 수 있는 콘텐츠는 이미지, 문자, 도형 등과 같이 다양하다. 뷰는 또 다른 뷰를 관리하고 구성하기 위해 사용되기도 한다.
+
+뷰는 제스처 인식시(gesture recognizer)를 사용하거나 직접 터치 이벤트를 처리할 수 있다. 또한 뷰 계층(view hierarchy) 구조에서 부모뷰(parent view)는 자식뷰(child view)의 위치와 크기를 관리한다.
+
+나타내고자 하는 유형의 콘텐츠에 적합한 뷰를 여러 개 사용하여 뷰 계층 구조를 구성하고 이를 통해 콘텐츠를 보여주는 것이 좋다. 예를 들어 UIKit에는 이미지, 텍스트 그리고 다른 유형의 콘텐츠를 나타내는 뷰가 포함되어 있다.
+
+## 뷰 계층(View Hierarchy)
+
+### 뷰 계층구조와 서브뷰 관리
+
+뷰는 자신의 콘텐츠를 보여주는 것과 더불어, 다른 뷰를 위한 컨테이너로써의 역할도 한다. 하나의 뷰가 다른 뷰를 포함할 때, 두 뷰 사이에 부모-자식 관계가 생성된다. 해당 관계에서는 자식뷰는 서브뷰(subview)로, 부모뷰는 슈퍼뷰(superview)로 불려진다. 부모-자식 관계 형성은 애플리케이션의 시각적 모습과 동작 모두에 영향을 미친다.
+
+1. 슈퍼뷰와 서브뷰의 관계에서 서브뷰가 불투명할 경우 아래 그림과 같이 슈퍼뷰가 서브뷰에 가려진다.
+
+   <center><img src="./img/View_ex1.png" width="350"></center>
+
+2) 서브뷰가 반투명할 경우 서브뷰와 슈퍼뷰의 콘텐츠가 서로 섞여 화면에 보여지게 된다. 아래 그림과 같이 원래 노란색이었던 뷰가 슈퍼뷰의 빨간색과 섞여 주황색으로 화면에 보이게 된다.
+
+   <center><img src="./img/View_ex2.png" width="350"></center>
+
+3) 슈퍼뷰는 하나의 배열 안에 서브뷰를 순서대로 저장한다. 만약 하나의 슈퍼뷰에 포함된 두 서브뷰가 서로 겹치게 되면, 나중에 추가된(또는 서브뷰 배열의 끝으로 옮겨진) 서브뷰가 맨 위에 보이게 된다.
+
+   <center><img src="./img/View_ex3.png" width="350"></center>
+
+4) 두 서브뷰가 모두 반투명할 경우 뒤에 있는 모든 뷰들이 섞여 화면에 보여지게 된다. 아래 그림과 같이 겹쳐지는 영역에 따라 색이 다르게 표시되는 것을 확인할 수 있다. 뷰 계층 생성과 관련된 더 많은 정보는 [Creating and Managing a View Hierarchy](https://developer.apple.com/library/archive/documentation/WindowsViews/Conceptual/ViewPG_iPhoneOS/CreatingViews/CreatingViews.html#//apple_ref/doc/uid/TP40009503-CH5-SW47) 에서 참고할 수 있다.
+
+   <center><img src="./img/View_ex4.png" width="350"></center>
+
+### 뷰 계층의 생성과 관리
+
+OS 애플리케이션에서 뷰 계층을 만드는 방법에는 인터페이스 빌더를 이용하는 방법과 코드를 작성하는 방법이 있다. 코드작성 방식을 사용할 경우 서브뷰를 부모뷰에 추가하기 위해, 부모뷰의 `addSubView(*:)` 메서드를 호출한다. 이 메서드는 해당 서브뷰를 서브뷰 목록의 마지막에 추가한다. 부모뷰의 서브뷰를 제거하기 위해서는 서브뷰의 `removeFromSuperView()` 메서드를 호출한다. 이 외에도 서브뷰를 부모뷰 목록의 중간에 삽입하기 위해 `insertSubview(*:at)`, 부모뷰 내에 이미 존재하는 서브뷰를 정렬하기 위해 `bringSubView(toFront:)`, `sendSubview(toBack:)` 등의 메서드들을 호출할 수 있다.
+
+- 프로젝트 생성 시 기본으로 생성되는 ViewController를 선택하고 Delete키를 눌러서 삭제
+- 객체 라이브러리에서 View Controller 객체를 캔버스로 드래그 앤 드롭한다.
+- UIViewController는 스스로 화면에 표시되는 인스턴스가 아니므로, 자신이 운용할 View를 반드시 가지고 있어야 한다. 이 때문에 인터페이스 빌더에서 ViewController 인스턴스를 추가하면 View가 자동으로 추가된다.
+  - View 클릭 → Identity Inspector → Document의 Label 항목에 새로운 이름 입력(설명의 편의를 위해 View의 이름을 'SuperView'로 설정한다.)
+  - 추가된 View Controller를 선택 → Attributes Inspector → 'Is Initial View Controller' 체크.
+  - 'Is Initial View Controller'는 애플리케이션 실행 시 처음에 보여지게 될 View Controller임을 명시한다. 체크하면 캔버스의 뷰 컨트롤러의 View 옆에 화살표가 생긴다.
+
+### 여 슈퍼뷰의 서브뷰로 추가하기 (인터페이스 빌더)
+
+- 객체 라이브러리에서 View를 SuperView로 드래그 앤 드롭한다.
+
+  <center><img src="./img/View_ex5.png" width="350"></center>
+
+- 생성된 뷰를 클릭 → Attributes Inspector → 배경색 설정
+
+  <center><img src="./img/View_ex6.png" width="350"></center>
+
+### 서브뷰 제거하기 (인터페이스 빌더)
+
+- Document Outline 또는 스토리보드에서 서브뷰 목록에서 제거할 서브뷰를 선택한다.
+- Delete 키를 눌러서 제거한다.
+
+### 뷰를 생성하여 슈퍼뷰의 서브뷰로 추가하기 (코드)
+
+- 서브뷰를 부모뷰에 추가하기 위해서는 부모뷰의 addSubview 메서드를 호출한다. 이 메서드는 해당 서브뷰를 부모뷰의 서브뷰 목록의 마지막에 추가한다. (코드에서 view는 메인 스토리보드에 있는 ViewController의 SuperView를 나타낸다)
+
+  <center><img src="./img/View_ex7.png" width="350"></center>
+
+- 주의: 프로젝트 실행 시 이미 존재하는 ViewController를 한 번 삭제하고 다시 만들 때 View Controller의 Identity Inspector 탭에서 View Controller의 클래스를 ViewController로 설정해주어야 코드가 정상적으로 작동한다.
+
+  <center><img src="./img/View_ex8..png" width="350"></center>
+
+### 서브뷰 제거하기 (코드)
+
+<center><img src="./img/View_ex9.png" width="350"></center>
+
+### 뷰의 좌표계
+
+UIKit에서 기본이 되는 좌표계는 좌측 상단 모서리를 원점으로 하며, 원점으로부터 아래쪽, 오른쪽 방향으로 확장된다. 좌표값은 해상도와 상관없이 콘텐츠의 위치를 잡는 부동소수점을 사용해서 나타낸다.
+
+**프레임과 바운드**
+
+iOS의 좌표체계의 시작은 왼쪽 위부터 시작이다. 즉, 제일 왼쪽의 제일 위의 지점이 (0,0)이다. 또, 수평축은 x로, 수직축은 y로 표현한다.
+
+뷰의 프레임(frame)은 뷰의 크기와 위치를 슈퍼뷰의 좌표계를 기준으로 나타낸다. 바운드(bounds)는 뷰의 크기와 위치를 해당 뷰 자신의 좌표계를 기준으로 나타낸다. 아래 그림을 통해 서브뷰의 프레임과 바운드의 차이를 알아보자.
+
+<center><img src="./img/View_ex10.png" width="350"></center>
+
+코드 구현
+
+<center><img src="./img/View_ex11.png" width="350"></center>
+
+**뷰의 사각형을 정의하기 위해서 필요한 것**
+
+1. 뷰가 그려질 위치
+2. 위치로부터 그려질 뷰의 크기
+
+뷰의 프레임(frame)과 바운드(bounds)는 [CGRect](https://developer.apple.com/documentation/coregraphics/cgrect)라는 구조체를 통해서 표현된다. CGRect는 사각형의 크기와 위치에 대한 정보를 담고 있다.
+
+CGRect의 origin 프로퍼티는 CGPoint 타입으로 사각형의 시작점을 나타낸다. CGRect의 size 프로퍼티는 CGSize 타입으로 사각형의 높이와 너비를 나타낸다.
+
+CGPoint는 좌표를 표현할 수 있는 x와 y를 갖고 있다. CGSize는 위치와 높이의 값인 width와 height를 갖고 있다.
+
+CGPoint의 x, y와 CGSize의 width, height는 모두 부동소수점 타입인 CGFloat으로 표현된다.
+
+<center><img src="./img/View_ex12.png" width="350"></center>
+
   </details>
   <details>
     <summary>5. MVC (Model-View-Controller)</summary>
