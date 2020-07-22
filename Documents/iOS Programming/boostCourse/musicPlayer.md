@@ -700,8 +700,9 @@ Foundation에서 제공하는 데이터 타입 및 컬렉션 타입의 대부분
 - 따라서 ViewController 파일을 생성하면 UIKit을 import 하게 됨으로써 자동적으로 Foundation 또한 import 하게 된다.
     </details>
   </details>
+
   <details>
-    <summary><span>3. 오토 레이아웃</span></summary>
+    <summary>3. 오토 레이아웃</summary>
     <details>
       <summary>3-1. 오토 레이아웃이란?</summary>
 
@@ -1436,8 +1437,9 @@ Visual Format Language를 사용하여 제약조건을 지정하는 방법에 �
   </details>
 
 </details>
-  <details>
-    <summary>4. iOS View의 체계</summary>
+
+<details>
+  <summary>4. iOS View의 체계</summary>
 
 # iOS View 체계
 
@@ -1725,6 +1727,7 @@ CGPoint의 x, y와 CGSize의 width, height는 모두 부동소수점 타입인 C
   <details>
     <summary>6. Apple Developer Documentation</summary>
   </details>
+
   <details>
     <summary>7. Summary</summary>
   </details>
