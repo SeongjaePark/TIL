@@ -1517,9 +1517,9 @@ OS 애플리케이션에서 뷰 계층을 만드는 방법에는 인터페이스
 
   <center><img src="./img/View_ex7.png" width="350"></center>
 
-- 주의: 프로젝트 실행 시 이미 존재하는 ViewController를 한 번 삭제하고 다시 만들 때 View Controller의 Identity Inspector 탭에서 View Controller의 클래스를 ViewController로 설정해주어야 코드가 정상적으로 작동한다.
+- 주의: 행 시 이미 존재하는 ViewController를 한 번 삭제하고 다시 만들 때 View Controller의 Identity Inspector 탭에서 View Controller의 클래스를 ViewController로 설정해주어야 코드가 정상적으로 작동한다.
 
-  <center><img src="./img/View_ex8..png" width="350"></center>
+  <center><img src="./img/View_ex8.png" width="350"></center>
 
 ### 서브뷰 제거하기 (코드)
 
