@@ -17,3 +17,7 @@
 
 - [**Naver BoostCourse iOS 프로그래밍을 위한 스위프트 기초**](https://github.com/SeongjaePark/TIL/blob/master/Documents/iOS%20Programming/swiftBasic.md)
 - [**Naver BoostCourse iOS 프로그래밍**](https://github.com/SeongjaePark/TIL/blob/master/Documents/iOS%20Programming/boostCourse.md)
+
+### CS 기초
+
+- [**Naver BoostCourse CS50 2019**](https://github.com/SeongjaePark/TIL/blob/master/Documents/CS50/CS50.md)
