@@ -291,6 +291,51 @@ int main(void) {
 }
 ```
 
+## 부울 연산자
+
+부울 연산자는 참과 거짓을 판단하는 **부울 연산식**을 만드는 데 사용된다.
+
+`bool a = d < 5;` true
+
+`bool b = 2 >= 8;` false
+
+`bool c = a && b;` false
+
+`bool d = a || b;` true
+
+`bool e = ~d;` false
+
+## 조건문을 표현하는 다른 방법
+
+## Switch문
+
+조건식의 결과값에 따라 매칭되는 case의 코드를 실행시킨다.
+
+```c
+switch (x)
+{
+    case 1:
+        printf("A\n");
+        break;
+    case 2:
+        printf("B\n");
+        break;
+    default:
+        printf("C\n");
+
+}
+```
+
+### 3항 연산자
+
+식 하나를 받아서, 식이 참이면 : 기호 왼편의 값으로 계산되고, 거짓이면 오른편의 값으로 계산된다.
+
+```c
+int y = (x > 3) ? 2 : 1;
+```
+
+위의 식에서 만약 x > 3가 참이면 y는 2가되고, 그렇지 않으면 1이 된다.
+
 </details>
 
 <details>
