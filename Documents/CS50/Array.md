@@ -515,6 +515,115 @@ names라는 문자열 형식의 배열에 네 개의 이름이 저장되어 있�
 <details>
   <summary>7) 문자열의 활용</summary>
 
+# 학습 목표
+
+문자열을 탐색하고 일부 문자를 수정하는 코드를 구현할 수 있다.
+
+# 문자열의 길이 및 탐색
+
+사용자로부터 문자열을 입력 받아 한 글자씩 출력하는 프로그램을 만들어 보자
+
+간단하게 for 루프를 통해 문자열의 인덱스를 하나씩 증가시켜가면서 해당하는 문자를 출력하면 될텐데, 문자열의 끝은 어떻게 알 수 있을까?
+
+한 가지 방법은 해당하는 인덱스의 문자가 널 종단 문자, 즉 '\0'와 일치하는지 검사하는 것이다.
+
+즉, s라는 문자열이 있다고 할 때 `for (int i = 0; s[i] != '\0'; i++) {...}`와 같은 루프를 사용하면 된다.
+
+하지만 아래 코드와 같이 strlen() 이라는 함수를 사용할 수도 있다.
+
+```c
+#include <cs50.h>
+#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    string s = get_string("Input: ");
+    printf("Output:\n");
+    for (int i = 0, n = strlen(s); i < n; i++) // n의 데이터타입이 i와 같을 경우 데이터 타입 선언을 생략해줘도 된다.
+    {
+        printf("%c\n", s[i]);
+    }
+}
+```
+
+**strlen**은 문자열의 길이를 알려주는 함수로, string.h 라이브러리 안에 포함되어 있다.
+
+위 코드에서는 n이라는 변수에 문자열 s의 길이를 저장하고, 해당 길이 만큼만 for 루프를 순환한다.
+
+따라서 일일이 널 종단 문자를 검사하는 것보다 훨씬 효율적이다.
+
+# 문자열 탐색 및 수정
+
+사용자로부터 문자열을 입력받아 대문자로 바꿔주는 프로그램을 아래와 같이 작성할 수 있다.
+
+```c
+#include <cs50.h>
+#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    string s = get_string("Before: ");
+    printf("After:  ");
+    for (int i = 0, n = strlen(s); i < n; i++)
+    {
+        if (s[i] >= 'a' && s[i] <= 'z')
+        {
+            printf("%c", s[i] - 32);
+        }
+        else
+        {
+            printf("%c", s[i]);
+        }
+    }
+    printf("\n");
+}
+```
+
+먼저 사용자로부터 입력 받은 문자를 s라는 변수에 저장한다.
+
+그리고 s의 길이만큼 for 루프를 돌면서, 각 인덱스에 해당하는 문자가 'a'보다 크고 'z'보다 작은지 검사한다.즉, 소문자인지 검사하는 것과 동일하다.
+
+여기서 문자의 대소비교가 가능한 이유는 ASCII 값, 즉 그 문자가 정의되어 있는 ASCII 코드 상에서의 숫자값으로 비교할 수 있기 때문이다.
+
+또한 알파벳의 ASCII 값을 잘 살펴보면 각 알파벳의 소문자와 대문자는 32씩 차이가 남을 확인할 수 있다.
+
+따라서 각 문자가 소문자인 경우 그 값에서 32를 뺀 후에 '문자' 형태로 출력하면 대문자가 출력이 된다.
+
+각 문자가 이미 대문자인 경우는 그냥 그대로 출력하면 된다.
+
+이와 동일한 작업을 수행하는 함수가 ctype 라이브러리에 `toupper()` 이라는 함수로 정의되어 있다.
+
+이를 이용하면 간단하게 아래와 같이 대문자 변환 프로그램을 작성할 수 있다.
+
+```c
+#include <cs50.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    string s = get_string("Before: ");
+    printf("After:  ");
+    for (int i = 0, n = strlen(s); i < n; i++)
+    {
+        printf("%c", toupper(s[i]));
+    }
+    printf("\n");
+}
+```
+
+# 생각해보기
+
+string.h와 ctype.h의 라이브러리에 어떤 다른 함수가 있는지 확인해보고, 어떤 함수를 어떻게 활용해볼 수 있을지 생각해보자.
+
+- string.h와 ctype.h를 검색해보면 사람들이 잘 정리한 글을 찾을 수 있다. 자기가 검색해서 공부해보는 것도 중요하기 때문에 직접 찾아보도록 하자.
+
+* string.h 라이브러리 안에 있는 `char strcat(char destination, const char source)` 함수는 두 개의 문자열을 합치는 기능을 수행한다. strcat 함수는 destinaion 문자열과 source 문자열을 합쳐서 그 결과를 destination 문자열에 저장한다.
+* cype.h 라이브러리 안에 있는 `int isupper (int argument);` 함수는 인자가 대문자이면 0이 아닌 값을 반환한다. 비록 isupper 함수가 정수를 인자로 받아 들일 지라도, 문자가 함수에 전달된다. 내부적으로는, 그 문자가 체크를 위해서 ASCII 값으로 전환된다.
+
 </details>
 
 <details>
