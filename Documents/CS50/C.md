@@ -43,7 +43,7 @@ C로 작성한 코드는 `"파일이름.c"`로 저장해야 한다. (확장자 "
 
 우리가 직접 작성한 코드는 **소스 코드**라고 불린다. 이를 2진수로 작성된 "머신 코드"로 변환해야 컴퓨터가 이해할 수 있다. 이런 작업을 컴파일러라는 프로그램이 수행해 준다.
 
-<img src="../imgs/compiler.png" width="400">
+<img src="imgs/compiler.png" width="400">
 
 터미널 창의 명령어 프롬프트에서 "\$" 기호 옆에 우리가 원하는 명령어를 입력하면 된다.
 
@@ -943,18 +943,18 @@ Y2K와 보잉787과 같은 문제를 방지하기 위해서는 프로그램을 �
 
 `ctype.h` : 문자 분류 함수, 문자열 처리시 문자의 유형에 따라 구분해서 처리해야 하는 경우에 사용하는 함수 라이브러이이다.
 
-<img src="../imgs/ctype.h.png" width="400">
+<img src="imgs/ctype.h.png" width="400">
 
 `math.h` : 수학 관련함수, 대부분의 수학 관련 함수는 double 형의 인자를 갖고, double 형의 값을 리턴한다.
 
-<img src="../imgs/math.h.png" width="400">
+<img src="imgs/math.h.png" width="400">
 
 `stdlib.h` : 데이터 변환 함수, 데이터 변환 함수는 데이터 간의 변환이 필요할 때 사용된다.
 
-<img src="../imgs/stdlib.h.png" width="400">
+<img src="imgs/stdlib.h.png" width="400">
 
 `string.h` : 문자열 처리 함수, 하나 혹은 두 개의 문자열을 입력 받아 문자열의 값을 처리한다.
 
-<img src="../imgs/string.h.png" width="400">
+<img src="imgs/string.h.png" width="400">
 
 </details>
