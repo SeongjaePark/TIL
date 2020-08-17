@@ -359,6 +359,96 @@ int main(void)
 <details>
   <summary>5) 배열(2)</summary>
 
+# 학습 목표
+
+배열을 정의하고 사용하는 방법을 설명할 수 있다.
+
+# 전역 변수
+
+이전 파트에 이어서, 아래 코드에서 scores 배열의 크기를 정해주는 N이라는 변수를 새로 선언했다.
+
+만약 N이 고정된 값(상수)이라면 그 값을 선언할 때 const를 앞에 붙여서 전역 변수, 즉 코드 전반에 거쳐 바뀌지 않는 값임을 지정해줄 수 있다.
+
+관례적으로 이런 전역 변수의 이름은 대문자로 표기한다.
+
+```c
+#include <cs50.h>
+#include <stdio.h>
+
+const int N = 3;
+
+int main(void)
+{
+    // 점수 배열 선언 및 값 저장
+    int scores[N];
+    scores[0] = 72;
+    scores[1] = 73;
+    scores[2] = 33;
+
+    // 평균 점수 출력
+    printf("Average: %i\n", (scores[0] + scores[1] + scores[2]) / N);
+}
+```
+
+scores의 크기로 전역 변수를 선언하였기 때문에 점수 개수가 바뀌었을 때 수정해야 하는 코드가 조금 줄었다.
+
+하지만 여전히 일일이 배열의 인덱스마다 점수를 지정해줘야 하는 불편함이 있다.
+
+# 배열의 동적 선언 및 저장
+
+아래 코드에서와 같이 루프와 함수를 선언하여 좀 더 동적인 프로그램을 작성할 수 있다.
+
+```c
+#include <cs50.h>
+#include <stdio.h>
+
+float average(int length, int array[]);
+
+int main(void)
+{
+    // 사용자로부터 점수의 갯수 입력
+    int n = get_int("Scores:  ");
+
+    // 점수 배열 선언 및 사용자로부터 값 입력
+    int scores[n];
+    for (int i = 0; i < n; i++)
+    {
+        scores[i] = get_int("Score %i: ", i + 1);
+    }
+
+    // 평균 출력
+    printf("Average: %.1f\n", average(n, scores));
+}
+
+//평균을 계산하는 함수
+float average(int length, int array[])
+{
+    int sum = 0;
+    for (int i = 0; i < length; i++)
+    {
+        sum += array[i];
+    }
+    return (float) sum / (float) length;
+}
+```
+
+여기서는 배열의 크기를 사용자에게 직접 입력 받고, 배열의 크기만큼 루프를 돌면서 각 인덱스에 해당하는 값을 역시 사용자에게 동적으로 입력 받아 저장한다.
+
+그리고 average 라는 함수를 따로 선언하여 평균을 구한다.
+
+average 함수는 length 와 array[], 즉 배열의 길이와 배열을 입력으로 받는다. 함수 안에서는 배열의 길이만큼 루프를 돌면서 값의 합을 구하고 최종적으로 평균값을 반환한다.
+
+이와 같은 방법을 통해서 임의의 점수 개수와 점수 배열에 대해서 동적으로 평균값을 구하는 프로그램을 작성할 수 있다.
+
+- `(float) length`와 같이 변수의 데이터 타입을 바꾸는 행위를 casting이라고 한다.
+
+# 생각해보기
+
+점수의 평균을 구하는 예제에서, 동적으로 발생한 코드는 그렇지 않은 코드에 비해 어떤 장단점이 있을까?
+
+- 배열의 길이나 배열 내부의 값이 변해야 하는 상황에서 유용하게 쓰일 수 있을 것이다.
+- 사용자가 매번 값을 새로 입력해야만 한다.
+
 </details>
 
 <details>
