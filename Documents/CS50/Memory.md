@@ -580,6 +580,145 @@ void swap(int *a, int*b)
 <details>
   <summary>8) 파일 쓰기</summary>
 
+# 학습 목표
+
+사용자로부터 값을 입력받아 파일에 출력하는 프로그램을 작성할 수 있다.
+
+# 파일 쓰기
+
+지난 강의에서 아래 그림과 같은 **메모리 구조**를 간략하게 배웠다.
+
+다시 복습하면, **머신 코드 영역**에는 우리 프로그램이 실행될 때 그 프로그램이 컴파일된 바이너리 저장된다.
+
+**글로벌 영역**에는 프로그램 안에서 저장된 전역 변수가 저장된다.
+
+**힙 영역**에는 malloc으로 할당된 메모리의 데이터가 저장된다. 그리고 **스택**에는 프로그램 내의 함수와 관련된 것들이 저장된다.
+
+<img src="imgs/fileWrite.png" width="400">
+
+힙 영역에서는 **malloc에 의해 메모리가 더 할당될수록**, 점점 사용하는 메모리의 범위가 아래로 늘어난다.
+
+마찬가지로 스택 영역에서도 **함수가 더 많이 호출 될수록** 사용하는 메모리의 범위가 점점 위로 늘어난다.
+
+이렇게 점점 늘어나다 보면 제한된 메모리 용량 하에서는 기존의 값을 침범하는 상황도 발생할 것이다.
+
+이를 **힙 오버플로우** 또는 **스택 오버플로우**라고 일컫는다.
+
+# 사용자에게 입력 받기
+
+스택은 우리가 여태껏 많이 써왔던 get_int나 get_string과 같은 함수에서도 사용된다.
+
+만약 이런 함수들을 직접 구현한다면 아래와 같은 코드가 될 것이다.
+
+`get_int`
+
+```c
+#include <stdio.h>
+
+int main(void)
+{
+    int x;
+    printf("x: ");
+    scanf("%i", &x);
+    printf("x: %i\n", x);
+}
+```
+
+`get_string`
+
+```c
+#include <stdio.h>
+
+int main(void)
+{
+    char s[5];
+    printf("s: ");
+    scanf("%s", s);
+    printf("s: %s\n", s);
+}
+```
+
+위 코드들에서 **scanf**라는 함수는 사용자로부터 형식 지정자에 해당되는 값을 입력받아 저장하는 함수이다.
+
+`get_int` 코드에서 int x를 정의한 후에 scanf에 x가 아닌 **&x**로 그 주소를 입력해주는 부분에 유의하자. scanf 함수의 변수가 실제로 스택 영역 안에 x가 저장된 주소로 찾아가서 사용자가 입력한 값을 저장하도록 하기 위함이다.
+
+반면 `get_string` 코드에서는 scanf에 그대로 s를 입력해줬다. 그 이유는 s를 크기가 5인 문자열, 즉 크기가 5인 char 자료형의 배열로 정의했기 때문이다.
+
+**clang** 컴파일러는 문자 배열의 이름을 포인터처럼 다룬다. 즉 scanf에 s라는 배열의 첫 바이트 주소를 넘겨주는 것이다.
+
+# 파일 쓰기
+
+이제 사용자로부터 입력을 받아 파일에 저장하는 프로그램도 작성할 수 있다.
+
+```c
+#include <cs50.h>
+#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    FILE *file = fopen("phonebook.csv", "a");
+    char *name = get_string("Name: ");
+    char *number = get_string("Number: ");
+    fprintf(file, "%s, %s\n", name, number);
+    fclose(file);
+}
+```
+
+**fopen**이라는 함수를 이용하면 파일을 FILE이라는 자료형으로 불러올 수 있다.
+
+fopen 함수의 첫 번째 인자는 파일의 이름, 두 번째 인자는 모드로 r은 읽기, w는 쓰기, a는 덧붙이기를 의미한다.
+
+사용자에게 name과 number라는 문자열을 입력 받고, 이를 **fprintf** 함수를 이용하여 printf에서처럼 파일에 직접 내용을 출력할 수 있다.
+
+작업이 끝난 후에는 **fclose** 함수로 파일에 대한 작업을 종료해줘야 한다.
+
+# 생각해보기
+
+get_long, get_float, get_char도 비슷한 방식으로 직접 구현할 수 있을까?
+
+`get_long`
+
+```c
+#include <stdio.h>
+
+int main(void)
+{
+    long x;
+    printf("x: ");
+    scanf("%li", &x);
+    printf("x: %li\n", x);
+}
+```
+
+`get_float`
+
+```c
+#include <stdio.h>
+
+int main(void)
+{
+    float x;
+    printf("x: ");
+    scanf("%f", &x);
+    printf("x: %.3f\n", x);
+}
+```
+
+`get_char`
+
+```c
+#include <stdio.h>
+
+int main(void)
+{
+    char x;
+    printf("x: ");
+    scanf("%c", &x);
+    printf("x: %c\n", x);
+}
+```
+
 </details>
 
 <details>
