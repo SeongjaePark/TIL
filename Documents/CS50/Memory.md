@@ -323,6 +323,106 @@ int main(void)
 <details>
   <summary>5) 문자열 복사</summary>
 
+# 학습 목표
+
+문자열을 복사할 수 있다.
+
+# 문자열 복사
+
+문자열을 복사하기 위해 아래 코드를 실행하면 어떻게 될까?
+
+```c
+#include <cs50.h>
+#include <ctype.h>
+#include <stdio.h>
+
+int main(void)
+{
+    string s = get_string("s: ");
+    string t = s;
+
+    t[0] = toupper(t[0]);
+
+    printf("s: %s\n", s);
+    printf("t: %s\n", t);
+}
+```
+
+사용자에게 입력 값을 받아 string s에 저장하고, string t를 s로 정의한다.
+
+그리고 t의 첫 번째 문자를 toupper 함수를 이용하여 대문자로 바꾼다면 s와 t는 각각 어떻게 출력될까?
+
+입력 값으로 "emma"를 주게 된다면, 단순한 예상과는 다르게 s와 t 모두 "Emma"라고 출력된다.
+
+그 이유는 **s**라는 변수는 "emma" 라는 문자열이 아닌 그 문자열이 있는 **메모리의 주소가 저장**되기 때문이다.
+
+**string s**는 **char \*s**와 동일한 의미라는 것을 떠올리면 된다.
+
+따라서 t도 s와 동일한 주소를 가리키고 있고, t를 통한 수정은 s에도 그대로 반영이 되는 것이다.
+
+그렇다면 두 문자열을 실제로 메모리상에서 복사하려면 어떻게 해야 할까?
+
+아래 코드와 같이 **메모리 할당 함수**를 사용하면 된다.
+
+```c
+#include <cs50.h> // get_string()
+#include <ctype.h> // toupper()
+#include <stdio.h> // printf()
+#include <string.h> // strlen()
+#include <stdlib.h> // malloc()
+
+int main(void)
+{
+    char *s = get_string("s: ");
+    char *t = malloc(strlen(s) + 1);
+
+    for (int i = 0, n = strlen(s); i < n + 1; i++)
+    {
+        t[i] = s[i];
+    }
+
+    t[0] = toupper(t[0]);
+
+    printf("s: %s\n", s);
+    printf("t: %s\n", t);
+}
+```
+
+위의 코드와 다른 점은 **malloc**이라는 함수를 이용해서 t를 정의한다는 것이다.
+
+malloc 이라는 함수는 정해진 크기 만큼 메모리를 할당하는 함수이다.
+
+즉 s 문자열의 길이에 **널 종단 문자(\0)**에 해당하는 **1**을 더한 만큼 메모리에 할당한다.
+
+그리고 루프를 돌면서 s 문자열 배열에 있는 문자 하나 하나를 t 배열에 복사해주면 된다.
+
+이 코드를 컴파일 후 실행시키고 입력 값으로 "emma"를 주면 우리가 예상한 대로 s는 "emma"가, t는 "Emma"가 출력된다.
+
+따라서 성공적으로 복사가 된 것을 확인할 수 있다.
+
+<string.h> 라이브러리에 포함된 strcpy() 함수를 이용하면 문자열을 복사할 수 있다.
+
+```c
+#include <cs50.h> // get_string()
+#include <stdio.h> // printf()
+#include <string.h> // strlen()
+#include <stdlib.h> // malloc()
+
+int main(void)
+{
+    char *s = get_string("s: ");
+
+    char *t = malloc(strlen(s) + 1);;
+    strcpy(t, s); // 포인터 s가 가리키는 문자열을 다른 메모리 주소를 가리키는 포인터 t에 복사
+}
+```
+
+# 생각해보기
+
+배운 바와 같이 메모리 할당을 통해 문자열을 복사하지 않고, 단순히 문자열의 주소만 복사했을 때는 어떤 문제가 생길까?
+
+- 복사한 문자열에 대해서만 조작을 하고 기존의 문자열에는 변화를 주고 싶지 않을 때에 의도치 않게 기존의 문자열까지도 훼손하게 되는 일이 발생한다.
+
 </details>
 
 <details>
