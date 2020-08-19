@@ -457,7 +457,7 @@ int main(void)
 
 가장 높은 층에서 트리가 시작되는 노드를 '**루트**'라고 한다. 루트 노드는 다음 층의 노드들을 가리키고 있고, 이를 '**자식 노드**'라고 한다.
 
-![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/7d5d16bc-e602-432a-a735-a495807ddb2e/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/7d5d16bc-e602-432a-a735-a495807ddb2e/Untitled.png)
+<img src="imgs/linkedList2.png" width="400">
 
 위 그림에 묘사된 트리는 구체적으로 '**이진 검색 트리**'이다.
 
