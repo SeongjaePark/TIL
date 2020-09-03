@@ -21,3 +21,7 @@
 ### CS 기초
 
 - [**Naver BoostCourse CS50 2019**](https://github.com/SeongjaePark/TIL/blob/master/Documents/CS50/CS50.md)
+
+### 파이썬(Python)
+
+- [**파이썬 자료구조**](https://github.com/SeongjaePark/TIL/blob/master/Documents/Python/DataStructure.md)
