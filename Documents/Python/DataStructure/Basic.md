@@ -1527,8 +1527,8 @@ tail 노드를 삭제하기 위해서는 바로 전 node가 필요한데, 이 �
 
 ```python
 class Node:
-  ""더블리 링크드 리스트 노드"""
-  def __init(self, data):
+  """더블리 링크드 리스트 노드"""
+  def __init__(self, data):
     self.data = data
     self.next = None
     self.prev = None
@@ -1602,6 +1602,582 @@ def __str__(self):
 
     return res_str
 ```
+
+  </details>
+
+  <details>
+    <summary>더블리 링크드 리스트 추가 연산</summary>
+
+# 더블리 링크드 리스트 추가 연산
+
+## 추가 연산 메소드 정의 (append)
+
+```python
+class Node:
+  """더블리 링크드 리스트 노드"""
+  def __init__(self, data):
+    self.data = data
+    self.next = None
+    self.prev = None
+
+class LinkedList:
+  """더블리 링크드 리스트 클래스"""
+  def __init__(self):
+    self.head = None
+    self.tail = None
+
+  def append(self, data):
+    """링크드 리스트 추가 연산 메소드"""
+    new_node = Node(data) # 새로운 데이터를 저장하는 노드
+
+    # 링크드 리스트가 비어 있는 경우
+    if self.head is None:
+      self.head = new_node
+      self.tail = new_node
+
+    else: # 링크드 리스트에 데이터가 이미 있는 경우
+      self.tail.next = new_node
+      new_node.prev = self.tail
+      sefl.tail = new_node
+
+  def fine_node_at(self, index):
+    """링크드 리스트 접근 연산 메소드. 파라미터 인덱스는 항상 있다고 가정"""
+    iterator = self.head # 연결 리스트를 돌기 위해 필요한 노드 변수
+
+    # index 번째 있는 노드로 간다
+    for _ in range(index):
+      iterator = iterator.next
+
+    return iterator
+
+  def find_node_with_data(self, data):
+    """링크드 리스트에서 주어진 데이터를 갖고 있는 노드를 리턴한다. 단, 해당 노드가 없으면 None을 리턴한다"""
+    iterator = self.head # 링크드 리스트를 돌기 위해 필요한 노드 변수
+
+    while iterator is not None:
+      if iterator.data == data:
+        return iterator
+
+      iterator = iterator.next
+
+    return None
+
+  def __str__(self):
+    """링크드 리스트를 문자열로 표현해서 리턴하는 메소드"""
+    res_str = "|"
+
+    # 링크드 리스트 안에 모든 노드를 돌기 위한 변수. 일단 가장 앞 노드로 정의한다.
+    iterator = self.head
+
+    # 링크드 리스트 끝까지 돈다
+    while iterator is not None:
+      # 각 노드의 데이터를 리턴하는 문자열에 더해준다.
+      res_str += f" {iterator.data} |"
+      iterator = iterator.next # 다음 노드로 넘어간다
+
+    return res_str
+```
+
+## 메소드 동작 확인
+
+```python
+# 빈 링크드 리스트 정의
+my_list = LinkedList()
+
+# 링크드 리스트에 데이터 추가
+my_list.append(2)
+my_list.append(3)
+my_list.append(5)
+my_list.append(7)
+
+print(my_list)
+# | 2 | 3 | 5 | 7 |
+```
+
+  </details>
+  <details>
+    <summary>더블리 링크드 리스트 삽입 연산</summary>
+
+# 더블리 링크드 리스트 삽입 연산 개념
+
+```python
+def insert_after(self, previous_node, data):
+	"""더블리 링크드 리스트 삽입 연산"""
+	new_node = Node(data)
+
+	#1) tail 노드 뒤에 삽입 하는 경우
+		self.tail 노드의 next에 new_node 지정
+		self.tail 노드에 new_node 할당
+	#2) 두 노드 사이에 삽입하는 경우
+		new_node.prev에 previous_node 할당
+		new_node.next에 previous_node.next 할당
+
+		previous 노드의 다음 노드의 prev에 new_node 할당
+		previous 노드의 next에 new_node 할당
+
+```
+
+# 더블리 링크드 리스트 삽입 연산 구현
+
+## `insert_after()` 메소드 구현
+
+```python
+class Node:
+    """링크드 리스트의 노드 클래스"""
+    def __init__(self, data):
+        self.data = data  # 실제 노드가 저장하는 데이터
+        self.next = None  # 다음 노드에 대한 레퍼런스
+        self.prev = None  # 전 노드에 대한 레퍼런스
+
+
+class LinkedList:
+    """링크드 리스트 클래스"""
+    def __init__(self):
+        self.head = None  # 링크드 리스트의 가장 앞 노드
+        self.tail = None  # 링크드 리스트의 가장 뒤 노드
+
+    def insert_after(self, previous_node, data):
+        """링크드 리스트 추가 연산 메소드"""
+        new_node = Node(data)
+
+        # tail 노드 뒤에 삽입하는 경우
+        if previous_node is self.tail:
+            self.tail.next = new_node
+            self.tail = new_node
+
+        # 두 노드 사이에 삽입하는 경우
+        else:
+            new_node.prev = previous_node
+            new_node.next = previous_node.next
+
+            previous_node.next.prev = new_node
+            previous_node.next = new_node
+
+    def find_node_at(self, index):
+        """링크드 리스트 접근 연산 메소드. 파라미터 인덱스는 항상 있다고 가정한다"""
+
+        iterator = self.head # 링크드 리스트를 돌기 위해 필요한 노드 변수
+
+        # index 번째 있는 노드로 간다
+        for _ in range(index):
+            iterator = iterator.next
+
+        return iterator
+
+    def append(self, data):
+        """링크드 리스트 추가 연산 메소드"""
+        new_node = Node(data)  # 새로운 노드 생성
+
+        # 빈 링크드 리스트라면 head와 tail을 새로 만든 노드로 지정
+        if self.head is None:
+            self.head = new_node
+            self.tail = new_node
+        # 이미 노드가 있으면
+        else:
+            self.tail.next = new_node  # 마지막 노드의 다음 노드로 추가
+            new_node.prev = self.tail
+            self.tail = new_node  # 마지막 노드 업데이
+
+    def __str__(self):
+        """링크드 리스트를 문자열로 표현해서 리턴하는 메소드"""
+        res_str = "|"
+
+        # 링크드 리스트 안에 모든 노드를 돌기 위한 변수. 일단 가장 앞 노드로 정의한다.
+        iterator = self.head
+
+        # 링크드 리스트 끝까지 돈다
+        while iterator is not None:
+            # 각 노드의 데이터를 리턴하는 문자열에 더해준다
+            res_str += " {} |".format(iterator.data)
+            iterator = iterator.next  # 다음 노드로 넘어간다
+
+        return res_str
+```
+
+## 메소드 동작 확인
+
+```python
+# 새로운 링크드 리스트 생성
+my_list = LinkedList()
+
+# 새로운 노드 5개 추가
+my_list.append(2)
+my_list.append(3)
+my_list.append(5)
+my_list.append(7)
+my_list.append(11)
+
+print(my_list)
+# | 2 | 3 | 5 | 7 | 11 |
+
+# tail 노드 뒤에 노드 삽입
+tail_node = my_list.tail  # 4 번째(마지막)노드를 찾는다
+my_list.insert_after(tail_node, 5)  # 4 번째(마지막)노드 뒤에 노드 추가
+print(my_list)
+# | 2 | 3 | 5 | 7 | 11 | 5 |
+print(my_list.tail.data)  # 새로운 tail 노드 데이터 출력
+# 5
+
+# 링크드 리스트 중간에 데이터 삽입
+node_at_index_3 = my_list.find_node_at(3)  # 노드 접근
+my_list.insert_after(node_at_index_3, 3)
+print(my_list)
+# | 2 | 3 | 5 | 7 | 3 | 11 | 5 |
+
+# 링크드 리스트 중간에 데이터 삽입
+node_at_index_2 = my_list.find_node_at(2)  # 노드 접근
+my_list.insert_after(node_at_index_2, 2)
+print(my_list)
+# | 2 | 3 | 5 | 2 | 7 | 3 | 11 | 5 |
+```
+
+# 더블리 링크드 리스트 prepend 메소드
+
+## `prepend()` 메소드 구현
+
+```python
+class Node:
+    """링크드 리스트의 노드 클래스"""
+    def __init__(self, data):
+        self.data = data  # 실제 노드가 저장하는 데이터
+        self.next = None  # 다음 노드에 대한 레퍼런스
+        self.prev = None  # 전 노드에 대한 레퍼런스
+
+
+class LinkedList:
+    """링크드 리스트 클래스"""
+    def __init__(self):
+            self.head = None  # 링크드 리스트 가장 앞 노드
+            self.tail = None  # 링크드 리스 가장 뒤 노드
+
+    def prepend(self, data):
+        """링크드 리스트 가장 앞에 데이터를 추가시켜주는 메소드"""
+        new_node = Node(data)
+
+				# 링크드 리스트가 비어 있는 경우
+        if self.head is None:
+            self.head = new_node
+            self.tail = new_node
+
+				# 이미 head 노드가 존재하는 경우(링크드 리스트가 비어있지 않은 경우)
+        else:
+            new_node.next = self.head
+            self.head.prev = new_node
+            self.head = new_node
+
+
+    def __str__(self):
+        """링크드 리스트를 문자열로 표현해서 리턴하는 메소드"""
+        res_str = "|"
+
+        # 링크드 리스트 안에 모든 노드를 돌기 위한 변수. 일단 가장 앞 노드로 정의한다.
+        iterator = self.head
+
+        # 링크드 리스트 끝까지 돈다
+        while iterator is not None:
+            # 각 노드의 데이터를 리턴하는 문자열에 더해준다
+            res_str += " {} |".format(iterator.data)
+            iterator = iterator.next  # 다음 노드로 넘어간다
+
+        return res_str
+```
+
+## 메소드 동작 확인
+
+```python
+# 새로운 링크드 리스트 생성
+my_list = LinkedList()
+
+# 여러 데이터를 링크드 리스트 앞에 추가
+my_list.prepend(11)
+my_list.prepend(7)
+my_list.prepend(5)
+my_list.prepend(3)
+my_list.prepend(2)
+
+print(my_list) # 링크드 리스트 출력
+# | 2 | 3 | 5 | 7 | 11 |
+
+# head, tail 노드가 제대로 설정됐는지 확인
+print(my_list.head.data)
+# 2
+print(my_list.tail.data)
+# 11
+```
+
+  </details>
+  <details>
+    <summary>더블리 링크드 리스트 삭제 연산</summary>
+
+# 더블리 링크드 리스트 삭제 연산 개념
+
+더블리 링크드 리스트의 노드는 전 노드와 다음 노드에 대한 레퍼런스를 모두 가지고 있음
+
+따라서 지우려는 노드 하나만 있으면 전 노드와 다음 노드에 모두 접근할 수 있음
+
+따라서 더블리 링크드 리스트의 삭제 메소드에는 지우려는 노드의 전 노드가 아니라, 지우려는 노드 하나만 넘겨주면 됨
+
+```python
+def delete(self, node_to_delete):
+  """더블리 링크드 리스트 삭제 연산"""
+
+  # 1) 지우려는 노드가 링크드 리스트의 마지막 남은 노드일 때
+  head 노드와 tail 노드에 None 할당
+
+  # 2) head 노드를 지우려는 경우(마지막 남은 노드가 아님)
+  head 노드에 head 노드의 다음 노드 할당
+  바뀐 head 노드의 prev에 None 할당
+
+  # 3) tail 노드를 지우려는 경우(마지막 남은 노드가 아님)
+  tail 노드에 tail 노드의 전 노드 할당
+  바뀐 tail 노드의 next에 None 할당
+
+  # 4) 두 노드 사이에 있는 노드를 지우려는 경우 (가장 일반적)
+  지울 노드의 전 노드의 next가 지울 노드의 다음 노드를 가리키게 함
+  지울 노드의 다음 노드의 prev가 지울 노드의 전 노드를 가리키게 함
+```
+
+4가지 경우 모두, 지우려는 노드만 있으면 어떤 노드인지 상관없이 딱 2개의 레퍼런스만 바꾸면 됨.
+
+시간복잡도: **_O(1)_**
+
+# 더블리 링크드 리스트 삭제 연산 구현
+
+## `delete()` 메소드 구현
+
+```python
+class Node:
+    """링크드 리스트의 노드 클래스"""
+    def __init__(self, data):
+        self.data = data  # 실제 노드가 저장하는 데이터
+        self.next = None  # 다음 노드에 대한 레퍼런스
+        self.prev = None  # 전 노드에 대한 레퍼런스
+
+class LinkedList:
+    """링크드 리스트 클래스"""
+    def __init__(self):
+        self.head = None  # 링크드 리스트의 가장 앞 노드
+        self.tail = None  # 링크드 리스트의 가장 뒤 노드
+
+    def delete(self, node_to_delete):
+        """더블리 링크드 리스트 삭제 연산 메소드"""
+        data = node_to_delete.data # 지울 노드의 데이터 저장
+
+        # 1) 지우려는 노드가 링크드 리스트의 마지막 남은 노드일 때
+        if self.head is self.tail:
+            self.head = None
+            self.tail = None
+
+        # 2) head 노드를 지우려는 경우(마지막 남은 노드가 아님)
+        elif node_to_delete is self.head:
+            self.head = self.head.next
+            self.head.prev = None
+
+        # 3) tail 노드를 지우려는 경우(마지막 남은 노드가 아님)
+        elif node_to_delete is self.tail:
+            self.tail = self.tail.prev
+            self.tail.next = None
+
+        # 4) 두 노드 사이에 있는 노드를 지우려는 경우 (가장 일반적)
+        else:
+            node_to_delete.prev.next = node_to_delete.next
+            node_to_delete.next.prev = node_to_delete.prev
+
+        return data # 지워진 노드의 데이터 리턴
+
+
+
+    def find_node_at(self, index):
+        """링크드 리스트 접근 연산 메소드. 파라미터 인덱스는 항상 있다고 가정한다"""
+
+        iterator = self.head # 링크드 리스트를 돌기 위해 필요한 노드 변수
+
+        # index 번째 있는 노드로 간다
+        for _ in range(index):
+            iterator = iterator.next
+
+        return iterator
+
+    def append(self, data):
+        """링크드 리스트 추가 연산 메소드"""
+        new_node = Node(data)  # 새로운 노드 생성
+
+        # 빈 링크드 리스트라면 head와 tail을 새로 만든 노드로 지정
+        if self.head is None:
+            self.head = new_node
+            self.tail = new_node
+        # 이미 노드가 있으면
+        else:
+            self.tail.next = new_node  # 마지막 노드의 다음 노드로 추가
+            new_node.prev = self.tail
+            self.tail = new_node  # 마지막 노드 업데이
+
+    def __str__(self):
+        """링크드 리스트를 문자열로 표현해서 리턴하는 메소드"""
+        res_str = "|"
+
+        # 링크드 리스트 안에 모든 노드를 돌기 위한 변수. 일단 가장 앞 노드로 정의한다.
+        iterator = self.head
+
+        # 링크드 리스트 끝까지 돈다
+        while iterator is not None:
+            # 각 노드의 데이터를 리턴하는 문자열에 더해준다
+            res_str += " {} |".format(iterator.data)
+            iterator = iterator.next  # 다음 노드로 넘어간다
+
+        return res_str
+```
+
+## 메소드 동작 확인
+
+```python
+# 새로운 링크드 리스트 생성
+my_list = LinkedList()
+
+# 새로운 노드 4개 추가
+my_list.append(2)
+my_list.append(3)
+my_list.append(5)
+my_list.append(7)
+
+print(my_list)
+# | 2 | 3 | 5 | 7 |
+
+# 두 노드 사이에 있는 노드 삭제
+node_at_index_2 = my_list.find_node_at(2)
+my_list.delete(node_at_index_2)
+print(my_list)
+# | 2 | 3 | 7 |
+
+# 가장 앞 노드 삭제
+head_node = my_list.head
+print(my_list.delete(head_node))
+# 2
+print(my_list)
+# | 3 | 7 |
+
+# 가장 뒤 노드 삭제
+tail_node = my_list.tail
+my_list.delete(tail_node)
+print(my_list)
+# | 3 |
+
+# 마지막 노드 삭제
+last_node  = my_list.head
+my_list.delete(last_node)
+print(my_list)
+# |
+```
+
+  </details>
+  <details>
+    <summary>더블리 링크드 리스트 시간 복잡도</summary>
+
+# 더블리 링크드 리스트 시간 복잡도
+
+- 접근: **_O(n)_**
+- 탐색: **_O(n)_**
+- 삽입: **_O(1)_**
+- 삭제: **_O(1)_**
+
+## 접근 & 탐색 연산
+
+더블리 링크드 리스트의 접근과 탐색 연산은 싱글리 링크드 리스트와 똑같이 함.
+
+head 노드부터 하나씩 다음 노드로 가면서 원하는 위치에 있거나 데이터를 갖고 있는 노드를 찾았음
+
+링크드 리스트의 길이가 n이라고 할 때, 최악의 경우 걸리는 시간은 이 n에 비례하니까 접근과 탐색은 **_O(n)_**이 걸림
+
+## 삽입 & 삭제 연산
+
+삽입 연산은 특정 노드가 주어졌을 때 그 다음 위치에 새로운 노드를 더함. 그냥 앞과 뒤 노드의 레퍼런스 몇 개만 바꿔주면 됨.
+
+링크드 리스트의 길이와 상관 없이 항상 일정함. **_O(1)_**
+
+삭제 연산은 파라미터로 지우려는 노드를 받아서 그 노드를 링크드 리스트에서 지웠음. 이 때는 경우가 4개로 좀 많긴 했지만, 모든 경우 다 그냥 레퍼런스 두 개만 바꿔주면 노드를 지울 수 있음
+
+삽입과 마찬가지로 항상 일정한 시간, **_O(1)_**이 걸림
+
+## 현실적인 시간 복잡도
+
+싱글리 링크드 리스트와 마찬가지로 더블리 링크드 리스트의 삽입과 삭제 연산을 하기 위해서는 특정 노드가 필요함. 그 특정 노드를 접근 또는 탐색한 후에야 삽입과 삭제도 할 수 있음
+
+그래서 현실적으로 더블리 링크드 리스트 연산들은 다음과 같은 시간이 걸림
+
+- 접근: **_O(n)_**
+- 탐색: **_O(n)_**
+- 원하는 노드에 접근 또는 탐색 + 삽입: **_O(n)_**
+- 원하는 노드에 접근 또는 탐색 + 삭제: **_O(n)_**
+
+## 삽입 & 삭제 특수한 경우
+
+링크드 리스트는 head와 tail 노드를 변수로 갖고 있어서 바로 접근할 수 있음. 이 특성을 이용하면 링크드 리스트의 가장 앞과 뒤에 삽입이나 삭제 연산을 할 때 좀 더 효율적으로 할 수 있음
+
+`append`와 `prepend` 메소드를 떠올려 보면, 파라미터를 안 받고 그냥 바로 tail 노드나 head 노드에 접근해서 양 끝에 새로운 데이터를 삽입할 수 있었음
+
+마찬가지로 더블리 링크드 리스트의 `delete` 메소드에 파라미터로 head나 tail 노드를 가지고 와서 넘겨주면 양 끝 데이터를 한 번에 **_O(1)_** 로 삭제할 수 있음
+
+- 가장 앞에 접근 + 삽입: **_O(1)_**
+- 가장 앞에 접근 + 삭제: **_O(1)_**
+- 가장 뒤에 접근 + 삽입: **_O(1)_**
+- 가장 뒤에 접근 + 삭제: **_O(1)_**
+
+## 싱글리 vs 더블리 링크드 리스트 tail 노드 삭제
+
+### 가장 뒤에 접근 + 삭제
+
+- 싱글리 링크드 리스트: **_O(n+1)_**
+- 더브리 링크드 리스트: **_O(1+1)_**
+
+싱글리 링크드 리스트의 삭제 연산은 지우려는 노드의 바로 전 위치의 노드를 파라미터로 받음. 그렇기 때문에 tail 노드를 지우기 위해서는 tail 노드 전 노드에 접근해서 이걸 파라미터로 넘겨줘야 함.
+
+맨 뒤 노드 바로 이전 노드에 접근하는 데에 **_O(n)_**이 걸리기 때문에 효율적으로 할 수 없음
+
+더블리 링크드 리스트는 삭제 연산을 할 때 지우려는 노드 자체를 파라미터로 받음. tail 노드는 링크드 리스트의 속성으로 저장하고 있기 때문에 바로 가지고 와서 삭제 연산의 파라미터로 넘겨주면 효율적으로 tail 노드를 삭제할 수 있음. head 노드도 마찬가지로 한 번에 삭제할 수 있음
+
+링크드 리스트를 사용해야 되는 상황에서 **tail 노드를 많이 삭제해야 된다면** 싱글리 링크드 리스트보다 **더블리 링크드 리스트를 사용하는 게 더 효율적**
+
+  </details>
+  <details>
+    <summary>싱글리 vs 더블리 링크드 리스트</summary>
+
+# 싱글리 vs 더블리 링크드 리스트
+
+## 노드가 갖는 레퍼런스
+
+싱글리 링크드 리스트 노드
+
+- 다음 노드에 대한 레퍼런스만 저장
+
+더블리 링크드 리스트 노드
+
+- 전 노드와 다음 노드에 대한 레퍼런스 둘 다 저장
+
+## 노드에 대한 접근
+
+싱글리 링크드 리스트
+
+- 특정 노드에서 앞에 있는 노드들에 접근할 수 없다!
+
+더블리 링크드 리스트
+
+- 어떤 노드든지 링크드 리스트 안 모든 노드에 접근할 수 있다!
+
+## 추가적 공간 (실제 저장 데이터를 제외한 다른 정보가 저장된 공간)
+
+링크드 리스트에서는 레퍼런스를 저장하는 공간이 추가적 공간
+
+싱글리 링크드 리스트: **_O(n)_**
+
+- 링크드 리스트 안의 레퍼런스 개수: _n - 1_
+
+더블리 링크드 리스트: **_O(n)_**
+
+- 링크드 리스트 안의 레퍼런스 개수: _2n - 2_
+
+두 자료의 추가적 공간에 대한 공간 복잡도는 동일하긴 하지만, 실질적으로는 두 배 정도 차이가 남
+
+평소에는 큰 차이 없이 사용해도 되지만, 조금이라도 공간을 효율적으로 사용하고 싶을 때에는 더블리 링크드 리스트보다 싱글리 링크드 리스트를 사용하는 편이 조금이나마 유리
 
   </details>
 
