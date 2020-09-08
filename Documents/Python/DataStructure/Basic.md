@@ -1964,7 +1964,7 @@ class LinkedList:
         data = node_to_delete.data # 지울 노드의 데이터 저장
 
         # 1) 지우려는 노드가 링크드 리스트의 마지막 남은 노드일 때
-        if self.head is self.tail:
+        if node_to_delete is self.head and node_to_delete is self.tail:
             self.head = None
             self.tail = None
 
@@ -2185,6 +2185,736 @@ head 노드부터 하나씩 다음 노드로 가면서 원하는 위치에 있�
 
 <details>
   <summary>4) 해시 테이블</summary>
+
+  <details>
+    <summary>key - value 데이터 & Direct Access Table</summary>
+
+# key - value 데이터
+
+모든 데이터에 순서 관계가 있는 것은 아님. ex) 호수와 입주민의 관계
+
+이처럼 이미 알고 있는 정보를 이용해서 저장한 정보를 검색할 수 있는 데이터 유형을 **key - value** 라고 함.
+
+- 하나의 **key**와 그 key에 해당하는 **value**를 합쳐서: **key - value** 쌍
+- 하나의 **key**에는 하나의 **value**만 있어야 한다!
+
+# Direct Access Table
+
+key를 배열 인덱스로 사용해서 데이터를 저장하고 가져오는 방식 = Direct Access Table
+
+- 효율적으로 key - value 쌍을 저장하고 가져올 수 있다. O(1)
+- but, 낭비하는 공간이 많다.
+  </details>
+  <details>
+    <summary>해시 테이블 & 해시 함수</summary>
+
+# 해시 테이블 (Hash Table) 개념
+
+## 해시 함수
+
+특정 값을 원하는 범위의 자연수로 바꿔주는 함수
+
+- key가 아무리 커도 원하는 범위 사이의 자연수로 바꿀 수 있음
+
+## 해시 테이블
+
+해시 함수와 배열을 같이 사용하는 자료구조
+
+key를 바로 인덱스로 사용하지 않고, 해시 함수에 넣어서 리턴된 값을 인덱스로 사용
+
+### 저장
+
+1. 원하는 크기의 배열을 만든다
+2. key를 해시 함수에 넣어서, 리턴된 값에 해당하는 배열의 인덱스에 key와 value를 모두 저장
+
+Direct Access Table에서는 key 자체가 인덱스였기 때문에 인덱스에 value만 저장했는데, 해시 테이블에서는 한 인덱스에 key와 value를 모두 저장해 줌
+
+이렇게 하면 배열의 크기가 무한대로 크지 않아도, 그 어떤 key - value 쌍도 배열에 저장할 수 있게 됨
+
+### 접근
+
+저장된 값을 가져올 때에도 마찬가지.
+
+1. key를 해시 함수에 넣어서, 리턴된 값데 해당하는 배열의 인덱스에 있는 value를 가져옴
+
+### 해시 테이블 정리
+
+1. 고정된 크기의 배열을 만든다
+2. 해시 함수를 이용해서 key를 원하는 범위의 자연수로 바꾼다
+3. 해시 함수 결과 값 인덱스에 key - value 쌍을 저장한다.
+
+# 해시 함수 구현
+
+## 해시 함수의 조건
+
+1. 한 해시 테이블의 해시 함수는 결정론적이어야 된다.
+   1. 그 말은 똑같은 key를 넣었을 때는 항상 똑같은 결과가 나와야 한다는 것. 942를 해시 함수를 넣을 때 어쩔 때는 5가 나오고 어쩔 때는 10이 나오면 안 됨. 942를 넣으면 항상 똑같은 결과가 나와야 함
+2. 결과 해시값이 치우치지 않고 고르게 나온다.
+   1. 그러니까 해시 함수에 101, 204, 302, 711, 942나 아무 숫자를 넣었을 때 항상 40만 나오면 안 된다. 원하는 범위가 0부터 100까지의 자연수면, 이 사이에 아무 두 숫자가 나올 확률이 최대한 비슷해야 됨
+3. 빨리 계산할 수 있어야 된다
+   1. 해시 테이블은 모든 연산을 할 때마다 해시 함수르 써야 되는데, 해시 함수가 비효율적이면 해시 테이블도 비효율적일 수 밖에 없음
+
+### 해시 함수 만드는 법: 나누기 방식
+
+가장 직관적이면서 쉬운 방법
+
+자연수 key를 해시 테이블의 크기로 나눈 나머지를 리턴하는 함수
+
+```python
+def hash_function_remainder(key, array_size):
+    """해시 테이블의 key를 나누기 방법으로 0 ~ array_size - 1 범위의 자연수로 바꿔주는 함수"""
+    return key % array_size
+
+print(hash_function_remainder(40, 200)) # 40
+print(hash_function_remainder(120, 200)) # 120
+print(hash_function_remainder(788, 200)) # 188
+print(hash_function_remainder(2307, 200)) # 107
+```
+
+어떤 키가 들어와도 0 ~ 원하는 정수 범위의 자연수로 바꾸어 줌
+
+### 해시 함수 만드는 법: 곱셈 방식
+
+예시: key가 200, 배열의 크기가 30
+
+1. 먼저 0 < a < 1 인 아무 값 a를 정한다. 일단 임의로 0.6666
+2. 그 다음에 이 a에 key를 곱한다. `0.666 x 200 = 133.32`. 이때 정수 부분은 버리고 소수 부분만 남긴다. 0.32가 남는다.
+3. 마지막으로 남은 소수 부분에 배열의 크기를 곱해준다. `0.32 * 30 = 9.6`. 이번엔 소수점 부분을 버리고 9만 남긴다.
+
+### 이 방법이 자연수를 리턴하는 이유
+
+a와 key를 곱한 값의 정수 부분을 버리면 그 결과 값은 0과 1 사이의 소수가 나옴. 0과 1 사이의 소수에 테이블의 크기를 곱해 버리면, 다시 0과 테이블 크기 사이의 수가 나옴.
+
+그러니까 항상 0보다 크거나 같고 테이블 크기보다는 작은 숫자가 나옴. 그리고 여기서 소수점 뒷자리를 버리니까 원하는 범위의 자연수를 구할 수 있음
+
+```python
+def hash_function_multiplication(key, array_size, a):
+    """해시 테이블의 key를 곱셈 방법으로 0 ~ array_size - 1 범위의 자연수로 바꿔주는 함수"""
+    temp = a * key # a와 key를 곱한다
+    temp = temp - int(temp) # a와 key를 곱한 값의 소숫점 오른쪽 부분만 저장한다
+
+    return int(array_size * temp) # temp와 배열 크기를 곱한 수의 자연수 부분만 리턴한다
+
+
+print(hash_function_multiplication(40, 200, 0.61426212)) # 114
+print(hash_function_multiplication(120, 200, 0.61426212)) # 142
+print(hash_function_multiplication(788, 200, 0.61426212)) # 7
+print(hash_function_multiplication(2307, 200, 0.61426212)) # 20
+```
+
+## 정리
+
+나누기 방법과 곱셈 방법은 해시 함수로 사용할 수 있는 가장 간단한 두 예시.
+
+사실 key를 받아서 원하는 범위의 자연수를 리턴하면서
+
+1. 결정론적 (같은 key를 넣으면 항상 같은 값 리턴)
+2. 원하는 범위의 자연수 하나하나가 리턴될 확률이 최대한 비슷해야 함
+3. 빨리 계산을 할 수 있어야 함
+
+이 세 조건을 만족하는 아무 함수나 만들면 해시 함수로 이용할 수 있음
+
+# 파이썬 hash 함수
+
+파이썬 언어도 내부적으로 `hash`라는 함수를 제공함. 방금 논한 해시 함수랑은 조금 다름. 파이썬 해시 함수는 파라미터로 받은 값을 그냥 아무 정수로만 바꿔주는 함수임
+
+특정 범위 안에 있는 정수가 아니라, **아무** 정수로 바꿔줌
+
+정수형, 소수형, 문자열 타입에 `hash` 함수를 호출했을 때 나오는 결과를 살펴보자
+
+```python
+# 정수 값
+print(hash(12345))  # 12345
+print(hash(12345))  # 12345
+
+# 다른 정수 값
+print(hash(12346))  # 12346
+```
+
+```python
+# 소수 값
+print(hash(15.1234))  # 284541027336970255
+print(hash(15.1234))  # 284541027336970255
+
+# 다른 소수 값
+print(hash(81.1234))  # 284541027336978513
+```
+
+```python
+# 문자열
+print(hash("파이썬"))  # -8002119629611903017
+print(hash("파이썬"))  # -8002119629611903017
+
+# 다른 문자열
+print(hash("자바"))  # -8553573703343279427
+```
+
+이런 식으로 같은 값을 넣으면 항상 같은 정수를 리턴해주는 함수이다. 이때 중요한 점은 `hash` 함수에 서로 다른 두 값을 파라미터로 넣었을 때 같은 정수가 리턴될 수 없다는 것이다.
+
+데이터를 **자신만의 고유한 정수 값**으로 바꿔주는 함수임
+
+지금까지는 해시 함수의 key를 정수형으로만 생각했음. 다른 타입의 데이터들을 자신만의 고유한 정수 값으로 바꿀 수 있으면 이제 정수 뿐만 아니라 다른 자료형들도 key로 사용할 수 있음.
+
+## `hash` 함수의 한계
+
+파이썬 `hash`함수는 언어 자체적으로는 불변 타입 자료형에만 사용할 수 있음
+
+파이썬의 대표적인 불변 타입 자료형:
+
+- 불린형
+- 정수형
+- 소수형
+- 튜플
+- 문자열
+  </details>
+  <details>
+    <summary>해시 테이블 충돌과 Chaining 개념 & Chaining에서 사용하는 링크드 리스트</summary>
+
+# 해시 테이블 충돌과 Chaining 개념
+
+## 해시 테이블 충돌
+
+배열과 해시 함수만으로 해시 테이블을 사용할 수 있으면 좋겠지만, 큰 문제점이 있음.
+
+서로 다른 두 key에 대한 해시 함수가 같을 때, 즉 이미 사용하고 있는 인덱스에 새로운 key - value 쌍을 또 저장해야 되는 경우에 **충돌(Collision)**이 일어났다고 표현함.
+
+## Chaining
+
+직역을 하면 충돌이 일어나면 그 데이터를 쇠사슬처럼 엮겠다는 뜻
+
+- 배열 인덱스에 링크드 리스트 저장해서 충돌 해결!
+- Chaining을 할 때엔, 링크드 리스트 노드에 data 대신 key와 value를 저장해 줌.
+  - 즉, 각 노드에 key, value, 그리고 next(다음 노드에 대한 레퍼런스) 변수가 저장됨
+- 아무리 충돌이 일어나도 링크드 리스트에 새 노드를 추가해주기만 하면, 원하는 key - value 쌍을 모두 저장할 수 있음
+
+# Chaining에서 사용하는 링크드 리스트
+
+더블리 링크드 리스트를 이용해서 해시 테이블을 직접 구현해보자.
+
+노드에 변수 `data` 대신 `key`와 `value`를 저장한다.
+
+## Node 클래스
+
+```python
+class Node:
+  """링크드 리스트의 노드 클래스"""
+  def __init__(self, key, value):
+		self.key = key
+    self.value = value
+    self.next = None # 다음 노드에 대한 레퍼런스
+    self.prev = None # 전 노드에 대한 레퍼런스
+```
+
+## LinkedList 클래스
+
+링크드 리스트 클래스에서는 필요한 메소드만 가지고 와서 쓰면 됨. 노드 클래스와 마찬가지로 조금씩 고쳐 써야한다.
+
+init 메소드는 바꾸지 않고 쓸 수 있다.
+
+```python
+class LinkedList:
+  """링크드 리스트 클래스"""
+  def __init__(self):
+    self.head = None # 링크드 리스트 가장 앞 노드
+    self.tail = None # 링크드 리스트 가장 뒤 노드
+```
+
+### 탐색 메소드
+
+```python
+	def find_node_with_key(self, key):
+	  """링크드 리스트에서 주어진 key를 갖고 있는 노드를 리턴한다. 단, 해당 노드가 없으면 None을 리턴한다"""
+	  iterator = self.head # 링크드 리스트를 돌기 위해 필요한 노드 변수
+
+	  while iterator is not None:
+	    if iterator.key == key:
+	      return iterator
+
+	    iterator = iterator.next
+
+	  return None
+```
+
+탐색 메소드는 이제 더 이상 특정 data를 갖는 노드를 찾는 게 아니라 특정 key를 갖는 노드를 찾는다. 이에 맞게 링크드 리스트를 처음부터 끝까지 돌면서 원하는 key를 갖는 노드를 리턴해주도록 수정해준다.
+
+### 추가(맨 뒤 삽입) 메소드
+
+```python
+	def append(self, key, value):
+    """링크드 리스트 추가 연산 메소드"""
+    new_node = Node(key, value)
+
+    # 빈 링크드 리스트라면 head와 tail을 새로 만든 노드로 지정
+    if self.head is None:
+      self.head = new_node
+      self.tail = new_node
+
+    # 이미 노드가 있다면
+    else:
+      self.tail.next = new_node # tail의 다음 노드로 추가
+      new_node.prev = self.tail
+      self.tail = new_node # tail 업데이트
+```
+
+추가 메소드 `append`는 이제 파라미터로 data 변수 대신 key와 value를 받는다. 링크드 리스트에 데이터를 더해줄 때는 항상 새로운 노드를 만들어 줘야 되는데, 파라미터로 받은 정보를 key와 value를 갖는 새로운 노드를 만들어 준다. 새 노드를 링크드 리스트에 연결해주는 부분 코드는 똑같다.
+
+### 삭제 메소드
+
+```python
+	def delete(self, node_to_delete):
+    """더블리 링크드 리스트 삭제 연산 메소드"""
+
+    # 링크드 리스트에서 마지막 남은 데이터를 삭제할 때
+    if node_to_delete is self.head and node_to_delete is self.tail:
+      self.head = None
+      self.tail = None
+
+    # 링크드 리스트 가장 앞 데이터 삭제할 때
+    elif node_to_delete is self.head:
+      self.head = self.head.next
+      self.prev = None
+
+    # 링크드 리스트 가장 뒤 데이터 삭제할 때
+    elif node_to_delete is self.tail:
+      self.tail = self.tail.prev
+      self.tail.next = None
+
+    # 두 노드 사이에 있는 데이터 삭제할 때
+    else:
+      node_to_delete.prev.next = node_to_delete.next
+      node_to_delete.next.prev = node_to_delete.prev
+```
+
+원래 링크드 리스트 삭제 메소드에서는 노드를 삭제할 때 삭제하는 노드의 데이터를 리턴해줬는데, 이 부분을 빼줬다.
+
+나머지 부분은 바꿀 필요가 없다. 더블리 링크드 리스트 삭제 메소드는 어차피 노드가 주어졌을 때 그 노드를 링크드 리스트에서 삭제해주기 때문에, 기존 data 변수나 key, value 변수와 전혀 관계가 없는 메소드이기 때문에 나머지 코드를 바꿔줄 필요가 없다.
+
+### 문자열 메소드
+
+문자열 메소드는 출력 형식을 조금 바꿔준다.
+
+```python
+def __str__(self):
+    """링크드 리스트를 문자열로 표현해서 리턴하는 메소드"""
+    res_str = ""
+
+    # 링크드 리스트 안에 모든 노드를 돌기 위한 변수, 일단 가장 앞 노드로 정의한다.
+    iterator = self.head
+
+    # 링크드 리스트 끝까지 돈다.
+    while iterator is not None:
+      # 각 노드의 데이터를 리턴하는 문자열에 더해준다.
+      res_str += f"{iterator.key}: {iterator.value}\n"
+      iterator = iterator.next # 다음 노드로 넘어간다
+
+    return res_str
+```
+
+원래는 링크드 리스트에 2, 3, 5, 7, 11이 들어있으면 이런 식으로 링크드 리스트의 모든 data 변수를 한 줄에 출력했음
+
+```python
+# | 2 | 3 | 5 | 7 | 11 |
+```
+
+이제는 key - value 쌍을 저장하니까 출력 형식을 바꿔준다.
+
+링크드 리스트에 101: "최지웅", 204: "강영훈", 305: "성태호" 가 들어있다고 하면, 아래와 같이 이 링크드 리스트를 출력했을 때 한 줄에 key - value 쌍 하나씩 나오도록 바꿔준 것이다.
+
+```python
+# 101: 최지웅
+# 204: 강영훈
+# 305: 성태호
+```
+
+  </details>
+  <details>
+    <summary>Chaining을 쓰는 해시 테이블 탐색, 삽입, 삭제 연산 & 평균 시간 복잡도</summary>
+
+# Chaining을 쓰는 해시 테이블 탐색 연산
+
+## 해시 테이블 탐색
+
+해시 테이블에는 배열과 링크드 리스트처럼 데이터의 순서 관계를 저장하지 않기 때문에, 접근 연산이 없다. 대신 탐색 연산을 사용
+
+배열과 링크드 리스트 탐색 연산은 원하는 조건에 해당하는 (원하는 data를 가지고 있는) 데이터를 찾아내는 데에 사용되는데, 해시 테이블의 탐색 연산은 주어진 **key에 해당하는 value**를 찾는다
+
+## 해시 테이블 탐색 연산 과정과 시간 복잡도
+
+1. 해시 함수 계산: **_O(1)_**
+2. 배열 인덱스 접근: **_O(1)_**
+3. 링크드 리스트 탐색: 최악의 경우(모든 데이터가 이 링크드 리스트에 들어가 있을 때) **_O(n)_**
+
+### 해시 테이블 탐색 연산의 시간 복잡도: **_O(n)_**
+
+# Chaining을 쓰는 해시 테이블 삽입 연산
+
+## 해시 테이블 삽입
+
+> 하나의 key에는 하나의 value만!
+
+- key - value 데이터 쌍을 저장, 또는 수정
+
+## 삽입 연산 시간 복잡도
+
+1. 해시 함수 계산: **_O(1)_**
+2. 배열 인덱스 접근: **_O(1)_**
+3. 링크드 리스트 노드 탐색: **_O(n)_**
+4. 링크드 리스트 저장 / 노드 수정: **_O(1)_**
+
+### 해시 테이블 삽입 연산의 시간 복잡도: _O(n)_
+
+# Chaining을 쓰는 해시 테이블 삭제 연산
+
+## 해시 테이블 삭제
+
+- 주어진 key에 대한 key - value 데이터 쌍 삭제
+
+## 삭제 연산 시간 복잡도
+
+1. 해시 함수 계산: **_O(1)_**
+2. 배열 인덱스 접근: **_O(1)_**
+3. 링크드 리스트 노드 탐색: **_O(n)_**
+4. 링크드 리스트 노드 삭제: **_O(1)_**
+
+### 해시 테이블 삭제 연산의 시간 복잡도: _O(n)_
+
+# Chaining을 쓰는 해시 테이블 평균 시간 복잡도
+
+해시 테이블의 탐색, 저장, 삭제 연산은 **_O(n)_**의 시간 복잡도를 가진다. 세 연산 모두 key를 이용해서 저장된 링크드 리스트 노드를 탐색하는 과정을 포함하는데, 링크드 리스트 탐색 연산은 링크드 리스트의 길이에 비례한다.
+
+해시 테이블이 사용하는 링크드 리스트의 길이가 가장 긴 경우는, 저장하는 모든 key - value 쌍이 하나의 링크드 리스트에 저장되는 경우이다. 해시 테이블에 저장된 key - value 쌍의 수가 *n*이라고 하면 길이가 *n*인 링크드 리스트를 탐색하는 데 걸리는 시간은 **_O(n)_**이다. 세 연산 모두 링크드 리스트를 탐색하는 단계를 포함하기 때문에, 세 연산은 최악의 경우 **_O(n)_**이 걸린다.
+
+근데 해시 테이블의 모든 key - value 쌍이 모두 같은 링크드 리스트에 저장되는 건 거의 일어나지 않는 일일텐데, 이걸 이용해서 해시 테이블의 연산들의 시간 복잡도를 평가하는 건 불공평하다.
+
+동적 배열 추가 동작은 분할 상환 분석을 이용해서 조금 더 합리적으로 시간 복잡도를 구했다. 이번에는 최악의 경우만으로 연산의 효율성을 평가하는 게 불공평할 때 사용하는 방법 중 하나인 **평균 시간 복잡도**를 이용해서 해시 테이블 연산들을 분석해 보자.
+
+## 해시 테이블 연산 분해 분석
+
+각 연산의 단계들을 나눠서 보면, 링크드 리스트를 탐색하는 데 **_O(n)_**이 걸리고 나머지 부분들은 다 **_O(1)_**이 걸린다. 그리고 링크드 리스트 탐색이 *n*에 비례하는 이유는 모든 데이터가 하나의 링크드 리스트에 저장된 경우 때문임
+
+배열에 저장된 각 링크드 리스트의 길이가 평균적으로는 *n*이 아니라 다른 값, 예를 들어 *average_length*라는 값이라면 어떨까? 나머지 부분 연산들의 시간 복잡도가 O(1) 밖에 걸리지 않기 때문에 세 연산 모두 링크드 리스트 탐색에 걸리는 시간, **_O(average_length)_**가 걸린다고 할 수 있다.
+
+해시 테이블 연산의 시간 복잡도는 평균적으로 이 *average_length*에 비례하는 것이다.
+
+## 배열에 저장되어 있는 링크드 리스트들의 평균 길이
+
+각 인덱스에 저장된 **링크드 리스트의 평균 길이 = 총 들어 있는 'key - value' 쌍 수 / 배열 인덱스 수**
+
+1. 해시 테이블에 총 들어가 있는 key - value 쌍의 수: _n_
+2. 해시 테이블이 사용하는 배열의 크기: _m_
+
+라고 하면, 링크드 리스트들의 평균 길이는 _n/m_ 이라고 할 수 있다.
+
+링크드 리스트들의 평균 길이가 _n/m_ 이면 각 연산들은 "평균적으로 **_O(n/m)_**이 걸린다"라고 표현할 수 있다.
+
+여기에서 중요한 한 가정을 한다. 해시 테이블을 만들 때 항상 충분히 여유롭게 총 저장하는 key - value 쌍 수가 해시테이블이 사용하는 배열의 크기와 비슷하거나 보다 작다고 가정한다.
+
+그러니까 해시 테이블을 사용할 때에는 항상 어느 정도까지는 _n=m_ 과 같이 유지시켜준다는 약속을 하는 것. 이 약속만 지켜주면, 해시 테이블 연산들이 **_O(n/m)_**이 걸리니까 *n=m*을 적용하면 다시 **_O(1)_**이라고 표현할 수 있다.
+
+## 해시 테이블 평균 시간 복잡도 종합
+
+실제로 해시 테이블을 사용할 때는 대부분의 경우 세 연산들이 그냥 O(1)이 걸린다고 가정하고 사용한다.
+
+분할 상환 분석할 때와 마찬가지로 이 연산들의 최악의 경우 시간 복잡도가 O(n)인 것ㅇ느 변하지 않는다. 생각해보면 모든 key - value 쌍이 하나의 인덱스에 저장되는 일이 일어나기 쉽지는 않지만 실제 일어날 수도 있는 일이기는 하다.
+
+이런 혼란을 줄이기 위해서 조금 더 정확하게
+
+**"해시 테이블 삽입, 삭제, 탐색 연산은 최악의 경우 *O(n)*이 걸리지만, 평균적으로는 *O(1)*이 걸린다"**
+
+라고 표현한다.
+
+  </details>
+  <details>
+    <summary>Chaining을 쓰는 해시 테이블 구현</summary>
+
+# Chaining을 쓰는 해시 테이블 구현
+
+### [HDLL.py](http://hdll.py) (더블리 링크드 리스트가 정의된 파일)
+
+```python
+class Node:
+    """링크드 리스트의 노드 클래스"""
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+        self.next = None  # 다음 노드에 대한 레퍼런스
+        self.prev = None  # 전 노드에 대한 레퍼런스
+
+class LinkedList:
+    """링크드 리스트 클래스"""
+    def __init__(self):
+        self.head = None  # 링크드 리스트의 가장 앞 노드
+        self.tail = None  # 링크드 리스트의 가장 뒤 노드
+
+
+    def find_node_with_key(self, key):
+        """링크드 리스트에서 주어진 데이터를 갖고있는 노드를 리턴한다. 단, 해당 노드가 없으면 None을 리턴한다"""
+        iterator = self.head   # 링크드 리스트를 돌기 위해 필요한 노드 변수
+
+        while iterator is not None:
+            if iterator.key == key:
+                return iterator
+
+            iterator = iterator.next
+
+        return None
+
+    def append(self, key, value):
+        """링크드 리스트 추가 연산 메소드"""
+        new_node = Node(key, value)
+
+        # 빈 링크드 리스트라면 head와 tail을 새로 만든 노드로 지정
+        if self.head is None:
+            self.head = new_node
+            self.tail = new_node
+        # 이미 노드가 있으면
+        else:
+            self.tail.next = new_node  # 마지막 노드의 다음 노드로 추가
+            new_node.prev = self.tail
+            self.tail = new_node  # 마지막 노드 업데이
+
+    def delete(self, node_to_delete):
+        """더블리 링크드 리스트 삭제 연산 메소드"""
+
+        # 링크드 리스트에서 마지막 남은 데이터를 삭제할 때
+        if node_to_delete is self.head and node_to_delete is self.tail:
+            self.tail = None
+            self.head = None
+
+        # 링크드 리스트 가장 앞 데이터 삭제할 때
+        elif node_to_delete is self.head:
+            self.head = self.head.next
+            self.head.prev = None
+
+        # 링크드 리스트 가장 뒤 데이터 삭제할 떄
+        elif node_to_delete is self.tail:
+            self.tail = self.tail.prev
+            self.tail.next = None
+
+        # 두 노드 사이에 있는 데이터 삭제할 때
+        else:
+            node_to_delete.prev.next = node_to_delete.next
+            node_to_delete.next.prev = node_to_delete.prev
+
+        return node_to_delete.value
+
+    def __str__(self):
+        """링크드 리스트를 문자열로 표현해서 리턴하는 메소드"""
+        res_str = ""
+
+        # 링크드 리스트 안에 모든 노드를 돌기 위한 변수. 일단 가장 앞 노드로 정의한다.
+        iterator = self.head
+
+        # 링크드 리스트 끝까지 돈다
+        while iterator is not None:
+            # 각 노드의 데이터를 리턴하는 문자열에 더해준다
+            res_str += "{}: {}\n".format(iterator.key, iterator.value)
+            iterator = iterator.next # 다음 노드로 넘어간다
+
+        return res_str
+```
+
+### main.py
+
+```python
+from HDLL import LinkedList  # 해시 테이블에서 사용할 링크드 리스트 임포트
+
+class HashTable:
+    def __init__(self, capacity):
+        self._capacity = capacity  # 파이썬 리스트 수용 크기 저장
+        self._table = [LinkedList() for _ in range(self._capacity)]  # 파이썬 리스트 인덱스에 반 링크드 리스트 저장
+
+    def _hash_function(self, key):
+        """
+        주어진 key에 나누기 방법을 사용해서 해시된 값을 리턴하는 메소드
+        주의: key는 파이썬 불변 타입이여야 한다.
+        """
+        return hash(key) % self._capacity
+
+    def _get_linked_list_for_key(self, key):
+        """주어진 key에 대응하는 인덱스에 저장된 링크드 리스트를 리턴하는 메소드"""
+        hashed_index = self._hash_function(key)
+
+        return self._table[hashed_index]
+
+    def _look_up_node(self, key):
+        """파라미터로 받은 key를 갖고 있는 노드를 리턴하는 메소드"""
+        linked_list = self._get_linked_list_for_key(key)
+
+        return linked_list.find_node_with_key(key)
+
+    def look_up_value(self, key):
+        """
+        주어진 key에 해당하는 데이터를 리턴하는 메소드
+        """
+        existing_node = self._look_up_node(key)
+        if existing_node is not None:
+            return self._look_up_node(key).value
+        else:
+            return None
+
+    def insert(self, key, value):
+        """
+        새로운 key - value 쌍을 삽입시켜주는 메소드
+        이미 해당 key에 저장된 데이터가 있으면 해당 key에 해당하는 데이터를 바꿔준다
+        """
+        existing_node = self._look_up_node(key)  # 이미 저장된 key인지 확인한다
+
+        if existing_node is not None:
+            existing_node.value = value  # 이미 저장된 key면 value만 바꿔주고
+        else:
+            # 없는 key면 링크드 리스트에 새롭게 삽입시켜준다
+            linked_list = self._get_linked_list_for_key(key)
+            linked_list.append(key, value)
+
+    def delete_by_key(self, key):
+        """주어진 key에 해당하는 key - value 쌍을 삭제하는 메소드"""
+
+        linked_list = self._get_linked_list_for_key(key)
+        existing_node = self._look_up_node(key)
+
+        if existing_node is not None:
+            linked_list.delete(existing_node)
+        else:
+            print(f"There is no student named {key}")
+						return None
+
+
+    def __str__(self):
+        """해시 테이블 문자열 메소드"""
+        res_str = ""
+
+        for linked_list in self._table:
+            res_str += str(linked_list)
+
+        return res_str[:-1]
+
+
+
+test_scores = HashTable(50) # 시험 점수를 담을 해시 테이블 인스턴스 생성
+
+# 여러 학생들 이름과 시험 점수 삽입
+test_scores.insert("현승", 85)
+test_scores.insert("영훈", 90)
+test_scores.insert("동욱", 87)
+test_scores.insert("지웅", 99)
+test_scores.insert("신의", 88)
+test_scores.insert("규식", 97)
+test_scores.insert("태호", 90)
+
+print(test_scores)
+# 영훈: 90
+# 태호: 90
+	# 동욱: 87
+# 신의: 88
+# 규식: 97
+# 현승: 85
+
+# 학생들 시험 점수 삭제
+test_scores.delete_by_key("태호")
+test_scores.delete_by_key("지웅")
+test_scores.delete_by_key("신의")
+test_scores.delete_by_key("현승")
+test_scores.delete_by_key("규식")
+
+print(test_scores)
+# 영훈: 90
+# 동욱: 87
+```
+
+  </details>
+  <details>
+    <summary>Open Addressing을 이용한 충돌 해결 & 탐사 방법</summary>
+
+# Open Addressing을 이용한 충돌 해결 & 탐사 방법
+
+## Open Addressing
+
+충돌이 일어났을 때, 다른 비어있는 인덱스를 찾아서 거기에 데이터를 저장하는 방법
+
+비어있는 인덱스를 어떻게 찾을까?
+
+### 선형 탐사 (Linear Probing)
+
+충돌이 일어났을 때 빈 인덱스를 하나씩 순서대로 선형적으로 찾는 방법
+
+- 충돌이 일어났을 때, 해당 인덱스 다음 인덱스부터 한 칸씩 다음 인덱스가 비었는지 확인
+
+### 제곱 탐사 (Quadratic Probing)
+
+해쉬 함수에 key를 넣어서 나온 해당 인덱스에 이미 데이터가 있을 경우, 그 인덱스에 1의 제곱 뒤에 있는 인덱스를 확인하고, 그 인덱스도 비어 있지 않다면 또 2의 제곱 뒤에 있는 인덱스를 확인하는 식으로 빈 인덱스를 탐사하는 방법
+
+ex) 해당 인덱스 = 10
+
+- 10 + 1^(2) = 11 인덱스 확인 → 데이터 있음
+- 11 + 2^(2) = 15 인덱스 확인 → 데이터 있음
+- 15 + 3^(2) = 24 인덱스 확인 → 비어 있음 → 새로운 key - value 쌍 저장
+
+> 이처럼, 제곱 탐사는 선형적으로 바로 다음 인덱스들을 하나씩 확인하지 않고, 제곱을 한 값들을 이용해서 인덱스를 찾는다.
+
+  </details>
+  <details>
+    <summary>Open Addressing을 쓰는 해시 테이블 시간 복잡도 & 평균 시간 복잡도</summary>
+
+# Open Addressing을 쓰는 해시 테이블 시간 복잡도
+
+## 연산 세부 단계
+
+- 해시 함수 계산: O(1)
+- 배열 인덱스 접근: O(1)
+- 원하는 인덱스에 key - value 쌍 저장: O(1)
+
+Open Addressing을 하게 되면 탐색, 삽입, 삭제 연산 모두 인덱스를 찾는 **탐사**를 해야 함.
+
+정확히 말하면, 삽입 연산은 탐사를 통해서 빈 인덱스를 찾고, 탐색과 삭제 연산은 원하는 key를 가진 데이터를 찾는다.
+
+## 탐사 최악의 경우
+
+어떤 경우에 가장 오래 걸릴까?
+
+해당 key에 대해 해시 함수가 리턴한 값보다 1 작은 인덱스를 제외하고 모든 인덱스에 이미 데이터가 있는 경우 혹은 딱 그 자리에 원하는 key를 가진 데이터가 있는 경우, 배열의 모든 인덱스를 하나씩 다 확인해야 한다.
+
+해시 테이블 안에 저장된 key - value 쌍의 개수가 *n*일 때, *n*에 비례하는 시간이 걸리는 것
+
+탐사를 제외한 세 연산의 다른 모든 단계들은 **_O(1)_**이 걸렸는데, 탐사는 최악의 경우 **_O(n)_**이 걸린다.
+
+### Open Addressing 연산 시간 복잡도
+
+- 삽입: **_O(n)_**
+- 탐색: **_O(n)_**
+- 삭제: **_O(n)_**
+
+# Open Addressing을 쓰는 해시 테이블 평균 시간 복잡도
+
+Open Addressing을 쓰는 해시 테이블 연산에서 최악의 경우는 해시 테이블이 사용하는 배열이 거의 꽉 찼을 경우임. 그런데 해시 테이블이 거의 꽉 차 있는 경우는 잘 일어나지 않고, 대부분의 경우 여유 공간이 넉넉하게 있을 것임
+
+Chaining을 이용하는 해시 테이블과 마찬가지로 최악의 경우로만 분석하면 불공평함
+
+Open Addressing을 사용하는 해시 테이블의 연산들도 **평균 시간 복잡도**로 표현해 보자
+
+## load factor
+
+해시 테이블 연산들을 분석할 때는 load factor라는 것을 사용함. load factor **_α_**는 해시 테이블이 사용하는 배열의 크기를 _m_, 해시 테이블 안에 들어 있는 데이터 쌍의 수를 *n*이라고 할 때: **_α = n/m_**
+
+α는 해시 테이블이 얼마나 차 있는지를 나타내는 변수임
+
+Open Addressing을 쓰는 해시 테이블의 연산들을 분석할 때 이 load factor는 굉장히 중요한 역할을 한다. 해시 테이블 안에 배열의 크기보다 많은 key - value 쌍을 저장할 수 없기 때문에 load factor **_α_**는 항상 1보다 작다고 가정한다.
+
+## 정리
+
+결론적으로 Open Addressing을 사용하는 해시 테이블에서 평균적으로 탐사를 해야 되는 횟수 (기댓값)는 1 / (1 - α) 보다 작다
+
+기댓값이 1 / (1 - α)라는 건 무슨 의미일까? 배열이 총 100칸이라고 하고 90개의 key - value 쌍을 저장하고 있다고 가정하자. 그럼 α = 0.9이다.
+
+기댓값에 α를 대입하면 10이 나온다. 빈 인덱스를 찾기 위해서 평균적으로 인덱스 10개 보다 적은 인덱스를 확인해도 된다는 뜻. 사실 load factor가 0.9도 굉장히 큰 값이고, 만약에 α = 0.5, 즉 햇 ㅣ테이블이 반 정도 차있다고 하면 기댓값은 2보다 작다.
+
+해시 테이블이 반이나 차 있어도 평균적으로 두 개의 인덱스만 확인해봐도 빈칸을 찾을 수 있다는 뜻. 모든 α에 대해서 계산을 하면 성공적으로 원하는 인덱스를 찾는데 확인해야 하는 인덱스 수는 평균적으로 **_O(1)_**이다. 탐사가 _평균적으로_ **_O(1)_**이 걸리는 것이다.
+
+Open Addressing을 사용한 해시 테이블 연산들의 시간복잡도가 O(n)인 이유는 다른 단계들은 **_O(1)_**로 할 수 있는데 탐사가 최악의 경우 **_O(n)_**이 걸리기 때문이었다. 하지만 탐사는 최악의 경우 **_O(n)_**이 걸리지만 평균적으로는 **_O(1)_**의 시간이 걸린다.
+
+따라서 Open Addressing을 사용하든 Chaining을 사용하든 **해시 테이블의 모든 연산들을 평균적으로 _O(1)_**로 할 수 있다. 굉장히 효율적인 것이다.
+
+  </details>
 
 </details>
 
