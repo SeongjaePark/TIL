@@ -1150,4 +1150,1228 @@ root 노드와 마지막 노드위 위치를 바꾸는 건 노드의 개수랑�
 
 <details>
   <summary>3) 이진 탐색 트리</summary>
+  <details>
+    <summary>이진 탐색 트리란 & 이진 탐색 트리 노드 구현 & 이진 탐색 트리 출력</summary>
+
+# 이진 탐색 트리란
+
+## 이진 탐색 트리 (Binary Search Tree)
+
+- 딕셔너리나 세트를 구현할 때 쓰일 수 있음
+
+이진 탐색 트리는 이진 트리이면서 어떤 속성을 지켜야 함
+
+이진 탐색 트리 속성: 특정 노드를 봤을 때, 왼쪽 부분 트리에 있는 모든 노드의 데이터는 그 노드의 데이터보다 작아야하고, 오른쪽 부분 트리에 있는 모든 노드의 데이터는 그 노드의 데이터보다 크다.
+
+이 특성을 이용해서 원하는 데이터의 탐색이 가능하다.
+
+# 이진 탐색 트리 노드 구현
+
+이진 탐색 트리는 이진 트리이지만, 항상 완전 이진 트리라는 보장이 없음
+
+- 따라서 배열이나 파이썬 리스트로 구현하지 않는다
+
+### 이진 탐색 트리 노드 구현
+
+```python
+class Node:
+  """이진 탐색 트리 노드"""
+  def __init__(self, data):
+    self.data = data
+    self.parent = None # 기존 이진 트리 노드 클래스에서 인스턴스 변수 parent 추가
+    self.left_child = None
+    self.right_child = None
+
+# 노드 인스턴스 생성
+node_0 = Node(5)
+node_1 = Node(3)
+node_2 = Node(7)
+
+node_0.left_child = node_1
+node_0.right_child = node_2
+
+node_1.parent = node_0
+node_2.parent = node_0
+```
+
+각 노드가 자식과 부모 모두에 대한 레퍼런스를 가지고 있다!
+
+### 이진 탐색 트리 클래스 구현
+
+```python
+class Node:
+  """이진 탐색 트리 노드"""
+  def __init__(self, data):
+    self.data = data
+    self.parent = None
+    self.left_child = None
+    self.right_child = None
+
+class BinarySearchTree:
+  """이진 탐색 트리"""
+  def __init__(self):
+    self.root = None
+
+# 비어 있는 이진 탐색 트리 생성
+bst = BinarySearchTree()
+```
+
+# 이진 탐색 트리 출력
+
+### in-order 순회 복습
+
+1. 왼쪽 부분 트리를 in-order 순회한다.
+2. 현재 노드의 데이터를 출력한다.
+3. 오른쪽 부분 트리를 in-order 순회한다.
+
+## in-order 순회와 이진 탐색 트리
+
+이진 탐색 트리를 in-order 순회하면 저장된 데이터들을 정렬된 순서대로 출력할 수 있따.
+
+## BinarySearchTree 클래스
+
+이전에 구현해 본 in-order 순회 함수를 재활용해서 이진 탐색 트리를 나타내는 BinarySearchTree 클래스에 트리 속의 데이터를 출력하는 메소드, `print_sorted_tree` 메소드를 작성해보자.
+
+## `print_sorted_tree()` 메소드
+
+```python
+def print_inorder(node):
+    """주어진 노드를 in-order로 출력해주는 함수"""
+    if node is not None:
+        print_inorder(node.left_child)
+        print(node.data)
+        print_inorder(node.right_child)
+
+class BinarySearchTree:
+    """이진 탐색 트리 클래스"""
+    def __init__(self):
+        self.root = None
+
+    def print_sorted_tree(self):
+        """이진 탐색 트리 내의 데이터를 정렬된 순서로 출력해주는 메소드"""
+        print_inorder(self.root)  # root 노드를 in-order로 출력한다
+```
+
+  </details>
+  <details>
+    <summary>이진 탐색 트리 삽입 & 이진 탐색 트리 삽입 구현</summary>
+
+# 이진 탐색 트리 삽입
+
+## 이진 탐색 트리 삽입
+
+연산이 끝난 이후에도 이진 탐색 트리의 속성이 유지되어야 한다
+
+- 새로운 노드 생성
+- root 노드부터 비교하면서 저장할 위치 찾음
+- 찾은 위치에 새롭게 만든 노드 연결:
+
+### 삽입 시간 복잡도
+
+트리의 높이: h
+
+- 새로운 노드 생성: O(1)
+- root 노드부터 비교하면서 저장할 위치 찾기: 최악의 경우 O(h+1) = O(h)
+- 찾은 위치에 새롭게 만든 노드 연결: O(1)
+
+삽입 시간 복잡도: **O(h)**
+
+# 이진 탐색 트리 삽입 구현
+
+## 이진 탐색 트리 데이터 삽입 연산
+
+1. 새로운 노드 생성
+2. root 노드부터 데이터 비교하면서 새로운 노드를 저장할 위치를 찾는다
+   1. 새로운 노드의 데이터가 더 크면, root 노드의 오른쪽 부분 트리에 저장해야 하고
+   2. 더 작으면, root 노드의 왼쪽 부분 트리에 저장돼야 한다.
+3. 찾은 위치에 새로운 노드를 저장한다.
+
+### 구현
+
+`Node` 클래스, `print_inorder` 함수, `BinarySearchTree` 클래스의 `init`메소드 및 `print_sorted_tree`메소드와 `insert` 메소드에서 root 노드가 없을 때에 대한 예외 처리는 이미 작성되어 있음
+
+`insert` 메소드의 나머지 부분을 완성시킴
+
+### 내가 짠 코드
+
+```python
+class Node:
+    """이진 탐색 트리 노드 클래스"""
+    def __init__(self, data):
+        self.data = data
+        self.parent = None
+        self.right_child = None
+        self.left_child = None
+
+def print_inorder(node):
+    """주어진 노드를 in-order로 출력해주는 함수"""
+    if node is not None:
+        print_inorder(node.left_child)
+        print(node.data)
+        print_inorder(node.right_child)
+
+def find_place(target_node, new_node):
+    if target_node.data > new_node.data:
+        if target_node.left_child is None:
+            target_node.left_child = new_node
+            new_node.parent = target_node
+        else:
+            find_place(target_node.left_child, new_node)
+    elif target_node.data < new_node.data:
+        if target_node.right_child is None:
+            target_node.right_child = new_node
+            new_node.parent = target_node
+        else:
+            find_place(target_node.right_child, new_node)
+
+
+class BinarySearchTree:
+    """이진 탐색 트리 클래스"""
+    def __init__(self):
+        self.root = None
+
+    def insert(self, data):
+        new_node = Node(data)  # 삽입할 데이터를 갖는 새 노드 생성
+
+        # 트리가 비었으면 새로운 노드를 root 노드로 만든다
+        if self.root is None:
+            self.root = new_node
+            return
+
+        # 새로운 데이터를 저장할 위치 찾기
+        find_place(self.root, new_node)
+
+
+    def print_sorted_tree(self):
+        """이진 탐색 트리 내의 데이터를 정렬된 순서로 출력해주는 메소드"""
+        print_inorder(self.root)  # root 노드를 in-order로 출력한다
+
+# 빈 이진 탐색 트리 생성
+bst = BinarySearchTree()
+
+# 데이터 삽입
+bst.insert(7)
+bst.insert(11)
+bst.insert(9)
+bst.insert(17)
+bst.insert(8)
+bst.insert(5)
+bst.insert(19)
+bst.insert(3)
+bst.insert(2)
+bst.insert(4)
+bst.insert(14)
+
+# 이진 탐색 트리 출력
+bst.print_sorted_tree()
+# 2
+# 3
+# 4
+# 5
+# 7
+# 8
+# 9
+# 11
+# 14
+# 17
+# 19
+```
+
+### 코드잇 해설
+
+```python
+class Node:
+    """이진 탐색 트리 노드 클래스"""
+    def __init__(self, data):
+        self.data = data
+        self.parent = None
+        self.right_child = None
+        self.left_child = None
+
+def print_inorder(node):
+    """주어진 노드를 in-order로 출력해주는 함수"""
+    if node is not None:
+        print_inorder(node.left_child)
+        print(node.data)
+        print_inorder(node.right_child)
+
+class BinarySearchTree:
+    """이진 탐색 트리 클래스"""
+    def __init__(self):
+        self.root = None
+
+    def insert(self, data):
+        new_node = Node(data)  # 삽입할 데이터를 갖는 새 노드 생성
+
+        # 트리가 비었으면 새로운 노드를 root 노드로 만든다
+        if self.root is None:
+            self.root = new_node
+            return
+
+        temp = self.root # 저장하려는 위치를 찾기 위해 사용할 변수, root 노드로 초기화한다.
+
+        # 원하는 위치를 찾아간다
+        while temp is not None:
+            if data > temp.data: # 삽입하려는 데이터가 현재 노드의 데이터보다 크다면
+                # 오른쪽 자식이 없으면 새로운 노드를 현재 노드의 오른쪽 자식으로 만듦
+                if temp.right_child is None:
+                    new_node.parent = temp
+                    temp.right_child = new_node
+                    return
+                else:
+                    temp = temp.right_child
+
+            elif data < temp.data: # 삽입하려는 데이터가 현재 노드의 데이터보다 작으면
+                # 왼쪽 자식이 없으면 새로운 노드를 현재 노드의 왼쪽 자식으로 만듦
+                if temp.left_child is None:
+                    new_node.parent = temp
+                    temp.left_child = new_node
+                    return
+                else:
+                    temp = temp.left_child
+
+    def print_sorted_tree(self):
+        """이진 탐색 트리 내의 데이터를 정렬된 순서로 출력해주는 메소드"""
+        print_inorder(self.root)  # root 노드를 in-order로 출력한다
+
+# 빈 이진 탐색 트리 생성
+bst = BinarySearchTree()
+
+# 데이터 삽입
+bst.insert(7)
+bst.insert(11)
+bst.insert(9)
+bst.insert(17)
+bst.insert(8)
+bst.insert(5)
+bst.insert(19)
+bst.insert(3)
+bst.insert(2)
+bst.insert(4)
+bst.insert(14)
+
+# 이진 탐색 트리 출력
+bst.print_sorted_tree()
+# 2
+# 3
+# 4
+# 5
+# 7
+# 8
+# 9
+# 11
+# 14
+# 17
+# 19
+```
+
+재귀함수를 사용할 때 self.root를 어떻게 이용해야할 지 생각이 안 나서 무작정 함수를 따로 정의하려고만 하고 코드를 짰는데,
+
+해설을 보고나니, while문과 임시 변수 temp를 잘 활용하면 굳이 클래스 밖에 함수를 따로 구현할 필요가 없겠다는 생각이 들었다.
+
+  </details>
+  <details>
+    <summary>이진 탐색 트리 탐색 & 이진 탐색 트리 탐색 구현</summary>
+
+# 이진 탐색 트리 탐색
+
+## 이진 탐색 트리 탐색 연산
+
+특정 데이터를 갖는 노드를 리턴하는 연산
+
+1. 주어진 노드의 데이터와 탐색하려는 데이터 비교 (root 노드에서 시작)
+2. 탐색하려는 데이터가 더 크면 노드의 오른쪽 자식으로 가고, 더 작으면 노드의 왼쪽 자식으로 간다.
+3. 위 과정을 찾을 때까지 반복한다.
+4. 탐색하려는 노드를 찾으면 리턴한다.
+
+## 탐색 시간 복잡도
+
+트리의 높이: h
+
+최악의 경우: O(h+1) = **O(h)**
+
+# 이진 탐색 트리 탐색 구현
+
+## 탐색 연산 일반화
+
+1. root 노드부터 노드의 데이터와 탐색하려는 데이터를 비교한다.
+2. 탐색하려는 데이터가 더 크면 노드의 오른쪽 자식으로, 작으면 왼쪽 자식으로 간다.
+3. 데이터를 찾을 때까지 위 단계들을 반복한다.
+
+## 내가 짠 코드
+
+```python
+class Node:
+    """이진 탐색 트리 노드 클래스"""
+    def __init__(self, data):
+        self.data = data
+        self.parent = None
+        self.right_child = None
+        self.left_child = None
+
+def print_inorder(node):
+    """주어진 노드를 in-order로 출력해주는 함수"""
+    if node is not None:
+        print_inorder(node.left_child)
+        print(node.data)
+        print_inorder(node.right_child)
+
+class BinarySearchTree:
+    """이진 탐색 트리 클래스"""
+    def __init__(self):
+        self.root = None
+
+    def search(self, data):
+        """이진 탐색 트리 탐색 메소드, 찾는 데이터를 갖는 노드가 없으면 None을 리턴한다"""
+
+        temp = self.root # 루트 노드를 임시 변수로 설정
+        # root 노드부터 노드의 데이터와 탐색하려는 데이터를 비교
+        while temp is not None:
+            if temp.data == data: # 탐색하려는 데이터를 가진 노드를 발견할 경우
+                return temp
+            elif temp.data < data: # 탐색하려는 데이터가 현재 노드보다 큰 경우
+                temp = temp.right_child # 오른쪽 자식으로 간다
+            else: # 탐색하려는 데이터가 현재 노드보다 작은 경우
+                temp = temp.left_child # 왼쪽 자식으로 간다
+
+        return None # data를 가진 노드가 트리에 없는 경우
+
+    def insert(self, data):
+        """이진 탐색 트리 삽입 메소드"""
+        new_node = Node(data)  # 삽입할 데이터를 갖는 노드 생성
+
+        # 트리가 비었으면 새로운 노드를 root 노드로 만든다
+        if self.root is None:
+            self.root = new_node
+            return
+
+        # 코드를 쓰세요
+        temp = self.root  # 저장하려는 위치를 찾기 위해 사용할 변수. root 노드로 초기화한다
+
+        # 원하는 위치를 찾아간다
+        while temp is not None:
+            if data > temp.data:  # 삽입하려는 데이터가 현재 노드 데이터보다 크다면
+                # 오른쪽 자식이 없으면 새로운 노드를 현재 노드 오른쪽 자식으로 만듦
+                if temp.right_child is None:
+                    new_node.parent = temp
+                    temp.right_child = new_node
+                    return
+                # 오른쪽 자식이 있으면 오른쪽 자식으로 간다
+                else:
+                    temp = temp.right_child
+            else:  # 삽입하려는 데이터가 현재 노드 데이터보다 작다면
+                # 왼쪽 자식이 없으면 새로운 노드를 현재 노드 왼쪽 자식으로 만듦
+                if temp.left_child is None:
+                    new_node.parent = temp
+                    temp.left_child = new_node
+                    return
+                # 왼쪽 자식이 있다면 왼쪽 자식으로 간다
+                else:
+                    temp = temp.left_child
+
+
+    def print_sorted_tree(self):
+        """이진 탐색 트리 내의 데이터를 정렬된 순서로 출력해주는 메소드"""
+        print_inorder(self.root)  # root 노드를 in-order로 출력한다
+
+# 빈 이진 탐색 트리 생성
+bst = BinarySearchTree()
+
+# 데이터 삽입
+bst.insert(7)
+bst.insert(11)
+bst.insert(9)
+bst.insert(17)
+bst.insert(8)
+bst.insert(5)
+bst.insert(19)
+bst.insert(3)
+bst.insert(2)
+bst.insert(4)
+bst.insert(14)
+
+# 노드 탐색과 출력
+print(bst.search(7).data) # 7
+print(bst.search(19).data) # 19
+print(bst.search(2).data) # 2
+print(bst.search(20)) # None
+```
+
+  </details>
+  <details>
+    <summary>이진 탐색 트리 삭제 연산 & 이진 탐색 트리 삭제 연산 구현</summary>
+
+# 이진 탐색 트리 삭제 1
+
+## 이진 탐색 트리 삭제 연산
+
+삭제하려는 데이터를 갖는 노드를 먼저 찾아야 됨
+
+경우 1: 삭제하려는 데이터가 leaf 노드의 데이터일 때
+
+- 부모 노드의 (왼쪽/오른쪽) 자식 레퍼런스를 None으로 변경하면 됨
+
+경우 2: 삭제하려는 데이터가 하나의 자식 노드만 있을 때
+
+- 자식 노드가 부모 노드의 자리를 차지하면 됨
+
+# 이진 탐색 트리 삭제 구현
+
+```python
+class Node:
+    """이진 탐색 트리 노드 클래스"""
+    def __init__(self, data):
+        self.data = data
+        self.parent = None
+        self.right_child = None
+        self.left_child = None
+
+def print_inorder(node):
+    """주어진 노드를 in-order로 출력해주는 함수"""
+    if node is not None:
+        print_inorder(node.left_child)
+        print(node.data)
+        print_inorder(node.right_child)
+
+class BinarySearchTree:
+    """이진 탐색 트리 클래스"""
+    def __init__(self):
+        self.root = None
+
+    def delete(self, data):
+        """이진 탐색 트리 삭제 메소드"""
+        node_to_delete = self.search(data)  # 삭제할 노드를 가지고 온다
+        parent_node = node_to_delete.parent  # 삭제할 노드의 부모 노드
+
+        # 경우 1: 지우려는 노드가 leaf 노드일 때
+        if node_to_delete.left_child is None and node_to_delete.right_child is None:
+            if self.root is node_to_delete:
+                self.root = None
+            else:  # 일반적인 경우
+                if node_to_delete is parent_node.left_child:
+                    parent_node.left_child = None
+                else:
+                    parent_node.right_child = None
+
+        # 경우 2: 지우려는 노드가 자식이 하나인 노드일 때:
+        # 지우려는 노드가 왼쪽 자식만 갖고 있을 때
+        elif node_to_delete.right_child is None:
+            # 지우려는 노드가 루트 노드일 때
+            if node_to_delete is self.root:
+                self.root = node_to_delete.left_child
+                self.root.parent is None
+            # 지우려는 노드가 부모 노드의 왼쪽 자식일 때
+            elif node_to_delete is parent_node.left_child:
+                parent_node.left_child = node_to_delete.left_child
+                node_to_delete.left_child.parent = parent_node
+            # 지우려는 노드가 부모 노드의 오른쪽 자식일 때
+            else:
+                parent_node.right_child = node_to_delete.left_child
+                node_to_delete.left_child.parent = parent_node
+        # 지우려는 노드가 오른쪽 자식만 갖고 있을 때
+        elif node_to_delete.left_child is None:
+            # 지우려는 노드가 루트 노드일 때
+            if node_to_delete is self.root:
+                self.root = node_to_delete.right_child
+                self.root.parent = None
+            # 지우려는 노드가 부모 노드의 왼쪽 자식일 떄
+            elif node_to_delete is parent_node.left_child:
+                parent_node.left_child = node_to_delete.right_child
+                node_to_delete.right_child.parent = parent_node
+            # 지우려는 노드가 부모 노드의 오른쪽 자식일 때
+            else:
+                parent_node.right_child = node_to_delete.right_child
+                node_to_delete.right_child.parent = parent_node
+
+
+    @staticmethod
+    def find_min(node):
+        """(부분)이진 탐색 트리의 가장 작은 노드 리턴"""
+        # 코드를 쓰세요
+        temp = node  # 탐색 변수. 파라미터 node로 초기화
+
+        # temp가 node를 뿌리로 갖는 부분 트리에서 가장 작은 노드일 때까지 왼쪽 자식 노드로 간다
+        while temp.left_child is not None:
+            temp = temp.left_child
+
+        return temp
+
+    def search(self, data):
+        """이진 탐색 트리 탐색 메소드, 찾는 데이터를 갖는 노드가 없으면 None을 리턴한다"""
+        temp = self.root  # 탐색 변수. root 노드로 초기화
+
+        # 원하는 데이터를 갖는 노드를 찾을 때까지 돈다
+        while temp is not None:
+            # 원하는 데이터를 갖는 노드를 찾으면 리턴
+            if data == temp.data:
+                return temp
+            # 원하는 데이터가 노드의 데이터보다 크면 오른쪽 자식 노드로 간다
+            if data > temp.data:
+                temp = temp.right_child
+            # 원하는 데이터가 노드의 데이터보다 작으면 왼쪽 자식 노드로 간다
+            else:
+                temp = temp.left_child
+
+        return None # 원하는 데이터가 트리에 없으면 None 리턴
+
+    def insert(self, data):
+        """이진 탐색 트리 삽입 메소드"""
+        new_node = Node(data)  # 삽입할 데이터를 갖는 노드 생성
+
+        # 트리가 비었으면 새로운 노드를 root 노드로 만든다
+        if self.root is None:
+            self.root = new_node
+            return
+
+        # 코드를 쓰세요
+        temp = self.root  # 저장하려는 위치를 찾기 위해 사용할 변수. root 노드로 초기화한다
+
+        # 원하는 위치를 찾아간다
+        while temp is not None:
+            if data > temp.data:  # 삽입하려는 데이터가 현재 노드 데이터보다 크다면
+                # 오른쪽 자식이 없으면 새로운 노드를 현재 노드 오른쪽 자식으로 만듦
+                if temp.right_child is None:
+                    new_node.parent = temp
+                    temp.right_child = new_node
+                    return
+                # 오른쪽 자식이 있으면 오른쪽 자식으로 간다
+                else:
+                    temp = temp.right_child
+            else:  # 삽입하려는 데이터가 현재 노드 데이터보다 작다면
+                # 왼쪽 자식이 없으면 새로운 노드를 현재 노드 왼쪽 자식으로 만듦
+                if temp.left_child is None:
+                    new_node.parent = temp
+                    temp.left_child = new_node
+                    return
+                # 왼쪽 자식이 있다면 왼쪽 자식으로 간다
+                else:
+                    temp = temp.left_child
+
+
+    def print_sorted_tree(self):
+        """이진 탐색 트리 내의 데이터를 정렬된 순서로 출력해주는 메소드"""
+        print_inorder(self.root)  # root 노드를 in-order로 출력한다
+
+# 빈 이진 탐색 트리 생성
+bst = BinarySearchTree()
+
+# 데이터 삽입
+bst.insert(7)
+bst.insert(11)
+bst.insert(9)
+bst.insert(17)
+bst.insert(8)
+bst.insert(5)
+bst.insert(19)
+bst.insert(3)
+bst.insert(2)
+bst.insert(4)
+bst.insert(14)
+
+# 자식이 하나만 있는 노드 삭제
+bst.delete(5)
+bst.delete(9)
+
+bst.print_sorted_tree()
+# 2
+# 3
+# 4
+# 7
+# 8
+# 11
+# 14
+# 17
+# 19
+```
+
+# 이진 탐색 트리 삭제 2
+
+## 이진 탐색 트리 삭제 연산 세번째 경우
+
+경우3: 삭제하려는 데이터의 노드가 두 개의 자식을 가지고 있을 때:
+
+- 지우려는 노드의 오른쪽 부분 트리에서 가장 작은 노드(successor)를 찾아서 그 데이터를 지우려는 노드에 넣어주고, successor 노드를 삭제한다.
+
+# 이진 탐색 트리 삭제 구현 (경우 3)
+
+# 이진 탐색 트리 삭제 경우 3
+
+1. 지우려는 노드의 successor를 받아온다. (find_min 메소드 활용)
+2. 삭제하려는 노드 데이터에 successor 데이터를 저장한다.
+3. successor 노드를 삭제한다.
+
+이때,
+
+- successor 노드가 부모 노드의 오른쪽 자식인지 왼쪽 자식인지
+- successor 노드가 오른쪽 자식을 가지는지
+
+를 고려해줘야 함.
+
+successor 노드가 왼쪽 자식을 가질 수는 없어서 그 경우는 고려해주지 않아도 됨
+
+## 내가 짠 코드
+
+```python
+class Node:
+    """이진 탐색 트리 노드 클래스"""
+    def __init__(self, data):
+        self.data = data
+        self.parent = None
+        self.right_child = None
+        self.left_child = None
+
+def print_inorder(node):
+    """주어진 노드를 in-order로 출력해주는 함수"""
+    if node is not None:
+        print_inorder(node.left_child)
+        print(node.data)
+        print_inorder(node.right_child)
+
+class BinarySearchTree:
+    """이진 탐색 트리 클래스"""
+    def __init__(self):
+        self.root = None
+
+    def delete(self, data):
+        """이진 탐색 트리 삭제 메소드"""
+        node_to_delete = self.search(data)  # 삭제할 노드를 가지고 온다
+        parent_node = node_to_delete.parent  # 삭제할 노드의 부모 노드
+
+        # 경우 1: 지우려는 노드가 leaf 노드일 때
+        if node_to_delete.left_child is None and node_to_delete.right_child is None:
+            if self.root is node_to_delete:
+                self.root = None
+            else:  # 일반적인 경우
+                if node_to_delete is parent_node.left_child:
+                    parent_node.left_child = None
+                else:
+                    parent_node.right_child = None
+
+        # 경우 2: 지우려는 노드가 자식이 하나인 노드일 때:
+        elif node_to_delete.left_child is None:  # 지우려는 노드가 오른쪽 자식만 있을 때:
+            # 지우려는 노드가 root 노드일 때
+            if node_to_delete is self.root:
+                self.root = node_to_delete.right_child
+                self.root.parent = None
+            # 지우려는 노드가 부모의 왼쪽 자식일 때
+            elif node_to_delete is parent_node.left_child:
+                parent_node.left_child = node_to_delete.right_child
+                node_to_delete.right_child.parent = parent_node
+            # 지우려는 노드가 부모의 오른쪽 자식일 때
+            else:
+                parent_node.right_child = node_to_delete.right_child
+                node_to_delete.right_child.parent = parent_node
+
+        elif node_to_delete.right_child is None:  # 지우려는 노드가 왼쪽 자식만 있을 때:
+            # 지우려는 노드가 root 노드일 때
+            if node_to_delete is self.root:
+                self.root = node_to_delete.left_child
+                self.root.parent = None
+            # 지우려는 노드가 부모의 왼쪽 자식일 때
+            elif node_to_delete is parent_node.left_child:
+                parent_node.left_child = node_to_delete.left_child
+                node_to_delete.left_child.parent = parent_node
+            # 지우려는 노드가 부모의 오른쪽 자식일 때
+            else:
+                parent_node.right_child = node_to_delete.left_child
+                node_to_delete.left_child.parent = parent_node
+
+        # 경우 3: 지우려는 노드가 2개의 자식이 있을 때
+        else:
+            # 지우려는 노드의 successor를 받아온다
+            successor = self.find_min(node_to_delete.right_child)
+
+            # 삭제하려는 노드 데이터에 successor의 데이터를 저장한다
+            node_to_delete.data = successor.data
+
+            # successor 노드를 삭제한다
+            # successor가 leaf 노드일 때
+            if successor.right_child is None:
+                successor.parent.left_child = None
+            # successor 노드에 오른쪽 자식이 있을 때
+            else:
+                successor.right_child.parent = successor.parent
+                successor.parent.left_child = successor.right_child
+
+
+    @staticmethod
+    def find_min(node):
+        """(부분)이진 탐색 트리의 가장 작은 노드 리턴"""
+        # 코드를 쓰세요
+        temp = node  # 탐색 변수. 파라미터 node로 초기화
+
+        # temp가 node를 뿌리로 갖는 부분 트리에서 가장 작은 노드일 때까지 왼쪽 자식 노드로 간다
+        while temp.left_child is not None:
+            temp = temp.left_child
+
+        return temp
+
+    def search(self, data):
+        """이진 탐색 트리 탐색 메소드, 찾는 데이터를 갖는 노드가 없으면 None을 리턴한다"""
+        temp = self.root  # 탐색 변수. root 노드로 초기화
+
+        # 원하는 데이터를 갖는 노드를 찾을 때까지 돈다
+        while temp is not None:
+            # 원하는 데이터를 갖는 노드를 찾으면 리턴
+            if data == temp.data:
+                return temp
+            # 원하는 데이터가 노드의 데이터보다 크면 오른쪽 자식 노드로 간다
+            if data > temp.data:
+                temp = temp.right_child
+            # 원하는 데이터가 노드의 데이터보다 작으면 왼쪽 자식 노드로 간다
+            else:
+                temp = temp.left_child
+
+        return None # 원하는 데이터가 트리에 없으면 None 리턴
+
+    def insert(self, data):
+        """이진 탐색 트리 삽입 메소드"""
+        new_node = Node(data)  # 삽입할 데이터를 갖는 노드 생성
+
+        # 트리가 비었으면 새로운 노드를 root 노드로 만든다
+        if self.root is None:
+            self.root = new_node
+            return
+
+        # 코드를 쓰세요
+        temp = self.root  # 저장하려는 위치를 찾기 위해 사용할 변수. root 노드로 초기화한다
+
+        # 원하는 위치를 찾아간다
+        while temp is not None:
+            if data > temp.data:  # 삽입하려는 데이터가 현재 노드 데이터보다 크다면
+                # 오른쪽 자식이 없으면 새로운 노드를 현재 노드 오른쪽 자식으로 만듦
+                if temp.right_child is None:
+                    new_node.parent = temp
+                    temp.right_child = new_node
+                    return
+                # 오른쪽 자식이 있으면 오른쪽 자식으로 간다
+                else:
+                    temp = temp.right_child
+            else:  # 삽입하려는 데이터가 현재 노드 데이터보다 작다면
+                # 왼쪽 자식이 없으면 새로운 노드를 현재 노드 왼쪽 자식으로 만듦
+                if temp.left_child is None:
+                    new_node.parent = temp
+                    temp.left_child = new_node
+                    return
+                # 왼쪽 자식이 있다면 왼쪽 자식으로 간다
+                else:
+                    temp = temp.left_child
+
+
+    def print_sorted_tree(self):
+        """이진 탐색 트리 내의 데이터를 정렬된 순서로 출력해주는 메소드"""
+        print_inorder(self.root)  # root 노드를 in-order로 출력한다
+
+# 빈 이진 탐색 트리 생성
+bst = BinarySearchTree()
+
+# 데이터 삽입
+bst.insert(7)
+bst.insert(11)
+bst.insert(9)
+bst.insert(17)
+bst.insert(8)
+bst.insert(5)
+bst.insert(19)
+bst.insert(3)
+bst.insert(2)
+bst.insert(4)
+bst.insert(14)
+
+# 자식이 두 개 다 있는 노드 삭제
+bst.delete(7)
+bst.delete(11)
+
+bst.print_sorted_tree()
+# 2
+# 3
+# 4
+# 5
+# 8
+# 9
+# 14
+# 17
+# 19
+```
+
+내 코드는 해당 과제에서는 오류가 나지 않았지만,
+
+코드잇 해설 코드와는 달리, successor가 삭제하려는 노드의 오른쪽 자식일 경우는 고려하지 못하고 있다.
+
+또한, successor가 오른쪽 자식이 None이든 아니든, successor의 parent의 자식으로 지정해주면 굳이 코드를 한 줄 더 쓸 필요가 없다.
+
+## 코드잇 해설
+
+```python
+class Node:
+    """이진 탐색 트리 노드 클래스"""
+    def __init__(self, data):
+        self.data = data
+        self.parent = None
+        self.right_child = None
+        self.left_child = None
+
+def print_inorder(node):
+    """주어진 노드를 in-order로 출력해주는 함수"""
+    if node is not None:
+        print_inorder(node.left_child)
+        print(node.data)
+        print_inorder(node.right_child)
+
+class BinarySearchTree:
+    """이진 탐색 트리 클래스"""
+    def __init__(self):
+        self.root = None
+
+    def delete(self, data):
+        """이진 탐색 트리 삭제 메소드"""
+        node_to_delete = self.search(data)  # 삭제할 노드를 가지고 온다
+        parent_node = node_to_delete.parent  # 삭제할 노드의 부모 노드
+
+        # 경우 1: 지우려는 노드가 leaf 노드일 때
+        if node_to_delete.left_child is None and node_to_delete.right_child is None:
+            if self.root is node_to_delete:
+                self.root = None
+            else:  # 일반적인 경우
+                if node_to_delete is parent_node.left_child:
+                    parent_node.left_child = None
+                else:
+                    parent_node.right_child = None
+
+        # 경우 2: 지우려는 노드가 자식이 하나인 노드일 때:
+        elif node_to_delete.left_child is None:  # 지우려는 노드가 오른쪽 자식만 있을 때:
+            # 지우려는 노드가 root 노드일 때
+            if node_to_delete is self.root:
+                self.root = node_to_delete.right_child
+                self.root.parent = None
+            # 지우려는 노드가 부모의 왼쪽 자식일 때
+            elif node_to_delete is parent_node.left_child:
+                parent_node.left_child = node_to_delete.right_child
+                node_to_delete.right_child.parent = parent_node
+            # 지우려는 노드가 부모의 오른쪽 자식일 때
+            else:
+                parent_node.right_child = node_to_delete.right_child
+                node_to_delete.right_child.parent = parent_node
+
+        elif node_to_delete.right_child is None:  # 지우려는 노드가 왼쪽 자식만 있을 때:
+            # 지우려는 노드가 root 노드일 때
+            if node_to_delete is self.root:
+                self.root = node_to_delete.left_child
+                self.root.parent = None
+            # 지우려는 노드가 부모의 왼쪽 자식일 때
+            elif node_to_delete is parent_node.left_child:
+                parent_node.left_child = node_to_delete.left_child
+                node_to_delete.left_child.parent = parent_node
+            # 지우려는 노드가 부모의 오른쪽 자식일 때
+            else:
+                parent_node.right_child = node_to_delete.left_child
+                node_to_delete.left_child.parent = parent_node
+
+        # 경우 3: 지우려는 노드가 2개의 자식이 있을 때
+        else:
+            # 삭제하려는 노드의 successor 노드 받아오기
+            successor = self.find_min(node_to_delete.right_child)
+
+            # 삭제하려는 노드의 데이터에 successor의 데이터 저장
+            node_to_delete.data = successor.data
+
+            # successor 노드 트리에서 삭제
+            if successor is successor.parent.right_child: # successor 노드가 오른쪽 자식일 때
+                successor.parent.right_child = successor.right_child
+            else: # successor 노드가 왼쪽 자식일 때
+                successor.parent.left_child = successor.right_child
+
+            if successor.right_child is not None: # successor 노드가 오른쪽 자식이 있을 때
+                successor.right_child.parent = successor.parent
+
+
+    @staticmethod
+    def find_min(node):
+        """(부분)이진 탐색 트리의 가장 작은 노드 리턴"""
+        # 코드를 쓰세요
+        temp = node  # 탐색 변수. 파라미터 node로 초기화
+
+        # temp가 node를 뿌리로 갖는 부분 트리에서 가장 작은 노드일 때까지 왼쪽 자식 노드로 간다
+        while temp.left_child is not None:
+            temp = temp.left_child
+
+        return temp
+
+    def search(self, data):
+        """이진 탐색 트리 탐색 메소드, 찾는 데이터를 갖는 노드가 없으면 None을 리턴한다"""
+        temp = self.root  # 탐색 변수. root 노드로 초기화
+
+        # 원하는 데이터를 갖는 노드를 찾을 때까지 돈다
+        while temp is not None:
+            # 원하는 데이터를 갖는 노드를 찾으면 리턴
+            if data == temp.data:
+                return temp
+            # 원하는 데이터가 노드의 데이터보다 크면 오른쪽 자식 노드로 간다
+            if data > temp.data:
+                temp = temp.right_child
+            # 원하는 데이터가 노드의 데이터보다 작으면 왼쪽 자식 노드로 간다
+            else:
+                temp = temp.left_child
+
+        return None # 원하는 데이터가 트리에 없으면 None 리턴
+
+    def insert(self, data):
+        """이진 탐색 트리 삽입 메소드"""
+        new_node = Node(data)  # 삽입할 데이터를 갖는 노드 생성
+
+        # 트리가 비었으면 새로운 노드를 root 노드로 만든다
+        if self.root is None:
+            self.root = new_node
+            return
+
+        # 코드를 쓰세요
+        temp = self.root  # 저장하려는 위치를 찾기 위해 사용할 변수. root 노드로 초기화한다
+
+        # 원하는 위치를 찾아간다
+        while temp is not None:
+            if data > temp.data:  # 삽입하려는 데이터가 현재 노드 데이터보다 크다면
+                # 오른쪽 자식이 없으면 새로운 노드를 현재 노드 오른쪽 자식으로 만듦
+                if temp.right_child is None:
+                    new_node.parent = temp
+                    temp.right_child = new_node
+                    return
+                # 오른쪽 자식이 있으면 오른쪽 자식으로 간다
+                else:
+                    temp = temp.right_child
+            else:  # 삽입하려는 데이터가 현재 노드 데이터보다 작다면
+                # 왼쪽 자식이 없으면 새로운 노드를 현재 노드 왼쪽 자식으로 만듦
+                if temp.left_child is None:
+                    new_node.parent = temp
+                    temp.left_child = new_node
+                    return
+                # 왼쪽 자식이 있다면 왼쪽 자식으로 간다
+                else:
+                    temp = temp.left_child
+
+
+    def print_sorted_tree(self):
+        """이진 탐색 트리 내의 데이터를 정렬된 순서로 출력해주는 메소드"""
+        print_inorder(self.root)  # root 노드를 in-order로 출력한다
+
+# 빈 이진 탐색 트리 생성
+bst = BinarySearchTree()
+
+# 데이터 삽입
+bst.insert(7)
+bst.insert(11)
+bst.insert(9)
+bst.insert(17)
+bst.insert(8)
+bst.insert(5)
+bst.insert(19)
+bst.insert(3)
+bst.insert(2)
+bst.insert(4)
+bst.insert(14)
+
+# 자식이 두 개 다 있는 노드 삭제
+bst.delete(7)
+bst.delete(11)
+
+bst.print_sorted_tree()
+# 2
+# 3
+# 4
+# 5
+# 8
+# 9
+# 14
+# 17
+# 19
+```
+
+# 이진 탐색 트리 삭제 연산 시간 복잡도
+
+## 탐색
+
+삭제 연산은 공통적으로 삭제하려는 데이털르 갖는 노드를 탐색해야 한다. 이진 탐색 트리의 높이를 h라고 했을 때, 타맥 연산은 O(h)의 시간 복잡도를 가짐
+
+데이터를 삭제할 때의 3가지 경우를, 이미 지우려는 노드를 찾았다고 가정하고 생각해보자.
+
+## 삭제 경우 1: 지우려는 데이터 노드가 leaf 노드일 때
+
+탐색한 노드의 부모에서 자식 레퍼런스를 None으로 지정해주면 됐다. 걸리는 시간이 노드 개수나 트리 높이에 비례하지 않는다. O(1)
+
+## 삭제 경우 2: 지우려는 데이터 노드가 하나의 자식이 있을 때
+
+삭제하려는 노드의 부모의 자식을 삭제하려는 노드의 자식으로 만들어 줬다. 이때는 어떤 노드인지와 상관 없이 그냥 레퍼런스 2개만 연결시켜주면 됨. 이 경우도 O(1)이 걸림
+
+## 삭제 경우 3: 지우려는 데이터 노드가 두 개의 자식이 있을 때
+
+1. 먼저 지우려는 데이터 노드의 successor 노드를 찾는다
+2. 지우려는 노드에 successor 노드의 데이터를 저장한 후
+3. successor 노드를 지운다.
+
+### 1단계
+
+successor 노드는 삭제하려는 노드의 오른쪽 자식을 `find_min` 메소드의 파라미터로 넘겨줘서 구했는데, `find_min` 메소드는 총 O(h)이 걸린다. 때문에 1단계는 O(h)이 걸린다.
+
+### 2단계
+
+단순히 노드에 데이터를 넣는 단계라서 O(1)이 걸리고
+
+### 3단계
+
+successor가 오른쪽 자식 노드가 있으면 O(2), 없으면 O(1)이 걸리기 때문에 결국 O(1)이 걸린다.
+
+### 경우 3 종합
+
+합쳐 보면 총 O(h+1+1)이 걸리는데, 결국 삭제의 세 번째 경우는 탐색을 제외하고 O(h)이 걸린다.
+
+## 정리
+
+### 삭제 연산 각 경우 시간 복잡도
+
+- 경우 1: O(1)
+- 경우 2: O(1)
+- 경우 3: O(h)
+
+### 탐색 연산 자체의 시간 복잡도 O(h)를 고려한 삭제 연산 시간 복잡도
+
+- 경우 1: O(h)
+- 경우 2: O(h)
+- 경우 3: O(h)
+
+결국, 삭제 연산 시간 복잡도 = **O(h)**
+
+  </details>
+  <details>
+    <summary>이진 탐색 트리 높이 h 분석</summary>
+
+# 이진 탐색 트리 높이 h 분석
+
+## 이진 탐색 트리 높이
+
+트리의 높이가 h라고 할 때, 이진 탐색의 가장 기본적인 연산들: 탐색, 삽입, 삭제의 시간 복잡도는 모두 O(h)이다. 따라서 이진 탐색 트리는 높이가 낮을수록 여러 연산을 하기에 효율적이라는 것을 알 수 있다.
+
+이진 탐색 트리는 완전 이진 트리가 아닌 경우가 더 많다. 따라서 노드가 n개 있을 때, 높이 h가 항상 O(lg(n))이라고 할 수 없다.
+
+### 편향된 경우
+
+최악의 경우를 예로 들자면, 이진 탐색 트리의 높이는 O(n)이 될 수도 있다.
+
+<img src="img/binarySearchTree1.png" width=800>
+
+노드의 개수가 n일 때, 트리의 높이도 n이다. 이런 식으로 트리 안에서 노드가 직선적인 모양으로 저장됐을 때 "트리가 한쪽으로 편향됐다 또는 치우쳤다"라고 표현한다.
+
+### 균형을 이룬 경우
+
+<img src="img/binarySearchTree2.png" width=800>
+
+root 노드를 기준으로 트리의 왼쪽과 오른쪽이 균형을 이루는 모습이다. 이런 균형 잡힌 모양이 될 수록 이진 탐색 트리의 높이는 작아진다. 트리의 높이가 작을수록, 즉 그 높이가 lg(n)에 가까울수록 "트리가 균형이 잡혔다"라고 한다.
+
+이진 탐색 트리 연산들의 시간은 모두 그 높이 h에 비례한다. 그럼 결론적으로,
+
+- 편향된 트리일수록 연산들이 비효율적으로,
+- 균형이 잡힌 트리일수록 연산들이 효율적으로
+
+이루어진다고 볼 수 있다.
+
+## 이진 탐색 트리 평균 높이
+
+최악의 경우 이진 탐색 트리의 높이는 n이 되지만, 항상 최악의 경우가 일어나는 건 아니다.
+
+총 n개의 데이터를 이진 탐색 트리에 삽입하면, 삽입할 떄 그 순서의 경우의 수는 n!이다. 그러니까 1 ~ 6의 정수 데이터를 삽입하는 경우, 총 경우의 수는 6*5*4*3*2\*1이다. 수학적으로 모든 순서의 확률이 동일하다고 가정하고 이 경우들의 평균 높이를 계산하면 O(lg(n))이 된다.
+
+따라서 "따라서 평균적으로 이진 탐색 트리의 높이 h는 O(lg(n))이다"" 라고 할 수 있긴 하다. 하지만 이진 탐색 트리에 삽입 연산과 삭제 연산들을 반복적으로 계속 하면 높이가 O(lg(n))일 거라는 보장을 할 수 없음. 실제로 생각보다 균형을 잃기 쉽다.
+
+## 정리
+
+이진 탐색 트리의 n개의 데이터들이 임의의 순서대로 삽입되었다고 가정을 하면 트리의 높이 h는 평균적으로 O(lg(n))으로 표현할 수 있다. 이걸 이진 탐색 트리의 탐색, 삽입, 삭제 연산에 적용해 보면 세 연산의 시간 복잡도는 모두 평균적으론느 O(lg(n))이다.
+
+- 삽입: O(h) = 평균적 O(lg(n)), 최악 O(n)
+- 탐색: O(h) = 평균적 O(lg(n)), 최악 O(n)
+- 삭제: O(h) = 평균적 O(lg(n)), 최악 O(n)
+
+하지만 삽입과 삭제 연산들을 반복하다보면 이진 탐색 트리의 노드들이 한쪽으로 편향될 수 있기 때문에 이진 탐색 트리의 연산들의 시간 복잡도는 보통 높이 그대로 O(h)로 표기한다.
+
+  </details>
+  <details>
+    <summary>이진 탐색 트리로 딕셔너리 구현하기</summary>
+
+# 이진 탐색 트리로 딕셔너리 구현하기
+
+## 이진 탐색 트리 노드
+
+```python
+class Node:
+	"""이진 탐색 트리 노드 클래스"""
+	def __init__(self, data):
+		self.data = data
+		self.parent = None
+		self.left_child = None
+		self.right_child = None
+```
+
+### 딕셔너리용 이진 탐색 트리 노드
+
+```python
+class Node:
+	"""이진 탐색 트리 노드 클래스"""
+	def __init__(self, key, value):
+		self.key = key
+		self.value = value
+		self.parent = None
+		self.left_child = None
+		self.right_child = None
+```
+
+이렇게 이진 탐색 트리 노드를 새롭게 정의해주면 된다. 전에는 노드의 데이터 변수 `data`를 이용해서 원하는 노드를 삽입, 삭제, 탐색했다. 이렇게 노드를 새롭게 정의하면 노드를 `data`가 아닌 변수 `key`를 사용해서 찾고 저장하고 지운다.
+
+다행히 크게 바뀌는 게 없는데, 이진 탐색 트리 클래스의 연산들도 이 새로운 노드 클래스의 내용에 맞게 수정해주기만 하면 됨
+
+이렇게 하면 이제 이진 탐색 트리 노드에 key - value 데이터 쌍을 자연스럽게 저장할 수 있다.
+
+## 시간 복잡도
+
+어차피 연산들 자체는 data 변수 대신 key를 사용하는 것으로 바뀌었을 뿐. 노드에 data 대신 key - value 두 변수를 저장한다고 시간 복잡도가 바뀌는 건 없다.
+
+- key를 이용한 key - value 데이터 쌍 삭제: O(h) = 평균 O(lg(n))
+- key를 이용한 노드 또는 value 탐색: O(h) = 평균 O(lg(n))
+- key - value 쌍 삽입: O(h) = 평균 O(lg(n))
+
+세 가지 연산 모두 O(h)로 할 수 있음
+
+  </details>
+  <details>
+    <summary>이진 탐색 트리 평가</summary>
+
+# 이진 탐색 트리 평가
+
+이진 탐색 트리와 용도가 비슷한 자료 구조가 뭐가 있을까?
+
+이진 탐색 트리를 사용하는 가장 대표적인 예시는 추상 자료형 세트(set)와 딕셔너리(dictionary)를 구현하는 건데, 해시 테이블을 사용해도 두 추상 자료형을 구현할 수 있었다.
+
+### 이진 탐색 트리
+
+- 삽입: O(h) = 평균 O(lg(n)), 최악 O(n)
+- 탐색: O(h) = 평균 O(lg(n)), 최악 O(n)
+- 삭제: O(h) = 평균 O(lg(n)), 최악 O(n)
+
+### 해시 테이블
+
+- 삽입: 평균 O(1), 최악 O(n)
+- 탐색: 평균 O(1), 최악 O(n)
+- 삭제: 평균 O(1), 최악 O(n)
+
+삽입, 탐색, 삭제 세 연산 모두 이진 탐색 트리보다 해시 테이블을 사용하는 게 더 효율적이다.
+
+그럼 이진 탐색 트리는 언제 사용하는 걸까?
+
+이진 탐색 트리는 데이터 사이에 순서를 저장해주는 자료 구조이다. 이전에 in-order 순회를 단순히 트리 안에 있는 데이터를 출력하는 용도로 사용했었다. 이런 출력 용도가 아니라도 모든 데이터를 정렬된 상태로 가지고 오거나, 정렬된 상태로 무언가 하고 싶을 때도 in-order 순회를 통해 모든 데이터를 빠르게 정렬해서 가지고 올 수 있다.
+
+반면 해시 테이블은 데이터 사이에 순서 관계를 저장할 수 없는 자료 구조이다. 데이터를 정렬하고 싶으면 순서를 저장하는 다른 자료 구조에 똑같은 데이터를 저장한 뒤 정렬시켜줘야 한다.
+
+**세트**와 **딕셔너리**는 데이터 사이에 순서 관계를 약속하지 않는 추상 자료형이긴 하다. 하지만 이 두가지를 사용하면서도 데이터 사이의 순서 관계를 저장해야 하는 경우들이 생길 수 있는데, 이럴 때 바로 이진 탐색 트리를 사용해야 한다.
+
+## 정리
+
+추상 자료형 세트나 딕셔너리를 코드로 구현할 때, 일반적인 경우에는 해시 테이블을 사용하는 게 이 진 탐색 트리를 사용하는 것보다 더 효율적이다. 하지만 세트의 데이터나 딕셔너리의 key를 정렬된 상태로 사용하고 싶을 때는 이진 탐색 트리를 사용해야 한다. 물론 이 때 해시 테이블보다는 연산의 효율성은 조금 포기해야 한다.
+
+  </details>
 </details>
