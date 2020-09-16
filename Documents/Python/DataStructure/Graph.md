@@ -872,4 +872,230 @@ BFS를 할 때 큐에 같은 노드가 두 번 들어갈 수 없었던 것처럼
 </details>
 <details>
   <summary>3) 최단 경로 알고리즘</summary>
+  <details>
+    <summary>최단 경로 알고리즘이란? & 최단 경로용 BFS</summary>
+
+# 최단 경로 알고리즘이란?
+
+## 최단 경로 (Shortest Path)
+
+- 두 노드 사이 경로 중 가장 거리가 짧은 경로
+
+## 최단 경로 알고리즘
+
+- 최단 경로를 구하는 구체적인 방법들!
+- 그래프 특성에 따라 다양하게 있음 (BFS, Dijkstra 등)
+
+# BFS predecessor
+
+## Predecessor
+
+BFS 알고리즘을 조금만 수정하면 최단 경로 알고리즘으로 쓸 수 있음
+
+각 노드의 변수로 predecessor 추가.
+
+이 변수는 직전에 방문한 노드를 담고 있음
+
+# 최단 경로용 BFS
+
+## 최단 경로용 BFS 알고리즘
+
+- 시작 노드를 방문 표시 후, 큐에 넣음
+- 큐에 아무 노드가 없을 때까지:
+  - 큐 가장 앞 노드를 꺼낸다
+  - 꺼낸 노드에 인접한 노드들을 모두 보면서:
+    - 처음 방문한 노드면:
+      - 방문 표시를 해준다
+      - predecessor 변수를 큐에서 꺼낸 노드로 설정
+      - 큐에 넣어준다
+
+## Backtracking
+
+거꾸로 찾아가는 걸 backtracking이라고 부름
+
+- 현재 노드를 경로에 추가한다
+- 현재 노드의 predecessor로 간다
+- predecessor가 없을 때까지 위 단계들 반복
+
+# BFS로 찾은 경로가 최단 경로인 이유
+
+BFS 알고리즘은 시작점 노드로부터 가까운 순서대로 방문하고, 한 번 방문한 노드는 다시 큐에 넣지 않음.
+
+방문할 때 predecessor 변수에 이전 노드를 추가하고, 다시 방문하지 않기 때문에 이 predecessor 라는 변수는 자동적으로 최단 경로에 포함되는 이전 노드를 담게 됨.
+
+# BFS 최단 경로용으로 바꾸기
+
+## subway_graph.py
+
+```python
+class StationNode:
+    """지하철 역을 나타내는 역"""
+    def __init__(self, station_name):
+        self.station_name = station_name
+        self.adjacent_stations = []
+        self.visited = False
+
+    def add_connection(self, station):
+        """파라미터로 받은 역과 엣지를 만들어주는 메소드"""
+        self.adjacent_stations.append(station)
+        station.adjacent_stations.append(self)
+
+def create_station_graph(input_file):
+    stations = {}
+
+    # 일반 텍스트 파일을 여는 코드
+    with open(input_file) as stations_raw_file:
+        for line in stations_raw_file:  # 파일을 한 줄씩 받아온다
+            previous_station = None  # 엣지를 저장하기 위한 변수
+            raw_data = line.strip().split("-")
+
+            for name in raw_data:
+                station_name = name.strip()
+
+                if station_name not in stations:
+                    current_station = StationNode(station_name)
+                    stations[station_name] = current_station
+
+                else:
+                    current_station = stations[station_name]
+
+                if previous_station is not None:
+                    current_station.add_connection(previous_station)
+
+                previous_station = current_station
+
+    return stations
+```
+
+## 내가 짠 main.py
+
+```python
+from collections import deque
+from subway_graph import *
+
+def bfs(graph, start_node):
+    """최단 경로용 bfs 함수"""
+    queue = deque()  # 빈 큐 생성
+
+    # 모든 노드를 방문하지 않은 노드로 표시, 모든 predecessor는 None으로 초기화
+    for station_node in graph.values():
+        station_node.visited = False
+        station_node.predecessor = None
+
+    # 시작점 노드를 방문 표시한 후 큐에 넣어준다
+    start_node.visited = True
+    queue.append(start_node)
+
+    while queue:  # 큐에 노드가 있을 때까지
+        current_station = queue.popleft()  # 큐의 가장 앞 데이터를 갖고 온다
+        for neighbor in current_station.adjacent_stations:  # 인접한 노드를 돌면서
+            if not neighbor.visited:  # 방문하지 않은 노드면
+                neighbor.visited = True  # 방문 표시를 하고
+                # 현재 큐에서 꺼낸 데이터를 predecessor로 설정한다
+                neighbor.predecessor = current_station
+                queue.append(neighbor)  # 큐에 넣는다
+
+
+def back_track(destination_node):
+    """최단 경로를 찾기 위한 back tracking 함수"""
+    res_str = ""  # 리턴할 결과 문자열
+
+    # 목적지 노드를 도우미 변수 temp에 할당
+    temp = destination_node
+    # 도착지 이름을 문자열에 추가
+    res_str =f"{temp.station_name}"
+
+    # predecessor가 없을 때까지 (시작점에 도달할 때까지)
+    while temp.predecessor is not None:
+        # 문자열에 predecessor의 이름 추가
+        res_str = f"{temp.predecessor.station_name} " + res_str
+        temp = temp.predecessor # temp 변수를 predecessor에 담긴 노드로 변경
+
+    # 최단 경로가 담긴 문자열 리턴
+    return res_str
+
+stations = create_station_graph("./new_stations.txt")  # stations.txt 파일로 그래프를 만든다
+
+bfs(stations, stations["을지로3가"])  # 지하철 그래프에서 을지로3가역을 시작 노드로 bfs 실행
+print(back_track(stations["강동구청"]))  # 을지로3가에서 강동구청역까지 최단 경로 출력
+# 을지로3가 을지로4가 동대문역사문화공원 신당 상왕십리 왕십리 마장 답십리 장한평 군자 아차산 광나루 천호 강동구청
+```
+
+## 해설과의 비교
+
+```python
+temp = destination_node
+
+while temp is not None:
+	res_str = f"{temp.station_name} {res_str}"
+	temp = temp.predecessor
+```
+
+- `res_str = f"{temp.station_name} " + res_str` 대신 해설처럼 `res_str = f"{temp.station_name} {res_str}"` 와 같이 쓰는 편이 띄어쓰기 관련해서 실수가 더 적을 것 같다.
+- `while temp is not None`으로 반복문을 도는 것이 따로 도착지를 먼저 문자열에 추가하는 코드 없이 더 명료해 보인다.
+  </details>
+  <details>
+    <summary>Dijkstra 알고리즘</summary>
+
+# Dijkstra 알고리즘 변수들
+
+## Dijkstra 알고리즘
+
+다익스트라 알고리즘은 가중치 그래프의 최단 경로이며, `distance`, `predecessor`, 그리고 `complete` 변수를 사용한다.
+
+- distance: 특정 노드까지의 "최단 거리 예상치" (현재까지 아는 정보로 계산한 최단 거리)
+- complete: 노드까지의 최단 경로를 찾았다고 표시하기 위한 변수
+
+# 엣지 Relaxation
+
+## 엣지 Relaxation이란?
+
+노드 A에서 B를 방문하면서, B의 `distance`, `predecessor`를 바꾸는 것.
+
+엣지 (A, B)를 relax한다.
+
+현재 노드(A)의 `distance` + 엣지 (A, B)의 가중치가 기존의 B의 `distance` 보다 작은지를 비교하고 더 작으면 B의 `predecessor`와 `distance`를 업데이트 해주는 과정임
+
+최단거리 예상 값을 계속 줄여나가는 게 노드의 긴장을 풀어준다는 개념과 비슷하기 때문에 사용하는 용어임
+
+# Dijkstra 알고리즘
+
+## Dijkstra 알고리즘
+
+- 모든 노드들의 `distance`를 무한대로, `predecessor`를 None으로 `complete`를 False로 설정
+- 시작점의 `distance`를 0으로, `predecessor`를 None으로 설정
+- 모든 노드가 `complete`일 때까지:
+  - `complete`하지 않은 노드 중 `distance`가 가장 작은 노드 선택
+  - 이 노드에 인접한 노드 중 `complete`하지 않은 노드를 돌면서:
+    - 각 엣지를 relax한다
+  - 현재 노드를 `complete` 처리한다
+
+# Dijkstra로 찾은 경로가 최단 경로인 이유
+
+## 최단 경로 문제와 최적 부분 구조(Optimal Substructure)
+
+Dijkstra로 구한 경로가 왜 최단 경로인지 보기 전에 먼저 최단 경로의 중요한 성질을 알아보자
+
+<img src="img/dijkstra.png" width=600>
+
+그래프를 보면 A부터 E까지의 최단 경로는 A - C - D - E이다. 여기서 부분 경로를 보자
+
+**중요한 성질**: 만약 A - C - D - E 가 A에서 E까지의 최단 경로라면, A - C - D는 A에서 D까지의 최단 경로고, C - D - E는 C부터 E까지의 최단 경로다.
+
+즉, 최단 경로 안에 있는 부분 경로들은 모두 최단 경로라는 것
+
+그럼 이 성질이 의미하는 것을 뭘까?
+
+A에서 E까지의 최단 경로를 찾는 문제는 A에서 D까지의 최단 경로를 찾는 문제와도 연관이 있고, A에서 B까지의 최단 경로를 찾는 문제와도 연관이 있고, A에서 C까지의 최단 경로를 찾는 문제와도 연관이 있다.
+
+최단 경로를 구하기 위해서 부분 최단 경로를 이용할 수 있다는 것
+
+## Dijkstra 알고리즘 증명 정리
+
+1. Dijkstra 알고리즘은 반복문을 돌면서 최단 경로를 이미 찾은 노드를 하나씩 찾아준다.
+   1. 처음에는 시작 노드의 최단 경로를 확정 짓고, 그 다음에는 C의 최단 경로를 확정지었다.
+2. 그리고 최단 경로를 이미 찾은 노드의 엣지들을 모두 relax 해줬다
+   1. 최단 경로는 다른 노드들까지의 최단 경로 + 현재 노드이기 때문에, 이미 확정난 최단 경로들로 다른 노드들까지의 최단 거리 예상치(`distance`)를 구하는 것이다.
+3. 매 단계에서 이 `distance`가 가장 작은 노드는 최단 거리를 이미 찾았다고 확신을 할 수 있음 1. 노드 D까지 가는 최단 거리는 이 세 가지 가능성 중 하나일 수밖에 없음. (최적 부분 구조) 1. C까지 가는 최단 경로 거리 + 엣지 (C, D)의 가중치 2. B까지 가는 최단 경로 거리 + 엣지 (B, D)의 가중치 3. E까지 가는 최단 경로 거리 + 엣지 (E, D)의 가중치 2. D가 선택됐다는 건 현재 찾은 경로(A - C - D)의 거리가 B까지 가는 최단 거리, E까지 가는 최단거리보다 작기 때문임. 그렇기 때문이 반복문이 한 번 실행될 때마다 `distance`가 가장 작은 노드가 최단 거리 노드라고 확신할 수 있다.
+  </details>
 </details>
