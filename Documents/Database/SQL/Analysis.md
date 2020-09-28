@@ -724,7 +724,656 @@ Pagination은 개발자에게도 중요한 주제이다. 실제로는 각 페이
 <details>
   <summary>4) 데이터 분석 단계로 나아가기</summary>
   <details>
-    <summary></summary>
+    <summary>데이터의 특성 구하기 & NULL을 다루는 방법</summary>
+
+# 데이터의 특성 구하기
+
+## 집계함수
+
+`COUNT(컬럼이름)`
+
+- 컬럼에 해당하는 NULL이 아닌 row의 수
+- `SELECT COUNT(weight) FROM member;`
+
+`COUNT(*)`
+
+- NULL에 상관없이, 모든 row의 수
+
+`MAX(컬럼이름)`
+
+- 컬럼 최댓값
+
+`MIN(컬럼이름)`
+
+- 컬럼 최솟값
+
+`AVG(컬럼이름)`
+
+- 컬럼 평균값 (NULL 제외)
+
+`SUM(컬럼이름)`
+
+- 컬럼 합계
+
+`STD(컬럼이름)`
+
+- 컬럼 표준편차
+
+## 산술 함수 (Mathematical Function)
+
+SQL에는 집계 함수 말고도, 단순한 산술 연산을 해주는 산술 함수가 있다.
+
+`ABS`
+
+- 절대값
+
+`SQRT`
+
+- 제곱근
+
+`CEIL`
+
+- 올림
+
+`FLOOR`
+
+- 내림
+
+`ROUND`
+
+- 반올림
+
+## 집계 함수와 산술 함수의 차이점
+
+(1) 집계 함수는 특정 컬럼의 여러 row의 값들을 동시에 고려해서 실행되는 함수
+
+(2) 산술 함수는 특정 컬럼의 각 row 값마다 실행되는 함수
+
+# NULL을 다루는 방법
+
+데이터를 분석하는 사람 입장에서는 NULL이 달갑지 않은 존재임. 모든 row와 모든 column에 제대로 된 값이 들어가 있어야 NULL을 따로 처리해주지 않아도 되어서 편리하기 때문. 하지만 현실에서는 데이터에 NULL이 있는 경우가 종종 있음.
+
+## NULL 조회
+
+`SELECT * FROM member WHERE address IS NULL;`
+
+## NULL을 제외하고 조회
+
+`SELECT * FROM member WHERE height IS NOT NULL;`
+
+## NULL을 좀 더 일반적인 단어로 바꿔주기
+
+다른 직군의 사람들은 NULL을 잘 모를 수도 있기 때문에 조금 더 일반적인 단어로 바꿔줄 수 있다.
+
+```sql
+SELECT
+	COALESCE(height, '####'),
+	COALESCE(weight, '----'),
+	COALESCE(address, '@@@@')
+FROM member;
+```
+
+`COALESCE`는 값이 있으면 그 값을 그대로 리턴해 주고, NULL이 있으면 뒤에 파라미터로 넘긴 문자를 리턴해 준다.
+
+# NULL에 관해 알아야 하는 사실
+
+## 1. IS NULL 과 = NULL 은 다르다
+
+**NULL은 어떤 값이 아니기 때문에 애초에 등호(=)를 사용해서 어떤 값과 비교할 수 있는 대상이 아님.**
+
+그래서 IS NULL 이라는 키워드가 별도로 마련된 것.
+
+NULL인지를 확인할 때는 = NULL을 쓰면 안 되고, 반드시 IS NULL을 써야 한다.
+
+마찬가지로, != NULL 이나 <> NULL 도 쓸 수 없고, **IS NOT NULL**이라고 나타내야 한다.
+
+## 2. NULL에는 어떤 연산을 해도 결국 NULL이다.
+
+NULL에는 뭘 더하든, 빼든, 곱하든, 나누든지 간에 항상 NULL이다.
+
+# 이상한 값 제외하는 법
+
+경우에 따라서 이상한 값을 제외하는 방법은 다를 수 있는데, 여러 조건문을 잘 활용하면 된다.
+
+## 나이 범위가 이상한 경우
+
+`SELECT AVG(age) FROM member WHERE age BETWEEN 5 AND 100;`
+
+과 같이 특정 범위의 나이만 포함시킬 수 있다.
+
+## 주소가 이상한 경우
+
+`SELECT * FROM member WHERE address NOT LIKE '%호';`
+
+로 주소 확인 후, 해당하는 회원들에게 주소를 다시 제대로 입력해달라는 메일을 보낼 수도 있겠다.
+
+  </details>
+  <details>
+    <summary>컬럼 다루기</summary>
+
+# 컬럼끼리 계산하기
+
+## BMI 구하기
+
+BMI = Body Mass Index = 몸무게(kg) / 키(m) ^(2)
+
+```sql
+SELECT email, height, weight, weight / ((height / 100) * (height / 100))
+FROM member;
+```
+
+참고: NULL이 포함된 계산식의 결과는 항상 NULL이다.
+
+# 컬럼에 alias 붙이기
+
+## Alias
+
+Alias = 별명, 별칭
+
+```sql
+SELECT
+	email,
+	height AS 키,
+	weight AS 몸무게,
+	weight / ((height / 100) * (height / 100)) AS BMI
+FROM member;
+```
+
+AS를 사용하지 않고 컬럼 뒤에 스페이스바로 한 칸 뛰고 alias를 적어주어도 되지만, 알아보기 쉽게 AS를 써주자
+
+## CONCAT
+
+`CONCAT` 함수를 이용해 여러 컬럼의 값을 한 컬럼에 나타내줄 수 있다.
+
+```sql
+SELECT
+	email,
+	CONCAT(height, 'cm', ', ', weight, 'kg') AS '키와 몸무게',
+	weight / ((height / 100) * (height / 100)) AS BMI
+FROM member;
+```
+
+# 컬럼의 값 변환해서 보기
+
+## CASE 문 활용해서 비만여부 체크하기
+
+25 ≤ BMI: 과체중 또는 비만
+
+18.5 ≤ BMI < 25 : 정상
+
+BMI < 18.5 : 저체중
+
+```sql
+SELECT
+	email,
+	CONCAT(height, 'cm', ', ', weight, 'kg') AS '키와 몸무게',
+	weight / ((height / 100) * (height / 100)) AS BMI,
+
+(CASE
+	WHEN weight IS NULL OR height IS NULL THEN '비만 여부 알 수 없음'
+	WHEN weight / ((height / 100) * (height / 100)) >= 25 THEN '과체중 또는 비만'
+	WHEN weight / ((height / 100) * (height / 100)) >= 18.5
+		AND weight / ((height / 100) * (height / 100)) < 25
+		THEN '정상'
+	ELSE '저체중'
+END) AS obesity_check
+
+FROM member
+ORDER BY obesity_check ASC;
+```
+
+# CASE 함수의 종류
+
+## 1. 단순 CASE 함수
+
+```sql
+CASE 컬럼 이름
+	WHEN 값 THEN 값
+	WHEN 값 THEN 값
+	WHEN 값 THEN 값
+	ELSE 값
+END
+```
+
+예시
+
+```sql
+SELECT email,
+CASE age
+	WHEN 29 THEN '스물 아홉 살'
+	WHEN 30 THEN '서른 살'
+	ELSE age
+END
+FROM member;
+```
+
+age 컬럼의 값이 29면 '스물 아홉 살', 30이면 '서른 살' 이라고 표현.
+
+그리고 CASE 함수 중에서 ELSE age는 나머지 경우에는 모두 age 컬럼에 있던 값을 그대로 보여달라는 뜻임
+
+이렇게 CASE문 바로 뒤에 컬럼 이름을 쓰고, 그 컬럼의 값과 어떤 값이 같은지(=)를 비교하는 CASE 함수를 **단순 CASE 함수**라고 한다.
+
+## 2. 검색 CASE 함수
+
+```sql
+CASE
+	WHEN 조건1 THEN 값
+	WHEN 조건2 THEN 값
+	WHEN 조건3 THEN 값
+	ELSE 값
+END
+```
+
+이런 CASE 함수에서는 일단 TRUE인 조건을 만나게 되면 거기에 있는 THEN 뒤의 값을 돌려주고, CASE 함수는 종료된다.
+
+검색 CASE 함수는 단순 CASE 함수와 어떤 점이 다를까?
+
+일반적으로 단순 CASE 함수에서는 등호 연산(=) 밖에 할 수 없다는 단점이 있다.
+
+하지만 검색 CASE 함수에서는 사용자가 직접 원하는 대로 조건을 설정할 수 있기 때문에 좀 더 다양한 조건을 걸 수 있다.
+
+# NULL을 다른 값으로 변환하는 다양한 함수
+
+## 1. COALESCE 함수
+
+COALESCE 함수는 괄호 속 인자 중에서 가장 첫번째로 NULL이 아닌 값을 반환한다.
+
+`SELECT COALESCE(height, 'N/A') FROM member;`
+
+- height 컬럼의 NULL들을 'N/A'라는 문자열로 교체했는데, 이는 Not Available, Not Applicable의 줄임말로 테이블에서 어떤 값이 없거나 표현할 수 없는 값일 때를 나타내는 단어임.
+
+`SELECT COALESCE(height, weight * 2.3, 'N/A') FROM member;`
+
+- 이번에는 COALESCE 함수 안에 weight \* 2.3 이라는 식이 추가됨
+- 사람의 키가 보통 몸무게에 2.3을 곱한 값이라고 가정한 것. 만약 height 컬럼이 NULL이면 해당 row의 weight 컬럼의 값을 가지고 키를 추론해본 것임
+- height 컬럼도 NULL이고 weight 컬럼도 NULL인 row라면 'N/A'가 출력될 것임
+
+## 2. IFNULL 함수
+
+IFNULL 함수는 첫 번째 인자가 NULL인 경우에는 두 번째 인자를 표시하고, NULL이 아니면 해당 값을 그대로 표현한다.
+
+`SELECT IFNULL(height, 'N/A') FROM member;`
+
+## 3. IF 함수
+
+IF 함수는 가장 첫 번째 인자로 어떤 조건식이 온다. 만약 그 조건식의 결과가 True라면 두 번째 인자를 리턴하고, False라면 세 번째 인자를 리턴한다.
+
+`SELECT IF(height IS NOT NULL, height, 'N/A') FROM member;`
+
+## 4. CASE 함수
+
+```sql
+SELECT
+	CASE
+		WHEN height IS NOT NULL THEN height
+		ELSE 'N/A'
+	END
+FROM member;
+```
+
+# alias를 붙이고 바로 쓸 수 없는 이유
+
+## 1. 띄어쓰기(스페이스)가 포함된 alias에는 따옴표를 붙여줘야 한다.
+
+만약 컬럼에 스페이스가 포함된 alias를 붙이고 싶다면, 작은 따옴표나 큰 따옴표를 붙여서 alias 부분을 확실하게 표현해주어야 한다.
+
+`SELECT name AS '상품 이름', price FROM item;`
+
+이렇게 하지 않으면 스페이스를 기준으로 구문 해석이 이루어지는 SQL 특성 상 에러가 발생하니까 주의해야 한다.
+
+## 2. SELECT 절에서 설정한 alias를 바로 사용할 수 없는 문제
+
+```sql
+SELECT
+	email,
+	CONCAT(height, 'cm', ', ', weight, 'kg') AS '키와 몸무게',
+	weight / ((height / 100) * (height / 100)) AS BMI,
+
+(CASE
+	WHEN weight IS NULL OR height IS NULL THEN '비만 여부 알 수 없음'
+	WHEN weight / ((height / 100) * (height / 100)) >= 25 THEN '과체중 또는 비만'
+	WHEN weight / ((height / 100) * (height / 100)) >= 18.5
+		AND weight / ((height / 100) * (height / 100)) < 25
+		THEN '정상'
+	ELSE '저체중'
+END) AS obesity_check
+
+FROM member
+ORDER BY obesity_check ASC;
+```
+
+우리는 위와 같이 Alias와 CASE 문을 사용한 적이 있다.
+
+그런데 우리는 BMI라는 Alias를 이미 붙였기에 ,CASE 문 안에서 반복되는 부분을 BMI로 표시해서 작성하려고 할 수 있다
+
+하지만 이 경우 오류가 난다.
+
+```sql
+SELECT
+	email,
+	CONCAT(height, 'cm', ', ', weight, 'kg') AS '키와 몸무게',
+	weight / ((height / 100) * (height / 100)) AS BMI,
+
+(CASE
+	WHEN weight IS NULL OR height IS NULL THEN '비만 여부 알 수 없음'
+	WHEN BMI >= 25 THEN '과체중 또는 비만'
+	WHEN BMI >= 18.5
+		AND BMI < 25
+		THEN '정상'
+	ELSE '저체중'
+END) AS obesity_check
+
+FROM member
+ORDER BY obesity_check ASC;
+```
+
+실행 결과창을 보면 BMI 라는 컬럼이 Unknown이라고 뜬다.
+
+왜 이 부분이 작동하지 않는 걸까? SQL 문의 실행원리에 대해 잘 알아야 이해할 수 있다.
+
+BMI는 우리가 SELECT 절 안에서 설정한 alias이다. 그런데 BMI 컬럼이 Unknown 이라고 뜨는 건 CASE 함수가 실행될 때는 BMI 라는 alias가 아직 인식되지 않은 상태라고 봐야 한다.
+
+하지만 CASE 문에서 매번 이렇게 똑같은, 그리고 긴 표현을 쓰는 건 보기에 안 좋을 것 같다.
+
+해결 방법이 있는데, 이는 다른 챕터들을 좀 더 배운 뒤 알아보도록 하자.
+
+  </details>
+  <details>
+    <summary>고유한 값 & 문자열 함수</summary>
+
+# 고유한 값만 보기
+
+## DISTINCT
+
+`DISTINCT` 함수를 이용하면 하나의 컬럼에서 어떤 고유한 값들이 존재하는지 한 눈에 볼 수 있다.
+
+`SELECT DISTINCT(gender) FROM member;`
+
+- 성별 고유한 값만 보기 ('m', 'f')
+
+`SELECT DISTINCT(SUBSTRING(address, 1, 2)) FROM member;`
+
+- SUBSTRING 함수를 이용해 address 컬럼에서 첫번째 문자열부터 2개의 문자를 추출함
+- 서울, 경기 등과 같은 문자가 추출되고 DISTINCT를 통해서 고유한 값만 리턴된다.
+
+# 고유한 값의 개수 구하기
+
+## COUNT
+
+`SELECT COUNT(DISTINCT(gender)) FROM member;`
+
+- gender 컬럼에 존재하는 고유한 값의 개수를 구해준다.
+
+`SELECT COUNT(DISTINCT(SUBSTRING(address, 1, 2)) AS region_count FROM member;`
+
+- 회원들이 사는 주요 지역의 고유한 값 개수를 구해준다. (개수를 구하기 전에 이상한 값의 유무에 주의하자)
+
+# 문자열 관련 함수들
+
+## 1. LENGTH 함수
+
+`LENGTH` 함수는 문자열의 길이를 구해준다.
+
+`SELECT *, LENGTH(address) FROM member;`
+
+## 2. UPPER, LOWER 함수
+
+`UPPER`는 문자열을 모두 대문자로 바꿔서 보여주는 함수고,
+
+- `SELECT email, UPPER(email) FROM member;`
+
+`LOWER`는 문자열을 모두 소문자로 바꿔서 보여주는 함수다.
+
+- `SELECT email, LOWER(email) FROM member;`
+
+## 3. LPAD, RPAD 함수
+
+문자열의 왼쪽 또는 오른쪽을 특정 문자열로 채워주는 함수이다.
+
+LPAD는 LEFT + PADDING(채우기)의 줄임말, RPAD 는 RIGHT + PADDING의 줄임말
+
+예를 들어 `LPAD(age, 10, '0')`는 age 컬럼의 값을 왼쪽에 문자 0을 붙여서 총 10자리로 만드는 함수임. 보통 어떤 숫자의 자릿수를 맞출 때 자주 사용하는 함수.
+
+그런데 age 컬럼의 데이터 타입은 숫자를 나타내는 INT 형이었다.
+
+비록 숫자이더라도 문자열 함수 안에 인자로 넣어주면 그 값이 자동으로 문자열로 형 변환되어 계산된다.
+
+## 4. TRIM, LTRIM, RTRIM 함수
+
+이 함수들은 문자열에 존재하는 공백을 제거하는 함수들이다.
+
+LTRIM: 왼쪽 공백 삭제
+
+RTRIM: 오른쪽 공백 삭제
+
+TRIM: 왼쪽, 오른쪽 양쪽 다 공백 삭제
+
+이 함수들이 문자열 내부(중간)에 존재하는 공백을 없애는 건 아니라는 사실에 주의하자.
+
+  </details>
+  <details>
+    <summary>그루핑</summary>
+
+# 그루핑해서 보기 1
+
+## GROUP BY 이용해서 그루핑(Grouping)하기
+
+`SELECT gender, COUNT(*), AVG(height), MIN(weight) FROM member GROUP BY gender;`
+
+각 그룹의 성별, 개체 수, 평균 키, 몸무게 최솟값 이 출력된다.
+
+COUNT, AVG, MIN과 같은 집계함수는 그루핑을 통해 생성된 각 그룹의 수치적인 특성을 구해준다.
+
+# GROUP BY를 안 썼을 때는?
+
+그루핑은 SQL에서 데이터를 분석할 때 아주 중요한 개념이기 때문에 확실하게 이해하고 넘어가야 한다.
+
+특히 GROUP BY를 써서 그루핑을 하고 난 후에, 생성된 각 그룹(하나의 row로 표현되었던)에 대해서 AVG, MIN 등의 집계 함수가 각각 동작한다는 것을 잘 기억해야 한다.
+
+GROUP BY를 쓰지 않을 때는 테이블의 전체 row가 하나의 그룹이고, 이 하나의 그룹에 대해서 집계 함수가 작동한다.
+
+# 그루핑해서 보기 2
+
+## 회원들의 주소를 주요 지역을 기준으로 그루핑하기
+
+```sql
+SELECT
+	SUBSTRING(address, 1, 2) as region,
+	COUNT(*)
+FROM member
+GROUP BY SUBSTRING(address, 1, 2);
+```
+
+## 여러 개의 컬럼을 기준으로 그루핑하기
+
+```sql
+SELECT
+	SUBSTRING(address, 1, 2) as region,
+	gender,
+	COUNT(*)
+FROM member
+GROUP BY
+	SUBSTRING(address, 1, 2),
+	gender;
+```
+
+그루핑 기준을 늘릴수록 더욱 세분화된 그루핑이 가능하다.
+
+# 그루핑해서 보기 3
+
+## HAVING
+
+HAVING을 이용해서 특정 조건에 부합하는 회원만 조회해 보자. (서울 거주 남성)
+
+```sql
+SELECT
+	SUBSTRING(address, 1, 2) as region,
+	gender,
+	COUNT(*)
+FROM member
+GROUP BY
+	SUBSTRING(address, 1, 2),
+	gender
+HAVING
+	region = '서울'
+	AND gender = 'm';
+```
+
+이 때 WHERE을 사용하면 오류가 난다.
+
+## WHERE와 HAVING
+
+**WHERE**는 테이블에서 **맨 처음 row들을 조회할 때** 조건을 설정하기 위한 구문임
+
+반면에 **HAVING**은 이미 조회된 row들을 다시 그루핑했을 때, **생성된 그룹들 중에서 다시 필터링**할 때 쓰는 구문임
+
+# GROUP BY 를 쓸 때 지켜야 하는 규칙
+
+## 예시
+
+```sql
+SELECT SUBSTRING(address, 1, 2) AS region, gender, COUNT(*) FROM member
+GROUP BY SUBSTRING(address, 1, 2), gender
+HAVING region IS NOT NULL
+ORDER BY region ASC, gender DESC;
+```
+
+지금 (1) 주요 지역, (2) 성별의 조합을 기준으로 그루핑이 이루어졌다.
+
+이렇게 GROUP BY를 사용할 때에는 중요한 규칙이 하나 있는데,
+
+GROUP BY를 사용할 때는
+
+**SELECT 절에는**
+
+**(1) GROUP BY 뒤에서 사용한 컬럼들**
+
+**또는 (2) COUNT, MAX 등과 같은 집계 함수만** 쓸 수 있다.
+
+이건 거꾸로 말해 GROUP BY 뒤에 쓰지 않은 컬럼 이름을 SELECT 뒤에 쓸 수 없다는 말임
+
+왜 그런 것일까?
+
+그루핑을 하면 각 그룹에 대한 정보가 한 줄로 표시되는데
+
+GROUP BY 뒤에 쓰지 않은, 즉 그루핑 기준으로 사용하지 않은 컬럼명을 SELECT 절 뒤에 써서 조회하려고 하면,
+
+각 그룹의 row들 중에서 해당 컬럼의 값을 어느 row에서 가져와야할 지 결정할 수가 없다.
+
+하지만 그루핑 기준으로 사용하지 않은 컬럼명도 집계함수의 인자로 사용하는 건 괜찮다.
+
+# SELECT 문의 실행 순서
+
+## 더 앞에 나와야 하는 순서
+
+1. SELECT
+2. FROM
+3. WHERE
+4. GROUP BY
+5. HAVING
+6. ORDER BY
+7. LIMIT
+
+## 각 절들이 해석 및 실행되는 순서
+
+1. FROM: 어느 테이블을 대상으로 할 것인지를 먼저 결정한다.
+2. WHERE: 해당 테이블에서 특정 조건(들)을 만족하는 row들만 선별한다.
+3. GROUP BY: row들을 그루핑 기준대로 그루핑한다. 하나의 그룹은 하나의 row로 표현된다.
+4. HAVING: 그루핑 작업 후 생성된 여러 그룹들 중에서, 특정 조건(들)을 만족하는 그룹들만 선볋
+5. SELECT: 모든 컬럼 또는 특정 컬럼들을 조회한다. **SELECT 절에서 컬럼이름에 alias를 붙인 게 있다면, 이 이후 단계(ORDER BY, LIMIT)부터는 해당 alias를 사용할 수 있다.**
+6. ORDER BY: 각 row를 특정 기준에 따라서 정렬한다.
+7. LIMIT: 이전 단계까지 조회된 row들 중 일부 row들만을 추린다.
+
+### 참고
+
+MySQL 에서는 HAVING에서 SELECT의 alias가 적용되는데, 이는 SQL 표준이 아닌 예외적인 모습이다.
+
+# 그루핑해서 보기 4
+
+## WITH ROLLUP 이용해서 부분총계 구하기
+
+ROLLUP = 말다, 소매를 걷어 올리다.
+
+세부 그룹들을 좀 더 큰 단위의 그룹으로 중간중간에 합쳐준다.
+
+먼저 써준 컬럼이 더 상위 기준이 됨. 상위 기준 안에서 각 그룹들을 합친 결과를 출력해 줌
+
+```sql
+SELECT SUBSTRING(address, 1, 2) as region, gender, COUNT(*)
+FROM member
+GROUP BY SUBSTRING(address, 1, 2), gender WITH ROLLUP
+HAVING reigon IS NOT NULL
+ORDER BY region ASC, gender DESC;
+```
+
+## 주의할 점
+
+`HAVING region IS NOT NULL`
+
+이 부분에서 region 컬럼의 값이 NULL인 경우를 제외하고 있는데,
+
+부분총계 컬럼은 합쳐진 컬럼의 값을 NULL로 표시하기 때문에
+
+HAVING 구문에 의해서 원래 region 컬럼이 NULL이 아님에도 불구하고 전체 총계까지도 제외하고 표시되어 버린다.
+
+(1) 원래 region 컬럼이 NULL인 row들은 아예 제외하고 (2)부분 총계는 빠짐없이 보고 싶은데 `HAVING region IS NOT NULL`을 쓰자니 (2)를 만족하지 못하고, 안 쓰면 (1)을 만족하지 못한다.
+
+'원래의 NULL' vs '부분 총계임을 나타내기 위해 사용된 NULL'을 구분할 수 있으면 좋을 것 같은데 어떻게 할 수 있을까?
+
+# WITH ROLLUP에 관해 더 알아보기
+
+## 1. GROUP BY 뒤 기준들의 순서에 따라 WITH ROLLUP의 결과도 달라진다.
+
+일단 member 테이블의 row 들을 총 3가지 컬럼을 기준으로 그루핑해보자.
+
+```sql
+SELECT YEAR(birthday) AS b_year, YEAR(sign_up_day) AS s_year, gedner, COUNT(*)
+FROM member
+GROUP BY YEAR(birthday), YEAR(sign_up_day), gender WITH ROLLUP
+ORDER BY b_year DESC;
+```
+
+그루핑이 여러 개일 때는 WITH ROLLUP이 점차적으로 넓은 범위의 부분 총계를 보여준다.
+
+마지막 row 에는 모든 컬럼이 NULL인, 즉 세 가지 기준을 모두 고려하지 않은 부분 총계를 보여준다. = 전체 총계
+
+여기서 중요한 점은
+
+**WITH ROLLUP**이 GROUP BY 뒤에 나오는 그루핑 기준의 등장 순서에 **맞춰서** 계층적인 부분 총계를 보여준다는 것이다.
+
+이는 **GROUP BY 뒤에 나오는 그루핑 기준의 순서에 따라 WITH ROLLUP이 출력하는 결과가 달라진다**라는 말이다.
+
+만약 다른 기준을 고려하지 않고 생일에 따른 부분 총계를 보고 싶으면 GROUP BY 바로 뒤에 생일을, 가입일자를 기준으로 한 부분 총계를 보고 싶으면 GROUP BY 바로 뒤에 가입일자를 써주면 되는 것이다.
+
+## 2. NULL임을 나타내기 위해 쓰인 NULL vs. 부분 총계를 나타내기 위해 쓰인 NULL
+
+우리는 WITH ROLLUP을 이용해서 부분 총계를 출력할 때,
+
+우리가 NULL을 볼 때 (1) 이게 원래 있는 NULL을 나타내는 건지, (2) 부분 총계임을 나타내기 위해 쓰인 NULL인 건지 구분 할 수 없다.
+
+이를 구분할 수 있게 해주는 함수가 바로 `GROUPING` 이라는 함수이다.
+
+```sql
+SELECT YEAR(sign_up_day) AS s_year, gender, SUBSTRING(address, 1, 2) AS region,
+GROUPING(YEAR(sign_up_day)), GROUPING(gender), GROUPING(SUBSTRING(address, 1, 2)),
+COUNT(*)
+FROM member
+GROUP BY YEAR(sign_up_day), gender, SUBSTRING(address, 1, 2) WITH ROLLUP
+ORDER BY s_year DESC;
+```
+
+`GROUPING` 함수는 그 인자를 그루핑 기준에서 고려하지 않은 부분 총계인 경우에 1을 리턴하고, 그렇지 않은 경우 0을 리턴한다.
+
+원래 NULL이 있던 곳에는 0이 출력되고, 부분 총계를 나타내기 위해 NULL이 쓰인 곳은 1이 출력된다.
+
+즉, `GROUPING` 함수는
+
+(1) 실제로 NULL을 나타내기 위해 쓰인 NULL인 경우에는 0,
+
+(2) 부분 총계를 나타내기 위해 표시된 NULL은 1
+
+을 리턴해서 둘을 구분하게 해주는 함수이다.
+
   </details>
 </details>
 
