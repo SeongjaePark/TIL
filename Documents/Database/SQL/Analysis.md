@@ -1380,6 +1380,130 @@ ORDER BY s_year DESC;
 <details>
   <summary>5) 테이블 조인을 통한 깊이있는 데이터 분석</summary>
   <details>
-    <summary></summary>
+    <summary>Foreign Key & 테이블 조인</summary>
+
+# Foreign Key
+
+## Foreign Key란?
+
+테이블 간의 관계에서 다른 테이블의 특정 row를 식별할 수 있게 해주는 컬럼을 **Foreign Key**라고 한다. 우리 말로는 **외래키**라고도 한다.
+
+이럴 때
+
+1. 참조를 하는 테이블을 **자식 테이블**
+2. 참조를 당하는 테이블을 **부모 테이블**
+
+이라고 한다.
+
+보통 자식 테이블의 Foreign Key가 부모 테이블의 Primary Key를 참조한다.
+
+Foreign Key는 다른 테이블의 특정 row를 식별할 수 있어야 하기 때문에 주로 다른 테이블의 Primary Key를 참조할 때가 많다.
+
+## Foreign Key 설정하는 이유
+
+MySQL의 테이블 스키마 설정 창의 Foreign Keys 탭에서 Foreign Key를 설정할 수 있다.
+
+Foreign Key를 설정하면 부모 테이블에 없는 개체에 대한 엉뚱한 정보를 추가하는 것을 미연에 방지할 수 있다.
+
+- 예: 존재하지 않는 상품에 대한 재고 정보를 추가하려고 할 때
+
+# 테이블 조인
+
+## 조인이란?
+
+실전에서는 여러 테이블을 다룰 수 있어야 하고, 테이블 간의 연관 관계를 파악하고 여러 테이블을 하나로 합쳐서 볼 수 있어야 한다.
+
+여러 테이블을 합쳐서 하나의 테이블인 것처럼 보는 행위를 **조인(join)**이라고 한다.
+
+이 조인을 잘해야 제대로 된 데이터 분석을 할 수 있다.
+
+## 다른 종류의 테이블 조인하기
+
+```sql
+SELECT
+	item.id,
+	item.name,
+	stock.item_id,
+	stock.inventory_count
+FROM item LEFT OTUER JOIN stock
+ON item.id = stock.item_id;
+```
+
+`ON [item.id](http://item.id) = stock.item_id`
+
+- item 테이블의 id 컬럼과 stock 테이블의 item_id 컬럼에서 값을 비교하여 서로 값이 같은 값끼리 가로로 연결하라는 뜻이다.
+
+`FROM item LEFT OUTER JOIN stock`
+
+- 두 테이블을 조인하는 방식을 정하는 부분인데, LEFT OUTER JOIN의 경우 왼쪽 테이블을 기준으로, 해당하는 오른쪽 테이블의 정보를 불러오는 방식이다. 만약 오른쪽 컬럼에서 해당 정보가 없다면 그 부분에는 NULL이 입력된다.
+- 반대로 오른쪽 테이블을 조인 기준으로 삼고 싶다면 RIGHT OUTER JOIN을 사용하면 된다.
+
+## 조인할 때 테이블에 alias 붙이기
+
+```sql
+SELECT
+	i.id,
+	i.name,
+	s.item_id,
+	s.inventory_count
+FROM item AS i LEFT OUTER JOIN stock AS s
+ON i.id = s.item_id;
+```
+
+SQL에서는 컬럼에 alias를 붙여 주었듯이 테이블에도 alias를 붙여줄 수 있다.
+
+그 방식은 컬럼에 alias를 붙여줄 때와 같다. `item AS i` , `stock AS s`
+
+**주의할 점**: 테이블에 alias를 붙여줄 경우에는, SQL 문에서 테이블 이름이 등장하는 다른 모든 부분들에도 alias를 사용해주어야 한다.
+
+- `i.id`, `i.name`, `s.item_id`, `s.inventory_count`
+
+그렇지 않으면 오류가 발생한다.
+
+## 컬럼의 alias와 테이블의 alias
+
+컬럼의 alias와 테이블의 alias에는 약간의 용도 차이가 있다.
+
+우선 **컬럼의 alias**는 각 컬럼이 실제로 우리에게 그 **alias로 변환되어서 보여지게 하기 위한 용도**로 쓰인다.
+
+**테이블의 alias**는 조회 결과에서 보기 위한 게 아니라, **SQL 문의 전체 길이를 줄여서 가독성을 높이기 위해** 사용된다.
+
+## INNER JOIN
+
+```sql
+SELECT
+	i.id,
+	i.name,
+	s.item_id,
+	s.inventory_count
+FROM item AS i INNER JOIN stock AS s
+ON i.id = s.item_id;
+```
+
+INNER JOIN은 LEFT OUTER JOIN이나 RIGHT OUTER JOIN 과는 다르게, **기준이 되는 테이블이 따로 없다**
+
+두 테이블 모두, 기준 컬럼에 일치하는 값이 있는 row들만 연결해줌.
+
+그래서 LEFT OUTER JOIN이나 RIGHT OUTER JOIN 에서처럼 기준 컬럼의 값이 NULL이 되는 경우가 없다.
+
+INNER JOIN은 집합으로 치면, 두 테이블 간의 **교집합**과 같다고 보면 된다.
+
+## Foreign Key가 아닌 컬럼 기준으로 조인을 하기도 한다
+
+만약에 Foreign Key를 기준으로 조인을 하게 되면 OUTER JOIN(LEFT 또는 RIGHT)와 INNER JOIN의 결과가 일치하게 된다.
+
+하지만 꼭 Foreign Key를 기준으로 조인을 해야 하는 것은 아니다.
+
+Foreign Key가 아닌 컬럼을 기준으로 해서 조인할 수도 있는데, 이렇게 하면 보통
+
+1. LEFT OUTER JOIN
+2. RIGHT OUTER JOIN
+3. INNER JOIN
+
+세 가지 조인의 결과가 모두 달라진다.
+
   </details>
+	<details>
+		<summary></summary>
+	</details>
 </details>
