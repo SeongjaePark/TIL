@@ -1504,6 +1504,482 @@ Foreign Key가 아닌 컬럼을 기준으로 해서 조인할 수도 있는데, 
 
   </details>
 	<details>
+		<summary>결합 연산과 집합 연산 & 여러 테이블 조인 & 의미 있는 데이터 추출</summary>
+
+# 결합 연산과 집합 연산
+
+테이블을 합치는 작업들을 조금 더 체계적인 관점에서 알아보자.
+
+테이블을 합치는 작업은 '**연산**' 이라고 표현한다. 테이블을 합치는 연산은 크게 **결합 연산**과 **집합 연산**으로 나눌 수 있다.
+
+**결합 연산** - 테이블을 **가로 방향**으로 합치는 연산
+
+- **조인**은 여기에 해당한다.
+
+**집합 연산** - 테이블을 **세로 방향**으로 합치는 연산
+
+## 집합 연산
+
+집합 연산은 **테이블 하나를 집합 하나**로 보고, 그 안의 **각 row를 하나의 원소**로 간주하고 진행되는 연산이다.
+
+집합 연산은 같은 종류의 테이블들끼리만 가능하다
+
+- 테이블의 row 하나하나를 집합에서 말하는 하나의 원소라고 생각해보자
+- 만약 같은 종류의 테이블이 아니면 row의 컬럼 구조가 다르기 때문에 각 원소가 서로 동질한 원소라고 할 수 없고, 집합 연산을 수행할 수 없다.
+
+### A ∩ B (교집합)
+
+INTERSECT 연산자 사용
+
+```sql
+SELECT * FROM member_A
+INTERSECT
+SELECT * FROM member_B
+```
+
+### A - B (A의 차집합)
+
+MINUS 연산자 또는 EXCEPT 연산자 사용
+
+```sql
+SELECT * FROM member_A
+MINUS
+SELECT * FROM member_B
+```
+
+### B - A (B의 차집합)
+
+```sql
+SELECT * FROM member_B
+EXCEPT
+SELECT * FROM member_A
+```
+
+### A U B (합집합)
+
+UNION 연산자 사용
+
+```sql
+SELECT * FROM member_A
+UNION
+SELECT * FROM member_B
+```
+
+합집합을 나타낼 때, 두 집합이 공통적으로 갖고 있는 원소(교집합에 속하는 원소)는 중복을 제거하고 하나만 표시된다.
+
+같은 원리로 UNION 연산자도 두 테이블에 공통적으로 존재하는 row 하나만 결과에 표시한다.
+
+### MySQL
+
+위의 3가지 연산자 중 MySQL에서는 버젼 8.0 기준으로 **UNION** 연산자만 지원한다. (다른 DBMS인 오라클에서는 3가지 연산자 모두 지원한다.)
+
+비록 MySQL 에서는 INTERSECT나 MINUS 같은 집합 연산자를 바로 사용할 수 는 없지만, 결합 연산에 해당하는 조인을 사용해서 간접적으로 원하는 결과를 얻을 수 있다.
+
+# 같은 종류의 테이블 조인하기
+
+상품 정보가 담겨있는 기존의 item 테이블과, 새롭게 만든 item_new 테이블이 있다.
+
+## item 테이블에만 있는 정보 확인하기
+
+LEFT OUTER JOIN 사용
+
+```sql
+SELECT
+	old.id AS old_id,
+	old.name AS old_name,
+	new.id AS new_id,
+	new.name AS new_name
+FROM item AS old LEFT OUTER JOIN item_new AS new
+ON old.id = new.id;
+
+```
+
+이렇게 LEFT OUTER JOIN을 활용하여 item을 기준으로 조인하면, item 테이블에만 있고 item_new 테이블에는 누락되어 있는 상품을 확인할 수 있다. 해당 상품은 new_id, new_name 컬럼의 값이 NULL로 나타나게 된다.
+
+item 테이블에만 있는 상품만 따로 보고 싶을 경우, 맨 아래에 `WHERE [new.id](http://new.id) IS NULL` 구문을 추가해주면 된다.
+
+## item_new 테이블에만 있는 정보 확인하기
+
+RIGHT OUTER JOIN 사용
+
+```sql
+SELECT
+	old.id AS old_id,
+	old.name AS old_name,
+	new.id AS new_id,
+	new.name AS new_name
+FROM item AS old RIGHT OUTER JOIN item_new AS new
+ON old.id = new.id;
+
+```
+
+RIGHT OUTER JOIN을 사용하여 item 테이블에는 없고 item_new 테이블에 추가된 상품을 확인한다.
+
+item_new에 새롭게 추가된 상품만 따로 보고싶을 경우, 맨 아래에 `WHERE [old.id](http://old.id) IS NULL` 구문을 추가해주면 된다.
+
+## 두 테이블 모두에 포함되어 있는 정보 확인하기
+
+INNER JOIN
+
+```sql
+SELECT
+	old.id AS old_id,
+	old.name AS old_name,
+	new.id AS new_id,
+	new.name AS new_name
+FROM item AS old INNER JOIN item_new AS new
+ON old.id = new.id;
+```
+
+INNER JOIN 연산자를 사용하여 두 테이블 모두에 포함되어 있는 상품 정보만 확인할 수 있다.
+
+## 두 테이블 합치기
+
+UNION
+
+```sql
+SELECT * FROM item
+UNION
+SELECT * FROM item_new;
+```
+
+UNION 집합 연산자를 이용해서 모든 상품 정보가 포함된 하나의 테이블로 합칠 수 있다.
+
+# ON 대신 USING
+
+이때까지 JOIN의 조건을 설정할 때 `ON` 절을 사용했다. 그런데 조인 조건을 나타낼 때 다른 방법을 쓰는 것도 가능하다.
+
+**만약 조인 조건으로 쓰인 두 컬럼의 이름이 같으면** `ON` 대신 `USING`을 쓰는 경우도 있다.
+
+`ON` 사용
+
+```sql
+SELECT
+	old.id AS old_id,
+	old.name AS old_name,
+	new.id AS new_id,
+	new.name AS new_name
+FROM item AS old INNER JOIN item_new AS new
+ON old.id = new.id;
+```
+
+`USING` 사용
+
+```sql
+SELECT
+	old.id AS old_id,
+	old.name AS old_name,
+	new.id AS new_id,
+	new.name AS new_name
+FROM item AS old INNER JOIN item_new AS new
+USING(id)
+```
+
+현재 item 테이블의 **id** 컬럼과 item_new 테이블의 **id** 컬럼을 기준으로 조인하고 있는데, 이렇게 두 테이블에서 조인 조건으로 사용되는 컬럼들의 이름이 같으면 그냥 USING이라고 쓰고 그 안에 컬럼 이름을 쓰는 것도 허용된다.
+
+이 상황에서는 `ON [old.id](http://old.id) = [new.id](http://new.id)` 와 `USING(id)` 의 의미가 같은 것이다.
+
+# USING 더 알아보기
+
+## 1. 서로 다른 종류의 테이블도, 조회하는 컬럼을 일치시키면 집합 연산이 가능하다.
+
+다음과 같은 두 테이블이 있다.
+
+**Sumer_Olympic_Medal**: 국가별 하계 올림픽 메달 수 테이블
+
+- 컬럼: id(Primary Key), nation(국가), count(메달 수), year(올림픽 개최 연도)
+
+**Winter_Olympic_Medal**: 국가별 동계 올림픽 메달 수 테이블
+
+- 컬럼: id(Primary Key), nation(국가), count(메달 수), location(올림픽 개최 도시), first_rank_count(메달 획들 1위 국가의 메달 수)
+
+두 테이블을 **UNION 연산**해서 각 국가의 메달 획득 수를 한 눈에 보고 싶다.
+
+하지만 컬럼 구조가 같은 테이블끼리만 UNION 연산을 할 수 있기에, 지금 상태에서 바로 UNION 연산을 하면
+
+```sql
+SELECT * FROM Summer_Olympic_Medal
+UNION
+SELECT * FROM Winter_Olympi_Medal;
+```
+
+에러가 난다. 에러 메시지에는 두 테이블의 컬럼 수가 다르다는 메시지가 나온다. 컬럼 구조가 달라서 UNION 연산이 실패한 것이다.
+
+하지만 방법이 있다. SELECT 절 뒤의 \* 부분을 두 테이블이 공통적으로 갖고 있는 컬럼 이름들로 바꿔주면 된다.
+
+```sql
+SELECT id, nation, count FROM Summer_Olympic_Medal
+UNION
+SELECT id, nation, count FROM Winter_Olympic_Medal;
+```
+
+그럼 두 테이블의 해당 컬럼들만을 대상으로 UNION 연산이 에러 없이 실행된다.
+
+두 테이블의 원래 컬럼 구조가 달라도, **두 테이블이 공통적으로 갖고 있는 컬럼들만 조회한 경우**에는 UNION 같은 집합 연산을 수행할 수 있다는 사실을 잘 기억해 두자.
+
+(총 컬럼의 수와, 각 컬럼의 데이터 타입만 일치하면 UNION 연산이 가능하다)
+
+## 2. UNION 과 UNION ALL
+
+합집합을 구해 주는 UNION에는 특징이 하나 있다.
+
+UNION은 두 테이블이 공통적으로 갖고 있는 원소들, 그러니까 두 테이블의 교집합에 해당하는 영역의 row들은 **중복을 제거**하고, 그냥 딱 하나의 row만 보여 준다.
+
+**별개의 데이터일 경우에도, 특정 컬럼들만을 조회한 경우 우연히 해당 컬럼들의 값이 모두 같아 하나의 row만 표시될 수도 있다.**
+
+이렇게 보는 것은 정확한 결과가 아닌, 정보가 누락된 것이다. 이 상황에서는 겹치는 row도 다 그대로 보여주는 것이 맞다.
+
+이럴 때에는 **UNION ALL**을 사용하면 된다.
+
+**UNION ALL**은 UNION처럼 두 테이블의 합집합을 보여준다는 점은 같다.
+
+하지만 겹치는 것을 중복 제거하지 않고, **겹치는 것들을 그대로 보여준다**는 점에서 차이가 있다.
+
+- UNION: 중복을 제거하고 깔끔하게 보는 것이 중요한 경우
+- UNION ALL: 중복을 제거하게 되면 정보 누락이 발생할 수 있는 경우
+
+# 서로 다른 3개의 테이블 조인하기
+
+DBMS에서 우리는 3개 이상의 테이블을 조인할 수 있고, 더 많은 테이블들을 조인할 때 더 많은 정보를 가져올 수 있다.
+
+우선 서로 다른 세 테이블 item, review, member를 조인하려고 한다.
+
+이때 review 테이블의 item_id, mem_id 컬럼은 각각 item 테이블의 id 컬럼과 member 테이블의 id 컬럼과 연관됨 컬럼이다.
+
+즉, review 테이블이 item 테이블과 member 테이블을 참조하고 있는 것이다.
+
+```sql
+SELECT
+	i.name, i.id,
+	r.item_id, r.star, r.comment, r.mem_id,
+	m.id, m.email
+FROM
+	item AS i LEFT OUTER JOIN review AS r
+		ON r.item_id = i.id
+	LEFT OUTER JOIN member AS m
+		ON r.mem_id = m.id;
+```
+
+위와 같이 item 테이블의 id 컬럼과 review 테이블의 item_id 컬럼을 기준으로 LEFT OUTER JOIN 후,
+
+다시 한 번 review 테이블의 mem_id 컬럼과 member 테이블의 id 컬럼을 기준으로 LEFT OUTER JOIN 하면
+
+세 개의 서로 다른 테이블을 조인할 수 있다.
+
+이때, 하나의 상품에는 여러 개의 리뷰가 달릴 수 있기 때문에, 상품과 리뷰의 관계는 1:n 의 관계이다.
+
+이는 상품과 재고의 관계가 1:1 이었던 것과 대비된다.
+
+# 의미있는 데이터 추출하기
+
+## 여성 회원들이 구매한 제품 중 별점 평균이 가장 높은 제품 순으로 정렬
+
+```sql
+SELECT i.id, i.name, AVG(star) # 상품의 아이디, 이름, 별점 평균 표시
+FROM
+    item AS i LEFT OUTER JOIN review AS r
+        ON r.item_id = i.id
+    LEFT OUTER JOIN member AS m
+        ON r.mem_id = m.id
+WHERE m.gender = 'f' # 여성 회원이 구매한 상품만 표시
+GROUP BY i.id, i.name # 상품의 아이디와 이름으로 그루핑
+ORDER BY AVG(star) DESC; # 상품의 별점 평균을 기준으로 내림차순
+```
+
+## 별점 평균에 더하여 리뷰의 개수도 함께 살펴보기
+
+여러 개의 상품의 별점 평균 값이 5점 만점인 것이 가능할까?
+
+```sql
+SELECT i.id, i.name, AVG(star), COUNT(*) # 상품의 아이디, 이름, 별점 평균, 리뷰 수 표시
+FROM
+    item AS i LEFT OUTER JOIN review AS r
+        ON r.item_id = i.id
+    LEFT OUTER JOIN member AS m
+        ON r.mem_id = m.id
+WHERE m.gender = 'f' # 여성 회원이 구매한 상품만 표시
+GROUP BY i.id, i.name # 상품의 아이디와 이름으로 그루핑
+HAVING COUNT(*) > 1 # 리뷰 수가 2개 이상인 상품만
+ORDER BY AVG(star) DESC, COUNT(*) DESC; # 상품의 별점 평균, 그 다음으로는 리뷰 수를 기준으로 내림차순
+```
+
+별점 평균 값이 만점인 경우는 대개 리뷰 수가 1개인 경우가 많다.
+
+`HAVING` 문을 활용하여 리뷰 수가 1개보다 큰 경우만 살펴볼 수 있다. 또한, 정렬 기준에 별점 평균 뿐만 아니라 리뷰 수를 추가해줄 수 있다.
+
+여기서 가장 평점이 안 좋은 상품의 아이디를 체크해서 상품에 달린 코멘트를 확인함으로써 어떤 문제가 있는지 체크해볼 수 있다.
+
+```sql
+SELECT * FROM review WHERE item_id = 2;
+```
+
+# 다른 종류의 조인들
+
+## 1. NATURAL JOIN
+
+INNER JOIN
+
+```sql
+SELECT p.id, p.player_name, p.team_name, t.team_name, t.region
+FROM player AS p INNER JOIN team AS t
+ON p.team_name = t.team_name;
+```
+
+이를 NATRUAL JOIN으로 변경
+
+```sql
+SELECT p.id, p.player_name, p.team_name, t.team_name, t.region
+FROM player AS p NATURAL JOIN team AS t;
+```
+
+INNER 조인이라고 쓴 부분을 NATURAL JOIN으로 바꾸었고, 조인 조건을 나타내는 ON 절을 아예 삭제해 버렸다.
+
+### NTURAL JOIN이란?
+
+NATURAL JOIN은 두 테이블에서 같은 이름의 컬럼을 찾아서 자동으로 그것들을 조인 조건으로 설정하고, INNER JOIN을 해주는 조인이다. 우리말로는 자연 조인이라고도 한다.
+
+이때까지 조인을 할 때마다 조인 조건을 설정했던 것과는 달리 NATURAL JOIN은 조인 조건을 자동으로 설정해주기 때문에 ON 절을 쓸 필요가 없다. 단어 뜻 그대로 별도의 조인 조건 없이, 자연스럽게 진행되는 조인인 것이다.
+
+사실 두 테이블에 같은 이름의 컬럼이 있더라도 NATURAL JOIN을 쓰기 보다는 조인 조건을 명시해주는 것이 좋다.
+
+NATURAL JOIN을 해버리면 SQL 문을 보더라도, 테이블 구조를 모르는 사람이라면 어떤 컬럼들을 기준으로 조인이 될 지 알 수 없기 때문이다.
+
+## 2. CROSS JOIN
+
+### CROSS JOIN이란?
+
+CROSS JOIN은 한 테이블의 하나의 row에 다른 테이블의 모든 row들을 매칭하고, 그 다음 row에서도 또, 다른 테이블의 모든 row들을 매칭하는 것을 반복함으로써 두 테이블의 row들의 모든 조합을 보여주는 조인이다.
+
+다음과 같이 사용할 수 있다
+
+```sql
+SELECT * FROM memeber CROSS JOIN stock;
+```
+
+테이블 하나를 하나의 집합이라고 생각해보자. 그럼 각 row는 하나의 원소가 될 것이다.
+
+두 집합의 모든 원소들의 조합을 나타내는 것을 수학의 집합 이론에서는 카르테시안 곱(Cartesian Product)이라고 하는데,
+
+CROSS JOIN은 두 테이블의 Cartesian Product를 구하는 조인이다.
+
+### CROSS JOIN은 어떤 경우에 사용할 수 있을까?
+
+예를 들어, 여러 종류의 의류들 중에서도 상의들의 정보가 담긴 테이블, 하의들의 정보가 담긴 테이블이 있다고 해보자.
+
+이때, 옷을 입을 때의 상-하의 조합들을 한 눈에 보고 싶은 경우에 CROSS JOIN을 사용할 수 있을 것이다.
+
+하지만 일반적인 경우에는 잘 쓸 일이 없는 종류의 조인이기는 하다.
+
+## 3. SELF JOIN
+
+### SELF JOIN이란?
+
+SELF JOIN은 셀프라는 단어의 뜻 그대로 테이블이 자기 자신과 조인을 하는 경우를 말한다.
+
+SELF JOIN이라고 해서 햇갈릴 필요 없이, 그냥 서로 별개인 두 테이블을 조인하는 것처럼 생각하면 된다.
+
+```sql
+SELECT *
+FROM member AS m1 LEFT OUTER JOIN member AS m2
+ON m1.age = m2.age;
+```
+
+지금 member 테이블을 SELF JOIN하고 있다. 같은 테이블이기 때문에 이름 구별을 하기 위해 각각 다른 alias(m1, m2)를 주었다. 그리고 두 테이블의 age 컬럼을 조인 기준으로 해서 LEFT OUTER JOIN을 했다.
+
+이럴 경우 각 회원마다 자신과 동갑인 다른 회원들(본인 포함)이 함께 출력된다. 이렇게 SELF JOIN을 통해 하나의 테이블 안에서 다양한 정보들을 추출해볼 수 있다.
+
+또다른 예시를 보자.
+
+employee 테이블에는 id(Primary Key), name(직원 이름), department(소속 부서), boss(직속 상사의 id 값) 컬럼이 있다.
+
+boss 컬럼의 값들은 결국 같은 테이블의 id 컬럼에 있는 값들 중 하나인데, 어떤 직원의 직속 상사도 당연히 그 회사의 직원일 테니까 당연한 것이다.
+
+이 상태에서 SELF JOIN을 해보자
+
+```sql
+SELECT *
+FROM employee AS e1 LEFT OUTER JOIN employee AS e2
+ON e1.boss = e2.id;
+```
+
+이 경우 각 직원 옆에 직속 상사 정보도 함께 출력된다.
+
+이 결과에서 같은 방식으로 한번 더 SELF JOIN을 해보자
+
+```sql
+SELECT *
+FROM employee AS e1 LEFT OUTER JOIN employee AS e2
+ON e1.boss = e2.id
+LEFT OUTER JOIN employee AS e3
+ON e2.boss = e3.id;
+```
+
+LEFT OUTER JOIN인 SELF JOIN을 한 번 더 하니까, 한 직원의 직속 상사의 직속 상사까지도 볼 수가 있다. 이를 통해 조직의 가장 높은 사람이 누구인지도 확인할 수 있다.
+
+이처럼 SELF JOIN은 조인 방식에 있어서 뭔가 새로운 조인은 아니다. 다만, 조인 대상이 같은 테이블을 마치 별도의 테이블은 것처럼 간주하고 진행된다는 점에서 특색이 있는 조인이다.
+
+SELF JOIN을 하면 하나의 테이블에 담긴 데이터를 다양한 관점에서 바라볼 수 있다.
+
+## 4. FULL OUTER JOIN
+
+### FULL OUTER JOIN이란?
+
+우리는 LEFT OUTER JOIN과, RIGHT OUTER JOIN을 배웠다. 둘다 왼쪽이나 오른쪽에 있는 테이블 하나를 기준으로 두고 상대 테이블을 조인하는 것이다.
+
+FULL OUTER JOIN은 두 테이블의 LEFT OUTER JOIN 결과와 RIGHT OUTER JOIN 결과를 합치는 조인이다. 대신, 두 결과에 모두 존재하는 row들(두 테이블에 공통으로 존재하는 row들)은 한 번만 표현해준다.
+
+```sql
+SELECT *
+FROM player AS p LEFT OUTER JOIN tem AS t
+ON p.team_name = t.team_name
+UNION
+SELECT *
+FROM player AS p RIGHT OUTER JOIN team AS t
+ON p.team_name = t.team_name;
+```
+
+위의 SQL 문을 통해 얻을 수 있는 결과가 바로 FULL OUTER JOIN의 결과이다.
+
+MySQL 에서는 지원되지 않지만, Oracle이라는 DBMS에서는 FULL OUTER JOIN을 바로 할 수 있도록 해주는 연산자가 내장되어 있다.
+
+Oracle에서는 아래와 같이만 써도 같은 결과를 볼 수 있다.
+
+```sql
+SELECT *
+FROM player AS p FULL OUTER JOIN team AS t
+ON p.team_name = t.team_name;
+```
+
+## 5. Non-Equi 조인
+
+### Non-Equi 조인이란?
+
+지금까지는 조인 조건을 설정할 때 두 컬럼의 값이 같은지를 기준으로 했다. 즉, 조인 조건에 항상 **등호(=)**를 사용해왔다.
+
+그런 조인들을 **Equi 조인**이라고 한다. Equi는 Equality Condition의 줄임말로, 동등 조건을 의미한다. 이때까지 우리가 해온 조인은 모두 동등 조건을 판단하는 Equi 조인이었다.
+
+**Non-equi 조인**의 경우 동등 조건이 아닌 다른 종류의 조건을 사용해서 조인을 한다.
+
+```sql
+SELECT m.email, m.sign_up_day, i.name, i.registration_date
+FROM member AS m LEFT OUTER JOIN item AS i
+ON m.sign_up_day < i.registration_date
+ORDER BY m.sign_up_day ASC;
+```
+
+지금 member 테이블과 item 테이블을 LEFT OUTER JOIN 했다. 그런데 ON 뒤에 조인 조건을 보니, **등호가 아니라 부등호(<)**가 들어있다.
+
+결과적으로 member 테이블의 sign_up_day(회원의 사이트 가입일)보다 더 이후인 registration_date(상품이 사이트에 등록된 날)을 가진 item 들이 연결되었다. 이는 특정 회원이 가입한 이후에 사이트에 올라온 상품들이 무엇인지 확인할 수 있다.
+
+사실 Non-Equi 조인은 Equi 조인만큼 보편적으로 사용되지는 않지만 특정 조건에서는 충분히 유용하게 사용될 수 있는 조인이기 때문에 아라두면 좋다.
+
+그리고 Non-Equi 조인에서는 부등호 말고도 다양한 조건 표현식이 사용될 수 있다.
+</details>
+
+</details>
+<details>
+	<summary>6) 서브쿼리와 뷰를 활용한 유연한 데이터 분석</summary>
+	<details>
 		<summary></summary>
 	</details>
 </details>
