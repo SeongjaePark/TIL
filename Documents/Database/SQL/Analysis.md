@@ -2545,6 +2545,7 @@ ORDER BY AVG(star) DESC, COUNT(*) DESC;
 
 <details>
 	<summary>뷰</summary>
+	
 # 뷰
 
 ## 데이터 분석가의 자산, 뷰
