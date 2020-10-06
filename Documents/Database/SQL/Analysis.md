@@ -1974,12 +1974,748 @@ ORDER BY m.sign_up_day ASC;
 사실 Non-Equi 조인은 Equi 조인만큼 보편적으로 사용되지는 않지만 특정 조건에서는 충분히 유용하게 사용될 수 있는 조인이기 때문에 아라두면 좋다.
 
 그리고 Non-Equi 조인에서는 부등호 말고도 다양한 조건 표현식이 사용될 수 있다.
+
 </details>
 
 </details>
 <details>
 	<summary>6) 서브쿼리와 뷰를 활용한 유연한 데이터 분석</summary>
 	<details>
-		<summary></summary>
-	</details>
+		<summary>서브쿼리</summary>
+
+# 서브쿼리
+
+## 서브쿼리란 무엇일까
+
+**서브쿼리는 SQL 문 안에 '부품'처럼 들어가는 SELECT문을 말한다.**
+
+sub(하위의, 일부분의) + Query(데이터베이스에 보내는 요청)
+
+서브 쿼리를 사용할 때에는 꼭 **괄호**를 사용해줘야 한다!
+
+현재 전체 상품의 별점 평균보다 낮은 별점 평균을 가지는 상품들을 조회하려고 한다. 이때 별도로 전체 상품의 별점 평균을 구하고, 이 값을 SQL 문 안에 써 줄 수도 있겠지만, 다음과 같이 SQL 내부에서 서브쿼리를 사용하면 더 쉽게 할 수 있다.
+
+```sql
+SELECT i.id, i.name, AVG(star) AS avg_star
+FROM item AS i LEFT OUTER JOIN review AS r
+ON r.item_id = i.id
+GROUP BY i.id, i.name
+HAVING avg_star < (SELECT AVG(star) FROM review)
+ORDER BY avg_star DESC;
+```
+
+## 서브쿼리에 관한 이야기
+
+서브쿼리는 SQL 문 안에 부품처럼 들어있는 "SELECT 문" 이라고 했다.
+
+(우리는 여러 종류의 SQL 문 중 SELECT 문을 배웠다. SELECT 문은 데이터 조회 및 분석을 위한 SQL 문이다. 이 밖에도 데이터 삽입, 갱신, 삭제를 위한 SQL 문들도 있다. 이러한 SQL 문 안에도 서브쿼리가 그 일부로 들어갈 수 있다.)
+
+서브 쿼리를 포함하는 전체 SQL 문은 **outer query(외부 쿼리)**, 서브 쿼리는 **inner query(내부 쿼리)**라고 하기도 한다.
+
+서브 쿼리를 이용하면 쿼리 창을 새로 켤 필요 없이, **하나의 쿼리 창**에서 하나의 SQL 문 만으로도 원하는 결과를 얻을 수 있다.
+
+이렇게 적재적소에 서브쿼리를 사용하면 원하는 결과를 좀 더 편하게 얻을 수 있다.
+
+위의 예시에서는 서브쿼리가 **HAVING 절** 안에서 사용되었는데, 서브쿼리는 HAVING 절 뿐만 아니라, SELECT 절, WHERE 절, FROM 절 등에서도 사용할 수 있다.
+
+## SELECT 절에 있는 서브쿼리
+
+서브 쿼리와 alias를 이용하여 각 상품을 최대 가격, 평균 가격과 함께 조회해 보자
+
+```sql
+SELECT
+    id,
+    name,
+    price,
+    (SELECT MAX(price) FROM item) AS max_price,
+    (SELECT AVG(price) FROM item) AS avg_price
+FROM item;
+```
+
+이처럼 SELECT 절에는 특정 컬럼의 최댓값, 평균값처럼 특정 컬럼의 특징을 찾아주는 서브쿼리를 자주 쓴다.
+
+## WHERE 절에 있는 서브쿼리 1
+
+전체 상품의 평균 가격보다 높은 가격을 가지고 있는 상품들만 조회해 보자
+
+```sql
+SELECT
+    id,
+    name,
+    price,
+    (SELECT AVG(price) FROM item) AS avg_price
+FROM item
+WHERE price > (SELECT AVG(price) FROM item);
+```
+
+이번에는 최고가, 최저가 상품을 조회해 보자.
+
+**최고가**
+
+```sql
+SELECT id, name, price
+FROM item
+WHERE price = (SELECT MAX(price) FROM item);
+```
+
+**최저가**
+
+```sql
+SELECT id, name, price
+FROM item
+WHERE price = (SELECT MIN(price) FROM item);
+```
+
+## WHERE 절에 있는 서브쿼리 2
+
+지금까지 살펴본 서브쿼리들은 `(SELECT AVG(price) FROM item)` 또는 `(SELECT MAX(price) FROM item)` 과 같이 어떤 값 하나만 리턴하는 서브쿼리들 이었다. 하지만, 서브쿼리는 어떤 값 하나 뿐만 아니라, 하나의 컬럼이 있고, 그에 해당하는 여러 row들을 리턴하는 서브쿼리도 있다.
+
+상품들 중에서 리뷰가 최소 3개 이상 달린 상품들의 정보만 보고 싶다.
+
+이 경우 다음과 같이 조인을 사용해서 조회할 수 있는 방법을 배웠다.
+
+```sql
+SELECT
+    i.id, i.name,
+    COUNT(*)
+FROM item AS i LEFT OUTER JOIN review AS r
+ON r.item_id = i.id
+GROUP BY i.id, i.name
+HAVING COUNT(*) >= 3;
+```
+
+하지만 이를 다음관 같이 서브쿼리를 이용해서 수행할 수도 있다.
+
+```sql
+SELECT * FROM item
+WHERE id IN
+(
+SELECT item_id
+FROM review
+GROUP BY item_id HAVING COUNT(*) >= 3
+);
+```
+
+## ANY(SOME), ALL
+
+IN 말고도 서브쿼리와 함께 유용하게 사용되는 키워드들이 있다.
+
+### 1. ANY의 의미
+
+codeit_theater 라는 테이블에는 id(Primary Key), name(영화 이름), category(영화 장르), month(개봉 월), view_count(총 관객 수) 컬럼이 있다.
+
+이 중에서 다음과 같은 SQL 문을 사용하면 category 값이 'Action'인 영화들의 view_count 컬럼(관객 수)을 살펴볼 수 있다.
+
+```sql
+SELECT view_count FROM codeit_theater WHERE category = 'Action'
+```
+
+이 SQL문의 결과는 **하나의 컬럼에 여러 개의 row 들이 있는 결과**이다.
+
+결과는 120000, 2300000, 7000000, 8300000 이 있는 view_count 컬럼이다
+
+이 SELECT 문을 서브 쿼리로 사용해보자.
+
+```sql
+SELECT * FROM codeit_theater
+	WHERE view_count > ANY(SELECT view_count FROM codeit_theater WHERE category = 'Action')
+		AND category != 'Action'
+```
+
+그런데 지금 WHERE 절을 자세히 보면 서브쿼리 앞에 **ANY**라는 키워드가 붙어있다.
+
+간단하게 나타내보면
+
+```sql
+WHERE view_count > ANY(서브쿼리)
+```
+
+이런 식으로 조건이 설정되어 있는데, 여기서 ANY는 무슨 뜻일까?
+
+이 조건은 view_count 컬럼의 값이, 서브쿼리가 리턴한 결과에 있는 값들 중 **단 하나의(ANY)** 값보다도 크면 True를 리턴한다.
+
+이 말은 곧, 서브쿼리의 결과값 중 최소인 값(120000)보다 큰 값이라면 모두 조건을 만족하게 된다는 것이다.
+
+이 서브쿼리가 사용된 전체 SQL 문을 실행하면, view_count가 120000 보다 큰 영화들이, 그 중에서도 액션 영화를 제외하고 조회된다.
+
+ANY가 WHERE 절에서 사용될 때는, 서브쿼리의 결과에 있는 각 row의 값들 중 **하나라도 조건을 만족하는 경우가 있으면 True를 리턴한다**는 뜻이다. ANY와 같은 기능을 하는 **SOME**도 있는데, ANY를 대신해 SOME을 사용해도 ANY를 사용할 때와 같은 결과를 출력한다.
+
+ANY와 SOME은 같은 기능을 하니까 원하는 것을 골라서 사용하면 된다.
+
+### 2. ALL의 의미
+
+이번에는 ALL이라는 키워드의 의미를 알아보자.
+
+위의 SQL 문에서 ANY 부분만 ALL로 바꾸고 실행해보자.
+
+```sql
+SELECT * FROM codeit_theater
+	WHERE view_count > ALL(SELECT view_count FROM codeit_theater WHERE category = 'Action')
+		AND category != 'Action'
+```
+
+ALL은 모든 경우에 대해서 해당 조건이 성립해야 True를 리턴한다.
+
+ALL이 쓰인다면 view_count 컬럼의 값이 서브 쿼리의 결과값으로 나온 모든 값보다 커야 True가 된다.
+
+## 서브쿼리 연습
+
+### 연습 1
+
+member 테이블에서 주소의 주요 지역을 기준으로 회원들을 그루핑했을 때, 가장 많은 회원들이 사는 주요 지역에 살고 있는 회원들을 조회하기
+
+```sql
+SELECT * FROM member
+	WHERE SUBSTRING(address, 1, 2) =
+	(SELECT SUBSTRING(address, 1, 2)
+		FROM member
+		GROUP BY SUBSTRING(address, 1, 2)
+		ORDER BY COUNT(*) DESC LIMIT 1);
+```
+
+### 연습 2
+
+review 테이블에서 (1) '2018년 12월 31일' 이전에 사이트에 등록된 상품들에 관한 리뷰들만 추려볼 것인데, (2) review 테이블의 모든 컬럼을 조회하라
+
+review 테이블과 item 테이블을 이용하고, 조인 말고 서브 쿼리를 이용하라
+
+(review 테이블에는 id, mem_id, item_id, star, comment 컬럼이, item 테이블에는 id, name, gender, price, description, registration_date 컬럼이 있다)
+
+```sql
+SELECT * FROM review
+WHERE item_id IN
+  (SELECT id FROM item WHERE registration_date < '2018-12-31');
+```
+
+## FROM 절에 있는 서브쿼리
+
+지금까지는 어떤 값 하나를 리턴하거나, 하나의 컬럼에 해당하는 여러 row들의 값을 리턴하는 서브 쿼리를 배웠다.
+
+그런데 이 두가지 형태 말고도, 서브 쿼리는 여러 개의 컬럼에 여러 개의 row가 있는 **테이블 형태의 결과를 리턴**하기도 한다.
+
+다음과 같이 FROM절을 이용하여 서브쿼리의 결과인 테이블로부터 데이터를 조회할 수 있다.
+
+```sql
+SELECT AVG(review_count)
+FROM
+(
+SELECT
+	SUBSTRING(address, 1, 2) AS region,
+	COUNT(*) AS review_count
+FROM review AS r LEFT OUTER JOIN member AS m
+ON r.mem_id = m.id
+GROUP BY SUBSTRING(address, 1, 2)
+HAVING region IS NOT NULL
+    AND region != '안드') AS review_count_summary; # alias 사용을 해줘야 한다는 점에 주의하자!
+```
+
+헌데 여기서 주의할 점은, 서브 쿼리 결과로 얻어진 테이블(derived table)에 alias를 붙여주지 않으면 오류가 난다는 점이다!
+
+`Every derived table must have its own alias` 라고 오류가 뜨게 된다.
+
+### 정리
+
+(1) 서브 쿼리로 얻어진, SQL 문 안에서만 유효한 테이블을 derived table 이라고 한다.
+
+(2) derived table을 SQL 문 안에서 사용할 때에는 반드시 alias를 붙여 주어야만 한다.
+
+## 서브쿼리의 종류 총정리
+
+서브쿼리는 그것이 리턴하는 결과의 형태에 따라 여러 종류로 나눌 수 있다.
+
+### 1. 단일값을 리턴하는 서브쿼리
+
+하나의 값, 즉, 단일값을 리턴하는 서브쿼리이다.
+
+예: `SELECT MAX(age) FROM member;`
+
+단일값은 수학, 물리 분야에서 **스칼라(scalar)**라고도 하는데,
+
+그래서 이런 서브쿼리를 **스칼라 서브쿼리**라고도 한다.
+
+이런 스칼라 서브쿼리는 SELECT 절에서 **하나의 컬럼처럼**, WHERE 절에서 =, > 등의 **조건 표현식과 비교하는 값으로** 쓸 수 있다.
+
+### 2. 하나의 column에 여러 row들이 들어 있는 형태의 결과를 리턴하는 서브쿼리
+
+하나의 column에, 여러 row가 있는 형태의 결과를 리턴하는 서브쿼리이다.
+
+예: `SELECT SUBSTRING(address, 1, 2) FROM member;`
+
+이런 서브쿼리는 IN, ANY(SOME), ALL 등의 키워드와 함께 쓸 수 있다.
+
+### 3. 하나의 테이블 형태의 결과(여러 column, 여러 row)를 리턴하는 서브쿼리
+
+테이블 형태의 값을 리턴하는 서브 쿼리이다.
+
+예: `SELECT * FROM member WHERE age > 30;`
+
+이런 서브쿼리로 일시적으로 탄생한 테이블을 **derived table**이라고 한다. (Oracle에서는 inline view라고도 한다)
+
+이런 서브쿼리로 생겨난 derived table은 마치 원래 있던 테이블인 것처럼 사용하면 된다. 대신, **derived table에는 alias를 붙여줘야 한다**는 규칙이 있다.
+
+서브쿼리가 리턴하는 결과의 형태를 잘 예측해야, 에러 없이 서브쿼리를 활용할 수 있다. 그리고 각 종류의 서브쿼리와 어떤 키워드들을 함께 쓸 수 있는지도 잘 기억하고 있는 것이 좋다.
+
+## EXISTS, NOT EXISTS와 상관 서브쿼리
+
+서브쿼리가 어떤 형식의 결과를 리턴하는지에 따라 그 종류를 나눌 수도 있지만, 다른 측면으로도 분류해볼 수 있다.
+
+서브쿼리를 다른 방식으로 분류하는 방법은, 서브쿼리를
+
+(1) **비상관 서브쿼리**
+
+(2) **상관 서브쿼리**
+
+로 분류하는 것이다.
+
+### 비상관 서브쿼리 (Non-correlated Subquery)
+
+```sql
+SELECT * FROM item
+	WHERE id IN (SELECT item_id FROM review GROUP BY item_id HAVING COUNT(*) >= 3);
+```
+
+위를 보면 WHERE 절에서 서브쿼리가 사용되고 있다.
+
+이 서브쿼리는 지금 **그 자체만으로도 실행이 가능한 서브쿼리**이다.
+
+따라서 이 서브쿼리만 빼서 `SELECT item_id FROM review GROUP BY item_id HAVING COUNT(*) >= 3);` 과 같이 별도로 실행을 해봐도 잘 실행된다.
+
+이것은 서브쿼리가 그것을 둘러싼 **outer query와 별개로, 독립적으로 실행되기 때문**이다.
+
+이렇게 outer query와 상관 관계가 없는 서브쿼리를 **비상관 서브쿼리**라고 한다. 지금까지 배운 서브쿼리들이 모두 이에 해당한다.
+
+### 상관 서브쿼리 (Correlated Subquery)
+
+상관 서브쿼리란 **outer query와 상관 관계가 있는 서브쿼리**를 말한다.
+
+```sql
+SELECT * FROM item
+	WHERE EXISTS (SELECT * FROM review WHERE review.item_id = item.id);
+```
+
+위를 보면 WHERE 절에 서브쿼리가 하나 쓰였고, 그 앞에 EXISTS 라는 단어가 있다.
+
+서브쿼리의 뒷 부분을 보면 **item**이라는 테이블의 이름이 있다. 그런데 여기서 신기한 사실은 **item 테이블의 이름이 서브쿼리의 FROM 절에 있는 게 아니라, outer query에 있다**는 점이다.
+
+지금 서브쿼리가 필요로 하는 item 테이블이 outer query에 적혀있기 때문에 이 서브쿼리는 단독으로 실행되지 못한다.
+
+이렇게 서브쿼리가 outer query에 적힌 테이블 이름 등과 상관 관계를 갖고 있어서 그 단독으로는 실행되지 못하는 서브쿼리를 **상관 서브쿼리**라고 한다.
+
+위의 SQL 문은 어떤 결과를 리턴할까?
+
+**item 테이블 중에서 그 id 컬럼 값이 review 테이블의 item_id 컬럼에 존재하는 row들만** 추려지게 된다. 즉, 상품들 중에서 리뷰가 달린 상품들만 조회한 것이다.
+
+그 과정은 다음고 같다.
+
+1. 일단 item 테이블의 첫 번째 row를 생각한다.
+2. 그 row의 id(item.id) 값과 같은 값을 item_id(review.item_id) 컬럼에 가진 review 테이블의 row가 있는지 조회한다.
+3. 만약에 존재하면(EXISTS)
+4. WHERE 절은 True가 되고, (1)에서 생각했던 item 테이블의 row는 최종 조회 결과에 포함된다.
+5. 이제 item 테이블의 마지막 row 까지 (2) ~ (4) 의 과정이 반복된다.
+
+위와 반대로 리뷰가 달리지 않은 상품들만 조회하고 싶을 경우, EXISTS 대신 NOT EXISTS를 사용하면 된다.
+
+상관 서브쿼리가 꼭 EXISTS, NOT EXISTS 같은 키워드를 써야만 하는 것은 아니다.
+
+지금 member 테이블을 조회하면서, 같은 해에 태어난 회원들 중 **가장 작은 키**를 가진 회원의 키 정보를 담은 컬럼을 오른쪽 끝에 추가해서 보려고 한다.
+
+```sql
+SELECT *,
+(SELECT MIN(height)
+FROM member AS m2 WHERE birthday IS NOT NULL AND height IS NOT NULL
+AND YEAR(m1.birthday) = YEAR(m2.birthday)) AS min_height_in_the_year
+FROM member AS m1
+ORDER BY min_height_in_the_year ASC;
+```
+
+위의 SQL 구문은 테이블 하나를 가지고 마치 이전에 배운 SELF JOIN과 같은 작업을 처리하고 있다.
+
+1. `WHERE birthday IS NOT NULL AND height IS NOT NULL`
+   - 일단 birthday 컬럼과 height 컬럼에 둘 다 값이 있는 회원들만 대상으로 해야하기 때문에 이런 조건을 건 것이다.
+2. `YEAR(m1.birthday) = YEAR(m2.birthday)`
+
+   그 다음 member 테이블의 첫 번째 row를 생각하자
+
+   - 그 row에 대해서 같은 YEAR(birthday) ('생일년도') 값을 가진 row들을 찾는다.
+
+3. `MIN(height)`
+   - 그 다음 해당 row들의 height 컬럼의 최솟값을 구한다.
+
+2~3번의 과정을 member 테이블의 나머지 모든 row에 대해 수행한다.
+
+이런 식으로 구하다 보면 특정 회원과 같은 해에 태어난 사람들 중 가장 작은 키를 가진 사람의 키를 마지막 컬럼에서 볼 수 있다.
+
+## 서브쿼리 연습
+
+### 연습 3
+
+member 테이블의 회원 중에서 리뷰를 하나도 남기지 않아서 review 테이블에 관련 정보가 하나도 없는 회원들만 조회해 보자
+
+```sql
+SELECT * FROM member
+WHERE NOT EXISTS
+(SELECT *
+FROM review
+WHERE review.mem_id = member.id);
+```
+
+### 연습 4
+
+item, review, member 테이블을 모두 이너 조인하고, 거기서 price star, email 컬럼만 조회한 것
+
+을 derived table로 활용해서
+
+price 컬럼의 최댓값, star 컬럼의 평균값, 그리고 email 컬럼의 고유한 값들의 개수를 조회해보자.
+
+derived table과 각각의 컬럼에는 alias를 붙이자.
+
+```sql
+SELECT
+    MAX(copang_report.price) AS max_price,
+    AVG(copang_report.star) AS avg_star,
+    COUNT(DISTINCT(copang_report.email)) AS distinct_email_count
+FROM
+(SELECT
+    price,
+    star,
+    email
+FROM
+item AS i INNER JOIN review AS r
+    ON r.item_id = i.id
+INNER JOIN member AS m
+    ON r.mem_id = m.id) AS copang_report;
+```
+
+## 서브쿼리 VS. 조인
+
+```sql
+SELECT id, name, (SELECT inventory_count FROM stock WHERE stock.item_id = item.id) FROM item;
+```
+
+위의 SQL 문은 지금 3개의 컬럼을 조회하고 있다.
+
+(1) item 테이블의 id 컬럼,
+
+(2) item 테이블의 name 컬럼,
+
+(3) stock 테이블의 inventory_count 컬럼
+
+item 테이블은 상품 정보 테이블, stock 테이블은 각 상품의 재고 정보 테이블이다.
+
+위 SQL 문 중 마지막 3번째 컬럼은 서브쿼리, 그 중에서도 상관 서브쿼리로 표현되어 있다. 이를 해석해 보면,
+
+(a) 일단 item 테이블의 첫 번째 row를 생각한다.
+
+(b) 그 row의 id 컬럼의 값과 같은 값을 item_id 컬럼에 가진 stock 테이블의 row를 찾는다.
+
+(c) 찾은 stock 테이블의 row의 inventory_count 컬럼의 값을 리턴한다.
+
+(d) b-c 의 과정을 item 테이블의 다른 모든 row에 대해서 반복한다.
+
+이렇게 하면 item 테이블의 각 상품에 맞는 재고 수(inventory_count) 값을 매칭시킬 수 있다.
+
+그런데 사실 위의 결과는 아래와 같이 조인만으로도 충분히 해결할 수 있다.
+
+```sql
+SELECT i.id, i.name, s.inventory_count
+FROM item AS i LEFT OUTER JOIN stock AS s
+ON s.item_id = i.id
+```
+
+그럼 과연 **상관 서브쿼리**와 **조인**, 이 둘 중 무엇을 써야할까?
+
+정답은 없다. 데이터를 분석할 때 더 익숙하고 직관적으로 이해할 수 있는 것을 선택하면 된다.
+
+하지만 만약 테이블에 아주 많은 수의 row들이 있을 때는 이 두 가지 방법 사이에 속도 차이가 날 수도 있다.
+
+특히 SQL 문으로 데이터 조회 코드를 짜는 개발자의 경우에는 이런 부분까지도 신경을 써야 한다.
+
+다만 복잡한 내용이니 우선은 SQL에서 같은 결과를 얻기 위해서 여러 방법을 활용할 수 있다는 사실을 기억하고 넘어가자
+
+## 서브쿼리로 더 간결해진 CASE 함수 내부
+
+이전에 SELECT 절에서 어떤 컬럼에 붙인 alias를, 같은 SELECT 절 안에서 재사용하지 못한 문제가 있었다.
+
+이로 인해 CASE 함수를 사용할 때 SQL 문의 가독성이 좋지 못하였다.
+
+```sql
+SELECT
+	email,
+	CONCAT(height, 'cm', ', ', weight, 'kg') AS '키와 몸무게',
+	weight / ((height/100) * (height/100)) AS BMI,
+(
+CASE
+	WHEN weight IS NULL OR height IS NULL THEN '비만 여부 알 수 없음'
+	WHEN weight / ((height/100) * (height/100)) >= 25 THEN '과체중 또는 비만'
+	WHEN weight / ((height/100) * (height/100)) >= 18.5
+		AND weight / ((height/100) * (height/100)) < 25
+		THEN '정상'
+	ELSE '저체중'
+END) AS obesity_check
+FROM member;
+```
+
+위의 SQL 문에서 BMI 라는 alias를 재사용하지 못해 가독성이 좋지 못하다.
+
+이 문제를 서브쿼리를 통해서 해결할 수 있다.
+
+```sql
+SELECT
+	email,
+	CONCAT(height, 'cm', ', ', weight, 'kg') AS '키와 몸무게',
+	BMI,
+(CASE
+	WHEN weight IS NULL OR height IS NULL THEN '비만 여부 알 수 없음'
+	WHEN BMI >= 25 THEN '과체중 또는 비만'
+	WHEN BMI >= 18.5
+		AND BMI < 25 THEN '정상'
+	ELSE '저체중'
+END) AS obsity_check
+FROM
+(SELECT *, weight/((height/100) * (height/100)) AS BMI FROM member) AS subquery_for_BMI
+ORDER BY obesity_check ASC;
+```
+
+위의 SQL 문에서는 BMI라는 alias를 붙인 SELECT 문을 서브쿼리로 만들었다. 이 서브쿼리는 FROM 뒤에 있으니까 derived table로 인식된다.
+
+지금 그 derived table에 subquery_for_BMI 라는 alias를 붙인 상태이다.
+
+이제 subquery_for_BMI는 마치 원래 존재하던 테이블인 것처럼 자유롭게 사용할 수 있다. 그래서 지금 보면 outer query에서 BMI라는 단어를 자유롭게 활용하는 것을 볼 수 있다.\
+
+이렇게 쓰면 마치, 이미 BMI라는 컬럼이 있는 테이블에서 조회를 하는 것과 같기 때문에 이전과는 달리 에러가 발생하지 않는다.
+
+서브쿼리가 읽기 쉬운 SQL 문을 작성하는 데에 도움이 되었다.
+
+## 서브쿼리의 중첩과 그 문제점
+
+서브쿼리 안에 또 서브쿼리를 쓸 수 있는데, 이를 서브쿼리를 중첩한다고 한다.
+
+```sql
+SELECT
+	i.id,
+	i.name,
+	AVG(star) AS avg_star,
+	COUNT(*) AS count_star
+FROM item AS i LEFT OUTER JOIN review AS r ON r.item_id = i.id
+	LEFT OUTER JOIN member AS m ON r.mem_id = m.id
+WHERE m.gender = 'f'
+GROUP BY i.id, i.name
+HAVING COUNT(*) >= 2
+ORDER BY AVG(star) DESC, COUNT(*) DESC;
+```
+
+위 SQL 문을 통해서, 여성 회원이 구매한 상품들의 별점 평균과 리뷰 수를 조회하였다. (리뷰 수가 2개 이상인 상품만 조회)
+
+이 상태에서, 별점의 평균 값이 가장 큰 상품들만 조회하고 싶다면 어떻게 해야할까?
+
+다음과 같이 서브쿼리를 중첩하여 조회할 수 있다.
+
+```sql
+SELECT i.id, i.name, AVG(star) AS avg_star, COUNT(*) AS count_star
+FROM item AS i LEFT OUTER JOIN review AS r ON r.item_id = i.id
+	LEFT OUTER JOIN member AS m ON r.mem_id = m.id
+WHERE m.gender = 'f'
+GROUP BY i.id, i.name
+HAVING COUNT(*) >= 2 AND avg_star =
+(
+	SELECT MAX(avg_star) FROM (
+		SELECT i.id, i.name, AVG(star) AS avg_star, COUNT(*) AS count_star
+		FROM item AS i LEFT OUTER JOIN review AS r ON r.item_id = i.id
+			LEFT OUTER JOIN member AS m ON r.mem_id = m.id
+		WHERE m.gender = 'f'
+		GROUP BY i.id, i.name
+		HAVING COUNT(*) >= 2
+		ORDER BY AVG(star) DESC, COUNT(*) DESC
+	) AS final
+)
+ORDER BY AVG(star) DESC, COUNT(*) DESC;
+```
+
+이걸 실행시켜 보면 여성 회원이 구입했고, 리뷰 수가 2개 이상인 상품 중,
+
+별점 평균이 가장 높은 상품(들)이 리뷰 수가 많은 순서대로 조회된다.
+
+이처럼 서브쿼리 중첩은 이용하면 원하는 데이터를 구할 수 있다.
+
+그런데 SQL 문이 너무 길어지고, 읽기 힘들어진다는 문제가 생긴다.
+
+서브쿼리는 중첩하지 원하는 정보를 얻을 수 있는 방법이 없을까?
+
+</details>
+
+<details>
+	<summary>뷰</summary>
+# 뷰
+
+## 데이터 분석가의 자산, 뷰
+
+서브쿼리 중첩으로 인해 SQL 문의 가독성이 떨어지는 문제는 '뷰'라는 것을 이용해 해결할 수 있다.
+
+> **뷰**는 조인 등의 작업을 해서 만든 **'결과 테이블' 이 가상으로 저장된 형태**를 말한다.
+
+결과 테이블을 뷰로 저장하는 방법: `CREATE VIEW 뷰이름 AS 결과테이블`
+
+```sql
+CREATE VIEW three_tables_joined AS
+SELECT i.id, i.name, AVG(star) AS avg_star, COUNT(*) AS count_star
+FROM item AS i LEFT OUTER JOIN review AS r ON r.item_id = i.id
+	LEFT OUTER JOIN member AS m ON r.mem_id = m.id
+WHERE m.gender = 'f'
+GROUP BY i.id, i.name
+HAVING COUNT(*) >= 2
+ORDER BY AVG(star) DESC, COUNT(*) DESC;
+```
+
+이렇게 생성된 뷰는 테이블처럼 데이터베이스에 저장되는 존재인데, '가상 테이블'이라고 부르기도 한다.
+
+이제부터 이 뷰는 마치 원래부터 존재하던 테이블처럼 사용하면 된다.
+
+뷰 데이터 조회하기
+
+```sql
+SELECT * FROM three_tables_joined;
+```
+
+별점의 평균 값이 가장 높은 상품들만 조회하기
+
+```sql
+SELECT * FROM three_tables_joined
+WHERE avg_star = (
+	SELECT MAX(avg_star) FROM three_tables_joined
+);
+```
+
+별점의 평균 값이 가장 높은 상품들 중에서도, 리뷰가 가장 많은 것만 조회하기
+
+```sql
+SELECT * FROM three_tables_joined
+WHERE avg_star = (SELECT MAX(avg_star) FROM three_tables_joined)
+	AND count_star = (SELECT MAX(count_star) FROM three_tables_joined);
+```
+
+이처럼, 뷰를 사용하면 복잡한 문제를 짧은 SQL 문으로 해결할 수 있다는 장점이 있다.
+
+뷰는 데이터 분석을 할 때 매우 유용한 기능이다.
+
+조인이나 서브쿼리를 통해서 자주 만들게 되는 결과테이블은 뷰로 저장해 두면 유용하게 사용할 수 있다. 대신 나중에 어떤 뷰인지 쉽게 기억할 수 있도록 적절한 이름으로 저장해두어야 한다.
+
+## 뷰에 관해 알아야 할 사실
+
+### 테이블과 뷰의 차이
+
+뷰는 '가상 테이블' 이라고도 한다. 그럼 뷰와 그냥 테이블은 **무슨 차이**가 있는 걸까?
+
+가장 큰 차이는 **뷰는 테이블과 달리 데이터가 물리적으로 컴퓨터에 저장되어 있는 건 아니라는 점**이다.
+
+테이블은 우리가 표 형식으로 보는 데이터들이 실제로 컴퓨터에 저장되어 있다.
+
+그런데 뷰는 표 형식으로 내용을 본다는 점에서는 테이블과 같지만, 테이블처럼 그 내용이 실제로 컴퓨터에 일일이 저장되어 있는 건 아니라는 점에서 다르다.
+
+그 대신 뷰는, 우리가 뷰를 사용할 때 DBMS가 그 뷰를 생성하는 SQL 문을 재실행하는 방식으로 가상의 테이블을 만들어주는 것이다.
+
+```sql
+CREATE VIEW three_tables_joined AS
+SELECT i.id, i.name, AVG(star) AS avg_star, COUNT(*) AS count_star
+FROM item AS i LEFT OUTER JOIN review AS r ON r.item_id = i.id
+	LEFT OUTER JOIN member AS m ON r.mem_id = m.id
+WHERE m.gender = 'f'
+GROUP BY i.id, i.name
+HAVING COUNT(*) >= 2
+ORDER BY AVG(star) DESC, COUNT(*) DESC;
+```
+
+예를 들면, three_tables_joined 라는 뷰를 사용할 때마다 AS 다음에 있는 SELECT 문이 재실행된다는 뜻이다.
+
+즉, 뷰라는 건 테이블처럼 컴퓨터에서 데이터 크기만큼의 물리적인 용량을 차지하고 있는 것은 아니라는 뜻이다. (cf. 요즘에는 자주 사용하는 뷰인 경우 테이블처럼 데이터가 물리적으로 저장되도록 하는 기능도 있다고 한다.)
+
+### 뷰의 장점
+
+뷰는 데이터베이스에 저장된 데이터를 분석해야할 때 매우 유용한 개념이자 기능이다.
+
+1.  뷰는 사용자에게 높은 편의성을 제공해준다.
+    - 여러 테이블을 조인하는 SQL 문을 매번 필요할 때마다 사용하는 것은 정말 번거로운 일이다.
+    - 하지만 이런 복잡한 SQL 문을 뷰로 한 번 저장해 두면 계속 재활용할 수 있어서 정말 편리하다.
+2.  각 직무별 데이터 수요에 알맞은, 다양한 구조의 데이터 분석 기반을 구축해둘 수 있다.
+    - 같은 테이블들이 존재하는 상황에서도, 직무에 따라 상황에 따라 필요로 하는 데이터의 종류와 구조가 사람마다 다를 수 있다.
+    - 뷰를 사용하면 각자에게 적합한 구조로 데이터들을 준비해둘 수 있기 때문에 회사 입장에서도 기존의 테이블 구조를 건드리지 ㅇ낳고, 풍부한 데이터 분석 기반을 준비할 수 있게 된다.
+3.  뷰는 데이터 보안을 제공한다. - 회사에서 직원들에 관한 정보를 담고 있는 employee 라는 테이블이 있고 이 테이블에는 굉장히 민감한 정보가 담긴 컬럼들이 있다고 가정해 보자(주민등록번호, 주소, 연봉 등). - 그런데 회사 내의 데이터 분석가가 어떤 분석을 하기 위해 이 employee 테이블이 필요할 수도 있다. 하지만 아무리 데이터 분석을 해야한다고 해도 중요한 정보를 분석가가 마음대로 볼 수 있게 하는 것은 옳지 않다. - 이때 분석가에게 민감 정보가 담긴 컬럼을 제외하고 보여줄 수 있는 방법도 바로 뷰다. - 예를 들어, `CREATE VIEW emp_view AS SELECT id, name, age, department FROM employee;` 와 같이 민감 정보를 담고 있는 컬럼을 제외하고 뷰를 만들 수도 있고, - `CREATE VIEW emp_view2 AS SELECT id, name, age, department FROM employee WHERE department != 'secret';` 과 같이 WHERE 절로 조건을 붙여서, 특정 row들만 보여주는 뷰를 만드는 것도 가능하다. - 데이터 분석가가 employee 테이블에 직접적인 접근을 하지 못하도록 막고(DBMS 에서 '사용자별 권한 관리' 기능), emp_view 뷰에만 접근할 수 있도록 하면 된다.
+
+        ## 실무에서 첫 번째로 해야할 일
+
+        만약 데이터 분석가의 경우 입사하게 될 경우에도 입사했다고 바로 SELECT 문을 사용할 수 있는 건 아니라고 한다. 일단 회사의 데이터가 어떻게 관리되고 있는지부터 파악을 해야 한다고 한다.
+
+        회사의 데이터 저장 상태를 파악할 때는 기존 직원의 설명을 듣고, 문서화된 자료를 읽는 것이 가장 좋다고 한다. 그리고 그것과 동시에 데이터베이스 현황을 간단하게 파악할 수 있는 SQL 문을 알고 직접 적용해보는 게 좋다고 한다.
+
+        데이터베이스의 현황을 파악하려면 일단 기본적으로
+
+        회사의 서버에
+
+        (1) 어떤 데이터베이스들이 있는지
+
+        (2) 각 데이터베이스 안에 어떤 테이블들이 있는지
+
+        (3) 각 테이블의 컬럼 구조는 어떻게 되는지
+
+        (4) 테이블들 간의 Foreign Key 관계는 어떤지
+
+        등을 조사해야 한다. DBMS로 MySQL을 사용하는 곳이라면 각 작업을 다음과 같이 할 수 있을 것이다.
+
+        ### 1. 존재하는 데이터베이스들 파악
+
+        ```sql
+        SHOW DATABASES;
+        ```
+
+        결과로 나타나는 데이터베이스 중
+
+        information_schema, mysql, performance_schema, sys 는 MySQL 이라는 DBMS의 구동을 위해 원래부터 존재하는 기본 데이터베이스들이다. 개발자는 이 기본 데이터베이스들을 참조하면 DBMS에 관해 깊은 공부를 할 수 있을 것이다.
+
+        ### 2. 한 데이터베이스 안의 테이블(뷰도 포함)들 파악
+
+        ```sql
+        SHOW FULL TABLES IN copang_main;
+        ```
+
+        한 데이터베이스 안에 어떤 테이블, 어떤 뷰들이 있는지 파악하는 것도 중요하다.
+
+        테이블은 BASE TABLE 이라고 표시되고, 뷰는 VIEW 라고 표시도니다.
+
+        ### 3. 한 테이블의 컬럼 구조 파악
+
+        한 테이블을 살펴보려면 `SELECT * FROM 테이블이름;` 을 실행해도 되겠지만, 간단하게 컬럼 구조만 살펴볼 수 있게 해주는 SQL 문도 있다.
+
+        ```sql
+        DESCRIBE item;
+        ```
+
+        지금 item 이라는 테이블의 컬럼 구조를 파악하기 위해 DESCRIBE 라는 키워드를 사용했다.
+
+        각 컬럼의 이름(Field)과 데이터 타입(Type), Not Null 속성 유무(Null), Primary Key 여부(Key) 등이 표시되어 있다.
+
+        DESCRIBE를 사용하면 테이블의 컬럼 구조만 깔끔하게 파악할 수 있어서 좋다.
+
+        ### 4. Foreign Key(외래키) 파악
+
+        ```sql
+        SELECT
+        	i.TABLE_SCHEMA, i.TABLE_NAME, i.CONSTRAINT_TYPE, i.CONSTRAINT_NAME,
+        	k.REFERENCED_TABLE_NAME, k.REFERENCED_COLUMN_NAME
+
+        FROM information_schema.TABLE_CONSTRAINTS AS i
+        LEFT JOIN information_schema.KEY_COLUMN_USAGE AS k ON i.CONSTRAINT_NAME = k.CONSTRAINT_NAME
+        WHERE i.CONSTRAINT_TYPE = 'FOREIGN KEY';
+        ```
+
+        테이블들 간의 관계를 파악하려면 데이터베이스에 존재하는 **Foreign Key**들을 파악해야 한다.
+
+        위 SQL 문은 MySQL이 직접 관리하는 기본 데이터베이스에서 Foreign Key 관련 정보를 꺼내 오는 SQL이다. Foreign Key 관련 정보를 조회하는 SQL 문은 DBMS의 기본 데이터베이스에서 그 정보를 가져오는 것이기 때문에 DBMS마다 그 차이가 크다. 본인이 사용하는 DBMS에 맞는 SQL 문을 스스로 검색해 보자.
+
+        그런데 Foreign Key를 파악할 때는 한 가지 문제가 있다. 두 테이블의 각 컬럼 간에 **Foreign Key 관계가 성립한다고 해도 관리자가 그것을 Foreign Key로 설정하지 않는 경우도 많다**는 것이다. 관리자의 실수 때문에 그런 것일 수도 있고, 데이터베이스의 성능을 고려해서 의도적으로 그렇게 하는 경우도 있다. 일단, **Foreign Key 관계가 논리적으로 성립해도 실제로 DBMS 상에서 설정되어 있지 않은 경우도 많다는 것을 기억**하고 넘어가자.
+
+        따라서 Foreign Key들을 정확하게 파악하려면, 해당 회사의 데이터베이스를 설계한 사람의 설명을 듣거나, 본인이 직접 데이터의 관계 및 흐름을 파악해서 스스로 파악하는 수 밖에 없다.
+
+        데이터베이스 현황을 보다 효율적으로 파악할 수 있는 방법이 있다. 회사에서 이미 사용되고 있는 기존의 SQL 문을 자세하게 살펴보는 것이다. 그럼 그 회사에서 필요로 하는 데이터의 성격은 어떤 것인지, 필요한 데이터들은 주로 어느 테이블에 있는지 등과 같은 정보를 빠르게 파악할 수 있다.
+
+    </details>
+
 </details>
