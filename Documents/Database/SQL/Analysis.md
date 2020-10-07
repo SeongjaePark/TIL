@@ -2,6 +2,8 @@
 
 [코드잇 SQL 데이터베이스 코스](https://www.codeit.kr/courses/sql-database)
 
+SQL로 하는 데이터 분석
+
 <details>
   <summary>1) 데이터베이스 기본 개념</summary>
   <details>
