@@ -490,6 +490,412 @@ UPDATE student SET major = 1 WHERE major = '컴퓨터공학과';
 이 모드를 끄려면 Workbench의 Preferences 에 가서 Safe Updates 의 체크박스를 해제하고 확인한 뒤, 접속을 끊고 재연결 하면 된다.
 
   </details>
+  <details>
+    <summary>컬럼 속성 주기</summary>
+
+# 컬럼 속성 주기
+
+## 컬럼에 NOT NULL 속성 주기
+
+데이터 타입 뿐만 아니라, 컬럼의 속성을 변경할 때에도 MODIFY를 쓴다
+
+작성 양식
+
+```sql
+ALTER TABLE 테이블명 MODIFY 컬럼명 데이터타입 NOT NULL;
+```
+
+작성 예시
+
+```sql
+ALTER TABLE student MODIFY name VARCHAR(35) NOT NULL; # 데이터 타입과 속성을 동시에 바꿀 수도 있다
+ALTER TABLE student MODIFY registration_number INT NOT NULL;
+ALTER TABLE student MODIFY major INT NOT NULL; # 데이터 타입을 바꾸지 않더라도, 데이터 타입을 써주지 않으면 문법 오류가 난다
+```
+
+아래와 같이 NOT NULL 속성을 부여받은 컬럼의 값이 없는 새로운 row를 추가하려고 하면 다음과 같은 오류가 난다.
+
+```sql
+INSERT INTO student (email, phone, gender)
+	VALUES ('abc@naver.com', '010-1234-5678', 'm');
+```
+
+Error Code 1364. Field 'name' doesn't have a default value
+
+## 컬럼에 DEFAULT 속성 주기
+
+NULL 속성을 가진 컬럼의 경우, default value가 NULL 로 되어있어, 값을 주지 않으면 값이 NULL이 된다.
+
+반면, NOT NULL 속성을 가진 컬럼의 경우, default value가 없어 값을 주지 않으면 오류가 생긴다. 하지만, default value를 정해줌으로써 값을 따로 주지 않아도 오류가 생기지 않게 할 수 있다.
+
+작성 양식
+
+```sql
+ALTER TABLE 테이블명 MODIFY 컬럼명 데이터타입 NULL속성여부 DEFAULT 디폴트값;
+# NULL 속성 여부를 생략해도 오류가 나지는 않으나,
+# NOT NULL 속성을 가졌던 컬럼의 경우 NULL 속성을 가진 것으로 변경된다.
+```
+
+작성 예시
+
+```sql
+ALTER TABLE student MODIFY major INT NOT NULL DEFAULT 101;
+```
+
+이렇게 컬럼의 디폴트 값을 정해주면, 해당 컬럼의 값이 없는 새로운 row 를 추가하더라도 디폴트 값이 들어간다.
+
+이때 NOT NULL 속성을 가진 컬럼의 경우도 더 이상 오류가 나지 않고 해당 컬럼에 디폴트 값이 추가된다.
+
+## DATETIME, TIMESTAMP 타입의 컬럼에 값을 넣는 2가지 방식
+
+테이블에 어떤 row가 추가되거나 갱신되었을 때, 그 추가 혹은 갱신 시각을 저장해야 할 때가 있다.
+
+예를 들어,
+
+- 게시글 업로드 시각,
+- 댓글이 달린 시각,
+- 댓글을 수정한 시각
+
+등의 정보가 그 예시다.
+
+### 1. NOW() 함수 사용하기
+
+어떤 SNS에서 사용자가 업로드한 게시물 정보를 저장한 post 테이블이 있고, 아래와 같은 컬럼들로 구성되어 있다고 하자.
+
+- id: PRIMARY KEY 역할을 하는 컬럼. AUTO_INCREMENT 속성을 가짐
+- title: 게시물의 제목
+- content: 게시물의 내용
+- upload_time: 게시물 최초 업로드 시각
+- recent_modified_time: 게시물 최근 갱신 시각
+
+이 테이블에 다음과 같이 게시물 하나가 추가된다
+
+```sql
+INSERT INTO post (title, content, upload_time, recent_modified_time)
+	VALUES('~~~ 탐방기', '오늘은 ~~~ ...', NOW(), NOW());
+```
+
+위 SQL 문을 보면 upload_time 컬럼, recent_modified_time 컬럼에 NOW() 라는 함수의 리턴값을 넣았다.
+
+테이블을 조회해보면 두 컬럼에 현재 시각이 들어가 있다.
+
+만약 이 포스트의 내용을 다시 갱신한다고 해보자.
+
+```sql
+UPDATE post
+	SET content = '오늘 간 곳은 ~~~ ...',
+			recent_modified_time = NOW()
+	WHERE id = 1;
+```
+
+content 컬럼을 갱신할 때 동시에, recent_modified_time 컬럼의 값도 NOW 함수의 리턴값으로 갱신해주면 된다.
+
+이렇게 NOW 함수를 쓰면 현재 시간을 편하게 구할 수 있다.
+
+그런데 이 방법 말고도 컬럼에 현재 시각을 넣는 다른 방법도 있다.
+
+### 2. 컬럼에 DEFAULT CURRENT_TIMESTAMP / ON UPDATE CURRENT_TIMESTAMP 속성 설정하기
+
+DATETIME 타입 또는 TIMESTAMP 타입의 컬럼에는
+
+DEFAULT CURRENT_TIMESTAMP 라는 속성과 ON UPDATE CURRENT_TIMESTAMP 라는 속성을 줄 수 있다.
+
+다음과 같이 post 테이블의 upload_time 컬럼과 recent_modified_time 컬럼에 위의 두 속성을 추가할 수 있다.
+
+```sql
+ALTER TABLE post
+	MODIFY upload_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+	MODIFY recent_modified_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+```
+
+upload_time 컬럼에는 DEFAULT CURRENT_TIMESTAMP 속성만 줬고,
+
+recent_modified_time 컬럼에는 DEFAULT CURRENT_TIMESTAMP 속성과 ON CURRENT_TIMESTAMP 속성을 둘다 줬다.
+
+이제 테이블에 새로운 row를 추가해보자.
+
+```sql
+INSERT INTO post (title, content)
+	VALUES ('오랜만에 ~~', '벌써 가을 ~~ ...');
+```
+
+title, content 컬럼에만 값을 주고, upload_time, recent_modified_time 컬럼에는 값을 주지 않았다는 것을 알 수 있다.
+
+그런데 post 테이블을 확인해보면 새로운 row에 upload_time, recent_modified_time 컬럼에 별도로 값을 주지 않았는데도 현재 시간이 값으로 잘 들어가 있다.
+
+두 컬럼에 DEFAULT CURRENT_TIMESTAMP 속성을 줬기 때문이다.
+
+그리고 나서 이 row의 content 컬럼 값을 갱신한다.
+
+```sql
+UPDATE post
+	SET content = '등산 .. ~~'
+	WHERE id = 2;
+```
+
+마찬가지로, 최근 갱신 시각을 나타내는 recent_modified_time 컬럼에는 따로 값을 지정하지 않았다.
+
+다시 post 테이블을 확인해보면 recent_modified_time 컬럼에 값을 주지 않았는데도 최근 갱신 시간이 들어가 있다.
+
+recent_modified_time 컬럼에 ON UPDATE CURRENT_TIMESTAMP 라는 속성을 주었기 때문이다.
+
+### 정리
+
+만약 각 row마다 시간값에 관한 처리를 다르게 해줘야 하는 경우라면 NOW 함수를 쓰는 것이 좋을 것이다.
+
+하지만 그럴 필요가 없는 상황이고, 굳이 날짜/시간 값을 별도로 신경쓰기가 싫다면 해당 컬럼에 DEFAULT CURRENT_TIMESTAMP 속성, ON UPDATE CURRENT_TIMESTAMP 속성을 설정해서 DBMS가 알아서 관리하도록 하는 게 편할 것이다.
+
+## 컬럼에 UNIQUE 속성 주기
+
+컬럼 속성 중 UQ 는 Unique 속성을 나타내는데, 컬럼에 이 속성을 추가하면 그 컬럼에 같은 값을 가진 또 다른 row가 추가되는 것을 막아준다.
+
+작성 양식
+
+```sql
+ALTER TABLE 테이블명 MODIFY 컬럼명 데이터타입 UNIQUE;
+```
+
+작성 예시
+
+```sql
+ALTER TABLE student MODIFY registration_number INT NOT NULL UNIQUE;
+```
+
+이렇게 컬럼에 UNIQUE 속성을 추가한 후,
+
+```sql
+INSERT INTO student (name, registration_number)
+	VALUES ('홍길동', 20112405);
+```
+
+이미 registration_number에 존재하는 값을 가진 row를 추가한다. 그럼 다음과 같은 오류가 발생한다.
+
+Error Code: 1062, Duplicate entry '20112405' for key 'student.registration_number'
+
+이는 registration_number 컬럼에 중복되는 값을 가진 row가 있기 때문에, 새 row가 추가될 수 없다는 것이다.
+
+이처럼, 반드시 각 row마다 고유한 값을 가져야 하는 컬럼이 있다면 UNIQUE 속성을 주면 된다.
+
+## Primary Key와 Unique 속성의 차이
+
+어떤 컬럼의 값이 각 row마다 달라야할 때 Unique 속성을 준다.
+
+그런데 Primary Key도 이런 성질을 가지고 있었다.
+
+Primary Key는 테이블에서 특정 row 하나를 식별할 수 있도록 해주는 컬럼이다. 그리고 이를 위해 Primary Key에 해당하는 컬럼은 각 row마다 다른 값을 가져야 한다.
+
+### Primary Key와 Unique 속성의 차이?
+
+일단 Primary Key 는 테이블당 오직 하나만 존재할 수 있다.
+
+이에 반해 Unique 속성은 각각의 컬럼들이 가질 수 있는 속성이기 때문에 한 테이블에 여러 개의 Unique 속성들이 존재할 수 있다.
+
+중요한 차이점 중 하나는 Priamry Key는 NULL을 가질 수 없지만, Unique는 NULL을 허용한다는 점이다.
+
+- Primary Key는 애초에 그 목적이 테이블에서 하나의 row를 식별하기 위해 사용되는 컬럼인데, 여기에 NULL이 있어버리면 특정 row를 검색해야할 때 등호(=) 연산을 수행할 수 없기 때문에 NULL을 허용하지 않는 것으로 추측된다고 한다.
+
+Primary Key에 NULL이 있는 row가 존재한다면,
+
+```sql
+SELECT * FROM member WHERE id = n;
+```
+
+와 같은 SQL 문을 실행할 때 그 row를 찾을 수 없게 된다. 만약 n 부분에 NULL을 넣는다고 해도 안 된다. 왜냐하면 WHERE NULL = NULL은 True를 리턴하지 않기 때문이다. SQL에서 NULL은 어떤 값이 아니라 '값이 없는 상태'를 의미하는 단어일 뿐이다. 그래서 같은 NULL 끼리 비교해도 같다는 결과가 나오지 않는다.
+
+```sql
+SELECT * FROM member WHERE id IS NULL;
+```
+
+과 같이 NULL 여부를 확인할 수 있는 별도의 SQL 문을 사용할 수는 있지만, 단지 NULL이 있는 해당 row 하나만을 위해 이렇게 별도로 해야한다는 건 바람직하지 않다. 이런 이유 때문에 Primary Key에서는 NULL이 허용되지 않는다.
+
+이 뿐만 아니라, Primary Key 는 다른 테이블의 Foreign Key에 의해 참조될 수도 있는 컬럼이다.
+
+그리고 보통은 이런 Foreign Key를 기준으로 두 테이블을 조인하는 경우가 많은데, 이때 부모 테이블의 Primary Key 가 NULL이라면 그 row를 참조해야 하는 자식 테이블의 row들과 제대로 조인될 수가 없다.
+
+왜냐하면 조인을 할 때도
+
+```sql
+SELECT * FROM table_a INNERJOIN table_b ON table_a.referenced_col = table_b.referencing_col;
+```
+
+이런 식으로 ON 절에 등호를 붙여서 조인 기준을 설정하는 것이 일반적이기 때문이다. 이 경우에도 NULL = NULL은 True를 리턴하지 않기 때문에 NULL이 있는 row끼리는 조인이 되지 않는다.
+
+### 정리
+
+Primary Key는 그 존재 목적과 실무적인 이유 등으로 인해 당연히 NULL이 들어가면 안 된다
+
+이에 반해, Unique 속성은 각 row마다 각자 다른 값을 가지도록 강제하는 것이다. 그리고 이때 각 row마다 해당 컬럼의 값이 다르다면, NULL도 Unique 하다고 인정되기 때문에 Unique 속성이 있는 컬럼에는 NULL이 허용되는 것이다.
+
+Cf) MySQL에서 Unique 속성은 중복되는 값은 허용하지 않지만, 여러 row가 NULL인 상태는 허용한다. ex) 사원번호가 중복되는 것은 허용하지 않지만, 아직 사원번호가 부여되지 않은 신입사원들의 정보를 입력할 수 있음.
+
+## 테이블에 CONSTRAINT(제약) 걸기
+
+하나의 테이블에는 시간이 지나면서 점점 더 많은 row들이 쌓이게 된다. 주의할 점은, 테이블에 이상한 row가 추가되는 것을 막아야 한다는 것이다. 예를 들어, 꼭 있어야 할 값이 없거나, 이상한 값이 있는 row가 추가되는 것을 막아야 한다.
+
+테이블에 CONSTRAINT(제약)을 추가하면 이상한 row가 추가되는 것을 막을 수 있다.
+
+작성 양식
+
+```sql
+ALTER TABLE 테이블명
+	ADD CONSTRAINT 제약_이름 CHECK (제약 내용);
+```
+
+작성 예시
+
+```sql
+ALTER TABLE student
+	ADD CONSTRAINT st_rule CHECK (registration_number < 30000000);
+```
+
+이렇게, registration 컬럼에는 30000000 보다 작은 값만 들어갈 수 있도록 제약을 걸었다.
+
+```sql
+INSERT INTO student (name, registration_number)
+	VALUES ('홍길동', 30000000);
+```
+
+위와 같이 제약 사항을 위반하는 row를 추가하면, 다음과 같이 제약사항이 위반되었다는 오류가 뜬다.
+
+Error Code: 3819. Check constraint 'st_rule' is violated.
+
+### 제약 사항을 삭제하는 법
+
+작성 양식
+
+```sql
+ALTER TABLE 테이블명 DROP CONSTRAINT 제약_이름;
+```
+
+작성 예시
+
+```sql
+ALTER TABLE student DROP CONSTRAINT st_rule;
+```
+
+### 2개 이상의 조건이 담긴 제약 만들기
+
+작성 양식
+
+```sql
+ALTER TABLE 테이블명
+	ADD CONSTRAINT 제약_이름
+	CHECK (조건1 AND 조건2);
+```
+
+작성 예시
+
+```sql
+ALTER TABLE student
+	ADD CONSTRAINT st_rule
+	CHECK (email LIKE '%@%' AND gender IN ('m', 'f'));
+```
+
+이제 이 테이블에
+
+```sql
+INSERT INTO student (name, email, gender)
+	VALUES ('홍길동', '이상한이메일', 'm');
+```
+
+또는
+
+```sql
+INSERT INTO student (name, email, gender)
+	VALUES ('홍길동', 'gildongh@naver.com', 'z');
+```
+
+와 같이 제약 조건 중 어느 하나라도 위반하는 row를 추가하려고 하면 오류가 뜨게 된다.
+
+## 그 밖의 컬럼 관련 작업들
+
+한 축구팀의 선수 정보를 관리하는 player_info 테이블이 있다고 가정하자.
+
+- role: 선수의 역할(공격수, 수비수 등). CHAR(5)
+- name: 선수의 이름. INT
+- id: PRIMARY KEY. INT
+
+이 테이블의 컬럼 구조를 좀 더 보기 좋게 만들어 보자.
+
+### 1. 컬럼 가장 앞으로 당기기
+
+Primary Key 역할을 하는 id 컬럼이 가장 뒤에 있어서 보기에 어색하다.
+
+```sql
+ALTER TABLE player_info
+	MODIFY id INT NOT NULL AUTO_INCREMENT FIRST;
+```
+
+이렇게 컬럼 정보의 맨 뒤에 FIRST 라고 써주면, 해당 테이블의 가장 첫 번째 컬럼이 된다.
+
+이런 식으로 테이블에서는 보통 Primary Key에 해당하는 컬럼을 가장 앞에 두는 것이 일반적이다.
+
+### 2. 컬럼 간의 순서 바꾸기
+
+선수 역할을 나타내는 role 컬럼이 선수 이름을 나타내는 name 컬럼보다 이후에 나오는 것이 더 자연스러울 것 같다.
+
+role 컬럼을 name 컬럼 이후에 위치하도록 해보자.
+
+```sql
+ALTER TABLE player_info
+	MODIFY role CHAR(5) NULL AFTER name;
+```
+
+컬럼 속성 가장 마지막에 AFTER name 이라고 썼다. 표현 그대로 name 컬럼 바로 다음으로 위치를 바꾸라는 뜻이다.
+
+### 3. 컬럼의 이름과 컬럼의 데이터 타입 및 속성 동시에 수정하기
+
+컬럼의 이름을 수정할 때는 `RENAME COLUMN A TO B` 절을,
+
+컬럼의 타입 및 속성을 수정할 때는 `MODIFY` 절을 사용한다고 배웠다.
+
+이 두 가지 작업을 한 번에 수행해주는 절이 바로 `CHANGE` 절이다.
+
+role 컬럼의 (1) 이름을 position 으로 바꾸고, (2) 동시에 그 데이터 타입을 CHAR(5) 에서 VARCHAR(2)로, 그 속성도 NULL 에서 NOT NULL로 바꾸자.
+
+```sql
+ALTER TABLE player_info
+	CHANGE role position VARCHAR(2) NOT NULL;
+```
+
+이렇게 컬럼의 이름과, 데이터 타입 및 속성을 동시에 바꾸고 싶을 때는 CHANGE 절을 사용하면 편리하다.
+
+### 4. 여러 작업 동시에 수행하기
+
+`ALTER TABLE` 문 뒤에는 컬럼에 관한 작업을 하는 절들을 여러 개 두는 것이 가능하다.
+
+(1) id 컬럼의 이름을 registration_number로 수정
+
+(2) name 컬럼의 데이터 타입을 VARCHAR(20)으로, 속성을 NOT NULL로 수정
+
+(3) position 컬럼을 테이블에서 삭제
+
+(4) 새로운 컬럼 2개(height, weight) 추가
+
+위의 4가지 작업을 동시에 수행하는 SQL 문을 작성해 보자.
+
+```sql
+ALTER TABLE player_info
+	RENAME COLUMN id TO registration_number,
+	MODIFY name VARCHAR(20) NOT NULL,
+	DROP COLUMN position,
+	ADD height DOUBLE NOT NULL,
+	ADD weight DOUBLE NOT NULL;
+```
+
+위의 SQL 문처럼, 각 작업마다 굳이 매번 `ALTER TABLE` 을 써줄 필요 없이, 여러 가지 작업을 하나의 `ALTER TABLE` 문 안에서 한 번에 수행하는 것이 가능하다.
+
+위의 SQL 문 중에서 작업 (1)과 작업 (2)를 수행하는 절을 `CHANGE` 절로 아래와 같이 쓸 수도 있다
+
+```sql
+ALTER TABLE palyer_info
+	CHANGE id registration_number INT NOT NULL AUTO_INCREMENT,
+	CHANGE name name VARCHAR(20) NOT NULL;
+```
+
+컬럼의 이름만 바꾸거나, 컬럼의 데이터 타입 및 속성만 바꿀 때에도 이런 식으로 `CHANGE` 절로도 처리할 수 있다.
+
+  </details>
 </details>
 
 <details>
