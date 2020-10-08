@@ -364,6 +364,132 @@ SELECT * FROM WHERE is_deleted != 'Y';
 
 <details>
   <summary>2) 테이블 다루기</summary>
+  <details>
+    <summary>컬럼 구조 변경</summary>
+
+# 컬럼 구조 변경
+
+## 컬럼 정보를 한 눈에 보여주는 DESCRIBE
+
+DESCRIBE 문을 쓰면 테이블의 컬럼 정보를 한 눈에 볼 수 있다.
+
+```sql
+DESCRIBE 테이블명; # DESCRIBE를 그냥 DESC 라고 줄여서 써도 된다.
+```
+
+이렇게 치면 해당 테이블의 컬럼 구조, 각 컬럼의 데이터 타입, 속성을 볼 수 있다.
+
+그럼 각 컬럼에 대한 다음과 같은 정보가 나타난다.
+
+Field: 컬럼의 이름
+
+Type: 컬럼의 데이터 타입
+
+Null: 컬럼의 Null 속성 유무
+
+Key: Primary Key, Unique 속성 여부
+
+Default: 컬럼의 기본값
+
+Extra: AUTO_INCREMENT 등의 기타 속성
+
+## 컬럼 추가
+
+작성 양식
+
+```sql
+ALTER TABLE 테이블명 ADD 추가할_컬럼명 데이터타입 속성;
+```
+
+작성 예시
+
+```sql
+ALTER TABLE student ADD gender CHAR(1) NULL;
+```
+
+## 컬럼 이름 변경
+
+작성 양식
+
+```sql
+ALTER TABLE 테이블명
+	RENAME COLUMN 원래의_컬럼명 TO 새로운_컬럼명;
+```
+
+작성 예시
+
+```sql
+ALTER TABLE student
+	RENAME COLUMN student_number TO registration_number;
+```
+
+## 컬럼 삭제
+
+작성 양식
+
+```sql
+ALTER TABLE 컬럼명 DROP 삭제할_컬럼명;
+```
+
+작성 예시
+
+```sql
+ALTER TABLE student DROP addmission_date;
+```
+
+## 컬럼 데이터 타입 변경
+
+작성 양식
+
+```sql
+ALTER TABLE 테이블명 MODIFY 컬럼명 데이터타입;
+```
+
+작성 예시
+
+```sql
+ALTER TABLE student MODIFY major INT;
+```
+
+이떄, 컬럼의 값들이 변경하려고 하는 데이터 타입에 맞지 않으면 오류가 난다. 따라서 변경하려는 데이터 타입에 맞게 컬럼의 값들을 수정해줘야 한다.
+
+```sql
+UPDATE student SET major = 3 WHERE major = '심리학과'
+UPDATE student SET major = 5 WHERE major = '수학과'
+UPDATE student SET major = 1 WHERE major = '컴퓨터공학과';
+```
+
+## UPDATE 가 안 되는 경우
+
+Workbench에서 위의 UPDATE 문에서 오류가 나는 경우
+
+Response 탭에서 에러 메세지를 보면 이렇게 나타난다.
+
+'Error Code: 1175. You are using safe update mode and you tried to update a table without a WHERE that uses a KEY column. To disable safe mode, toggle the option in Preferences -> SQL Editor and reconnect.'
+
+내가 Workbench에서 safe update 모드를 사용하고 있기 때문에, KEY column을 사용해서 테이블을 갱신해야 한다는 것이다.
+
+여기서 KEY column이란 Primary Key를 의미한다.
+
+safe update 모드란 '안전한 갱신'을 보장하기 위한 모드로,
+
+```sql
+UDPATE student SET major = 1;
+```
+
+처럼 모든 row의 특정 컬럼을 갱신해버리는 SQL 문이나,
+
+```sql
+UPDATE student SET major = 1 WHERE major = '컴퓨터공학과';
+```
+
+처럼 WHERE 절에 Primary Key가 사용되지 않은 UPDATE 문이 실행되지 않도록 한다.
+
+이건 UPDATE 문을 주의 깊게 사용하지 않을 때 발생할 수 있는 위험한 결과를 방지하기 위한 DBMS 상의 모드이다.
+
+이 모드를 끄려면 Workbench의 Preferences 에 가서 Safe Updates 의 체크박스를 해제하고 확인한 뒤, 접속을 끊고 재연결 하면 된다.
+
+  </details>
 </details>
 
 <details>
