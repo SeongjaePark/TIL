@@ -896,6 +896,133 @@ ALTER TABLE palyer_info
 컬럼의 이름만 바꾸거나, 컬럼의 데이터 타입 및 속성만 바꿀 때에도 이런 식으로 `CHANGE` 절로도 처리할 수 있다.
 
   </details>
+  <details>
+    <summary>테이블 자체를 다루기</summary>
+
+# 테이블 자체를 다루기
+
+## 테이블 이름 변경, 복사본 만들기, 삭제
+
+### 테이블 이름 변경
+
+작성 양식
+
+```sql
+RENAME TABLE 기존_테이블_이름 TO 새로운_테이블_이름;
+```
+
+작성 예시
+
+```sql
+RENAME TABLE student TO undergraduate
+```
+
+### 복사본 만들기
+
+작성 양식
+
+```sql
+CREATE TABLE 새로운_테이블_이름 AS SELECT * FROM 복사할_테이블_이름;
+```
+
+작성 예시
+
+```sql
+CREATE TABLE copy_of_undergraduate AS SELECT * FROM undergraduate;
+```
+
+기존 테이블을 직접 다루기가 무서울 때는 이렇게 기존 테이블을 복사한 테이블을 활용해서 다뤄볼 수 있다.
+
+### 테이블 삭제하기
+
+작성 양식
+
+```sql
+DROP TABLE 테이블명;
+```
+
+작성 예시
+
+```sql
+DROP TABLE copy_of_undergraduate;
+```
+
+## 테이블 컬럼 구조만 복사하기
+
+작성 양식
+
+```sql
+CREATE TABLE 새로운_테이블_이름 LIKE 복사할_테이블_이름;
+```
+
+작성 예시
+
+```sql
+CREATE TABLE copy_of_undergraduate LIKE undergraduate;
+```
+
+컬럼 구조가 같은 다른 테이블의 row들 그대로 가져오기
+
+```sql
+INSERT INTO copy_of_undergraduate SELECT * FROM undergraduate;
+```
+
+일부 조건을 충족하는 row들만 가져오기
+
+```sql
+INSERT INTO copy_of_undergraduate
+	SELECT * FROM undergraduate WHERE major = 101;
+```
+
+## INSERT INTO 문과 서브쿼리
+
+SQL 문에서 하나의 부품처럼 사용되는 `SELECT` 문을 서브쿼리라고 한다.
+
+지금까지는 `SELECT` 문 안에 또 `SELECT` 문이 있는 경우만 봤는데, 위의 SQL 문처럼 `INSERT INTO` 문에서 서브쿼리를 사용하는 것도 가능하다.
+
+서브쿼리는 다음과 같은 식으로도 활용 가능하다
+
+```sql
+INSERT INTO freshman SELECT * FROM undergraduate WHERE grade = 1; # 1학년 테이블
+INSERT INTO sophomore SELECT * FROM undergraduate WHERE grade = 2; # 2학년 테이블
+INSERT INTO junior SELECT * FROM undergraduate WHERE grade = 3; # 3학년 테이블
+INSERT INTO senior SELECT * FROM undergraduate WHERE grade = 4; # 4학년 테이블
+```
+
+만약 undergraduate 테이블에 학년을 나타내는 grade 컬럼이 있다고 가정하면, 이런 식으로 학년별 테이블을 새롭게 만들 수도 있다.
+
+기존 테이블은 건드리지 않고, 기존 테이블의 특정 row들만으로도 새 테이블을 만들어야 할 때 사용하면 꽤 유용할 것이다.
+
+다음과 같이 활용하는 것도 가능할 것이다
+
+```sql
+CREATE TABLE freshman AS SELECT * FROM undergraduate WHERE grade = 1; # 1학년 테이블
+CREATE TABLE sophomore AS SELECT * FROM undergraduate WHERE grade = 2; # 2학년 테이블
+CREATE TABLE junior AS SELECT * FROM undergraduate WHERE grade = 3; # 3학년 테이블
+CREATE TABLE senior AS SELECT * FROM undergraduate WHERE grade = 4; # 4학년 테이블
+```
+
+## TRUNCATE 로 데이터 한 번에 날리기
+
+때로는 기존 테이블의 데이터를 전부 다 삭제하고, 같은 테이블에서 다시 시작하고 싶을 수 있다.
+
+이럴 때 물론 `DELETE` 문을 사용해도 되지만, `TRUNCATE` 문을 사용하는 방법이 있다.
+
+DELETE 문 사용
+
+```sql
+DELETE * FROM 테이블명;
+```
+
+TRUNCATE 문 사용
+
+```sql
+TRUNCATE 테이블명;
+```
+
+테이블의 뼈대는 그대로 남아있지만 모든 row들이 삭제되는 것을 확인할 수 있다.
+
+  </details>
 </details>
 
 <details>
