@@ -428,7 +428,7 @@ ALTER TABLE student
 작성 양식
 
 ```sql
-ALTER TABLE 컬럼명 DROP 삭제할_컬럼명;
+ALTER TABLE 컬럼명 DROP COLUMN 삭제할_컬럼명; # COLUMN 부분 생략 가능
 ```
 
 작성 예시
