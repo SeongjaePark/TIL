@@ -1027,4 +1027,277 @@ TRUNCATE 테이블명;
 
 <details>
   <summary>3) Foreign Key 제대로 사용하기</summary>
+
+# Foreign Key 제대로 사용하기
+
+## Foreign Key가 필요한 이유
+
+Foreign Key란 한 테이블의 컬럼 중에서 **다른 테이블의 특정 row를 식별할 수 있는 컬럼**을 말한다. Foreign Key는 우리말로 **외래키**라고도 한다.
+
+현재 강의에 대한 정보를 담고 있는 다음의 두 테이블이 있다.
+
+### course 테이블
+
+강의 정보들이 저장되어 있는 테이블
+
+- id - INT NOT NULL AUTO_INCREMENT PRIMARY KEY
+- title - 강의명. VARCHAR(30) NULL
+- semester - 학기. VARCHAR(6) NULL
+- maximum - 최대 수강인원. INT NULL
+- professor - 교수명. VARCHAR(10) NULL
+
+### review 테이블
+
+강의 평가가 저장되어 있는 테이블
+
+- id - INT NOT NULL AUTO_INCREMENT PRIMARY KEY
+- course_id - course 테이블의 id 컬럼을 참조하는 Foreign Key. INT NULL
+- star - 강의 평점. INT NULL
+- comment - 강의리뷰. VARCHAR(500) NULL
+
+현재 review 테이블의 course_id 컬럼은 course 테이블의 id 컬럼을 참조하고 있는 Foreign Key이다.
+
+review 테이블 중에서 특정 row가 나타내는 강의평가가 **어느 수업에 대한 것인지**를 알려면
+
+(1) review 테이블의 course_id 컬럼의 값을 보고
+
+(2) course 테이블로 가서 그 값을 id 컬럼의 값으로 가진 row를 찾으면 된다.
+
+이 경우 review 테이블의 course_id 라는 Foreign Key로 course 테이블의 Primary Key인 id 컬럼을 '참조'하고 있는 것이다.
+
+이때 Foreign Key가 있는 review 테이블을 '자식 테이블(child table)'이나 '참조하는 테이블(referencing table)'이라고 하고,
+
+Foreign Key에 의해 참조당하는 course 테이블을 '부모 테이블(parent table)', '참조 당하는 테이블(referenced table)'이라고 한다.
+
+만약 DBMS 상에서 한 테이블의 컬럼을, '이것이 다른 테이블의 컬럼을 참조하는 Foreign Key다' 라고 설정해 놓으면 **'참조 무결성(Referential Integrity)'** 이라는 것을 지킬 수 있다.
+
+'참조 무결성'이란 두 테이블 간에 참조 관계가 있을 때 각 데이터 간에 유지되어야 하는 정확성과 일관성을 의미한다. 'course_id 값이 3인 강의 평가들은 있는데 정작 course 테이블에는 id 값이 3인 수없이 없다?' 라는 건 참조 무결성이 훼손된 사례임
+
+## Foreign Key 설정하기
+
+Foreign Key는 참조 무결성을 지키기 위해서 필요하다.
+
+하지만, 개념적으로 Foreign Key가 존재한다고 해서 참조 무결성이 지켜지는 것은 아니다.
+
+이 컬럼이 Foreign Key다 라고 설정을 해 줘야만 참조 무결성을 지킬 수 있다.
+
+### Foreign Key 설정 SQL 문
+
+작성 양식
+
+```sql
+ALTER TABLE `데이터베이스명`.`자식테이블명`
+ADD CONSTRAINT `ForeignKey_이름` # ADD 까지만 써줘도 실행이 되나, 그러면 Foreign Key 이름을 지정할 수 없다.
+	FOREIGN KEY (`참조하는_컬럼명`)
+	REFERENCES `데이터베이스명`.`부모테이블명` (`참조당하는_컬럼명`)
+	ON DELETE RESTRICT
+	ON UPDATE RESTRICT
+```
+
+Foreign Key 설정 또한 하나의 제약사항이기 때문에 그 이름을 정해줄 수 있다. ADD 뒤의 부분을 생략하면 자동으로 Foreign Key 설정의 이름이 정해진다.
+
+ON DELETE 와 ON UPDATE 뒤에는 RESTRICT 뿐만 아니라, CASCADE, SET NULL, NO ACTION이 올 수 있다.
+
+작성 예시
+
+```sql
+ALTER TABLE `course_rating`.`review`
+ADD CONSTRAINT `fk_review_table`
+	FOREIGN KEY (`course_id`)
+	REFERENCES `course_rating`.`course` (`id`)
+	ON DELETE RESTRICT
+	ON UPDATE RESTRICT;
+```
+
+## SHOW CREATE TABLE 문으로 현재 테이블 어떻게 만들 수 있는지 보기
+
+`SHOW CREATE TABLE` 문은 특정 테이블을 지금 바로 생성한다고 할 때 작성해야할 `CREATE TABLE` 문이 뭔지를 보여주는 유용한 SQL 문이다.
+
+예를 들어, 위에 언급된 review 테이블을 만들고 Foreign Key 설정을 해준 뒤 `SHOW CREATE TABLE` 문을 실행하면 다음과 같은 결과가 나타난다.
+
+```sql
+CREATE TABLE `review` (
+	`id` int NOT NULL AUTO_INCREMENT,
+	`course_id` int DEFAULT NULL,
+	`star` int DEFAULT NULL,
+	`comment` varchar(500) DEFAULT NULL,
+	PRIMARY KEY (`id`)
+	KEY `fk_review_table_idx` (`course_id`),
+	CONSTRAINT `kf_review_table` FOREIGN KEY (`course_id`) REFERENCES `course` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+```
+
+이 중 주목할 부분은 CONSTRAINT 가 포함되어 있는 줄이다. 이 부분을 보면 Foreign Key 설정에 관한 명령이 포함되어 있는 것을 알 수 있다.
+
+이처럼, `CREATE TABLE` 문을 작성할 때부터 Foreign Key 설정을 해서 테이블을 처음에 만들 때부터 Foreign Key 설정을 해줄 수 있는 것이다.
+
+## Foreign Key 로 보장되는 참조 무결성
+
+참조하고 있는 부모 테이블의 컬럼에 존재하지 않는 값을 자식 테이블의 Foreign Key 컬럼에 추가하려고 하면 다음과 같은 형식으로 오류가 난다.
+
+Error Code: 1452. Cannot add or update a child row:
+
+a foreign key constraint fails (`course_rating`.`review`, CONSTRAINT .... )
+
+이는 Foreign Key 제약사항을 만족시키지 못했기 때문에 자식 테이블에 행을 추가/갱신 할 수 없었다는 말이다.
+
+이렇듯 Foreing Key 설정을 할 경우 자식 테이블의 Foreign Key에 추가하려는 값이 부모 테이블의 참조되는 컬럼에 없는 엉뚱한 값, 즉 참조 무결성을 해치는 경우를 방지할 수 있다. 예를 들면, 부모 테이블인 course 테이블에 존재하지 않는 수업에 대한 강의평가가 자식 테이블인 review 테이블에 추가될 수 없게 되는 것이다.
+
+## 부모 테이블의 row가 삭제될 때
+
+이번에는 참조 무결성을 부모 테이블인 course 테이블의 관점에서 생각해 보자.
+
+만약 부모 테이블의 row가 삭제된다면, 그 row를 참조하던 자식 테이블의 row들은 어떻게 될까?
+
+예를 들면, course 테이블에서 하나의 수업이 사라지면, review 테이블에 있는 그 수업에 대한 강의평가들은 어떻게 처리되는 것일까?
+
+부모 테이블의 row가 삭제될 때 이를 참조하던 자식 테이블의 row들이 남아있는 경우 참조 무결성이 깨지게 되는데, 이러한 경우 어떻게 해야 하는지에 대한 정해진 답은 없다.
+
+다만 이런 상황에서 자식 테이블의 row들을 어떻게 처리해야 할 지 사용자가 일종의 정책을 정할 수 있다.
+
+크게 3가지 정책이 있다.
+
+> 자신이 처한 상황에 적합한 정책을 사용할 수 있도록 각각의 정책을 확실하게 이해해야 한다.
+
+### RESTRICT 정책
+
+Foreign Key 제약에서 `ON DELETE` 가 RESTRICT 로 설정되어 있을 경우, 자신을 참조하고 있는 자식 테이블의 row가 하나라도 있는 부모 테이블의 row는 삭제될 수 없다. 삭제하려 할 경우 Foreing Key 제약사항을 위반하기 때문에 삭제할 수 없다는 오류가 나타난다.
+
+만약에 삭제하고 싶다면, 그 row를 참조하고 있는 자식 테이블의 모든 row를 삭제한 후에야 가능한 것이다.
+
+참고로 NO ACTION 정책은 RESTRICT와 같은 의미의 정책이다.
+
+### CASCADE 정책
+
+CASECADE 는 '폭포수처럼 떨어지다', '연쇄 작용을 일으키다' 라는 의미를 가지고 있다.
+
+CASCADE 정책을 사용하면, 부모 테이블을 삭제할 때, 그것을 참조하고 있는 자식테이블의 row들도 함께 삭제된다.
+
+CASCADE 정책을 사용할 때에는, 소중한 자료가 사라질 가능성을 내포하고 있음을 명심하고 사용해야 한다.
+
+### SET NULL 정책
+
+SET NULL 정책은 부모 테이블의 row 가 삭제되었을 때, 그 row를 참조하던 자식 테이블의 Foreign Key 컬럼의 값을 모두 NULL로 바꾸는 정책이다. 그렇게 되면 이 row들은 부모 잃은 row들이 된다.
+
+부모 테이블의 row를 삭제하고 싶지만, 그것을 참조하던 자식 테이블의 row들을 남겨두고 싶다면 SET NULL 정책을 사용해야 한다.
+
+## 부모 테이블의 row에서 참조 당하는 컬럼이 갱신될 때는?
+
+부모 테이블의 row에서 참조 당하는 컬럼이 갱신될 때 사용하는 정책들 모두 의미가 똑같으며, `ON UPDATE` 에 적용한다.
+
+### RESTRICT
+
+부모 테이블 중 자식 테이블에 의해 참조 당하는 row의 참조 당하는 컬럼(예: id) 값을 갱신할 수 없으며, 변경하려고 Foreign Key 제약 사항 위반으로 할 경우 에러가 난다.
+
+### CASCADE
+
+부모 테이블 중 자식 테이블에 의해 참조 당하는 row들의 참조 당하는 컬럼 값을 변경할 경우, 이를 참조하던 자식 테이블의 Foreign Key 값도 그에 맞게 갱신된다.
+
+### SET NULL
+
+부모 테이블 중 자식 테이블에 의해 참조 당하는 row들의 참조 당하는 컬럼 값을 갱신할 경우, 이를 참조하던 자식 테이블의 Foreign Key 값은 NULL로 바뀐다.
+
+정리하면, ON DELETE에서든 ON UPDATE 에서든 RESTRICT, CASCADE, SET NULL 정책이 가지는 의미는 동일하다.
+
+그리고 ON DELETE와 ON UPDATE 각각에 서로 다른 정책을 설정할 수 있다.
+
+## 논리적 Foreign Key, 물리적 Foreign Key
+
+실무에서는 주문 테이블 - 배송 테이블, 회원 테이블 - 댓글 테이블, 부서 테이블 - 직원 테이블 처럼
+
+많은 테이블들이 Foreign Key를 매개로 해서 관계를 맺고 있고, 여러 테이블들을 하나로 합치는 JOIN을 이 Foreign Key를 기준으로 하는 것이 일반적이기 때문에, 현재 데이터베이스에 존재하는 Foreign Key들을 잘 파악하는 것이 중요하다.
+
+그런데 실무에서 데이터베이스 테이블을 살펴보다보면 **어떤 테이블의 특정 컬럼이 Foreign Key로 설정되어야 할 것 같은데 Foreign Key로 설정되지 않은 경우**를 보게 될 수도 있다.
+
+어떤 테이블의 한 컬럼이 논리적으로 다른 테이블의 컬럼을 참조해야 해서 개념 상 Foreign Key에 해당하는 것과, 실제로 해당 컬럼을 Foreign Key로 설정해서 두 테이블 간의 참조 무결성을 지킬 수 있게 되는 것은 별개이다.
+
+그래서 이 둘을 나누어서 개념상, 논리적으로 성립하는 Foreign Key를 **논리적(Logical) Foreign Key**라고 하고,
+
+DBMS 상에서 실제로 특정 컬럼을 Foreign Key로 설정해서 두 테이블 간의 참조 무결성을 보장할 수 있게 됐을 때, 그 컬럼을 **물리적(Physical) Foreign Key**라고 한다.
+
+데이터베이스에 들어갈 여러 테이블들을 설계하다 보면 당연히 여러 논리적 Foreign Key 들이 생길 수 밖에 없다. 하지만 실무에서는 논리적 Foreign Key라고 해서 꼭 그것을 물리적 Foreign Key로 설정하는 것은 아니다. 물리적 Foreign Key로 설정한다면 참조 무결성이 보장되니까 좋을텐데 왜 설정하지 않는 것일까?
+
+### 1. 성능 문제
+
+실제 서비스에 의해 사용되고 있는 데이터베이스의 테이블들은 단 1초 내에도 수많은 조회(SELECT), 갱신(UPDATE), 삭제(DELETE) 작업이 일어나고 있을 수 있다. 이럴 때 SQL 문 하나하나가 얼마나 빨리 실행되는지가 사용자의 만족도에 큰 영향을 미치게 될 것이다.
+
+**물리적 Foreign Key가 있는 자식 테이블의 경우에는, INSERT, UPDATE 문 등이 실행될 때 약간의 속도 저하가 발생할 가능성이 있다.** 왜냐하면 INSERT, UPDATE 문이 실행될 때 혹시라도 참조 무결성을 깨뜨리는 변화가 발생하지는 않을 지 추가적으로 검증해줘야 하기 때문이다. 즉, 물리적 Foreign Key를 설정하게 되면, 데이터의 참조 무결성을 보장해주는 대신, 성능 부분에서는 약간의 양보가 필요한 것이다.
+
+만약 데이터의 참조 무결성보다는 일단 당장 빠른 성능이 중요하다면 물리적 Foreign Key를 굳이 설정하지 않기도 한다. 그리고 이렇게 일단은 INSERT, UPDATE 문 등이 보다 더 빠르게 실행되도록 하고, 참조 무결성을 어기는 데이터들은 정기적으로 별도 확인 후에 삭제해주는 방식을 택하기도 한다.
+
+### 2. 레거시(Legacy) 데이터의 참조 무결성이 이미 깨진 상태라면?
+
+IT 세계에는 레거시(Legacy)라는 용어가 있다. '유물, 유산' 이라는 뜻을 가진 단어인데, IT 세계에서는 프로그램의 기존 코드, 기존 데이터 등을 나타낼 때 사용하는 말이다.
+
+데이터베이스 쪽 분야에서는 레거시 데이터라는 말을 흔히 사용하는데, 어떤 회사에 개발자로 입사했을 때 이미 그 회사에 쌓여있던 데이터라고 생각하면 된다. 만약 이런 레거시 데이터들을 살펴봤는데 회사가 그 동안 물리적 Foreign Key 없이 데이터를 쌓아와서 참조 무결성을 어기는 row들이 생겨버린 상황이라고 해보자.
+
+이런 경우에는 어떤 선택을 해야 할까? 일단 참조 무결성을 어기는 row들을 과감하게 지워버린 후에 물리적 Foreign Key를 설정하는 방법이 있을 것이다. 하지만 만약 참조 무결성을 어기는 row들의 수가 많고, 그것들도 소중한 데이터라서 함부로 삭제할 수 없는 상황이라면 어떻게 해야할까?
+
+물론 이후부터는 참조 무결성을 지키면서 데이터를 저장하도록 할 수는 있다. 하지만 아무리 그 뒤로 참조 무결성을 지킨다고 해도 이미 레거시 데이터 때문에 전체적인 차원에서의 참조 무결성을 깨져버린 상태다.
+
+바로 이런 현실적인 이유 때문에 그냥 물리적 Foreign Key 없이, 참조 무결성을 지키는 것을 포기하고 서비스를 운영하는 곳들도 생겨나게 된다. 참조 무결성이 깨지더라도 일단 소중한 데이터들을 삭제하지 말자는 생각인 것이다.
+
+위에서 언급된 이유 등으로 인해 실무에서는 **논리적 Foreign Key를 굳이 물리적 Foreign Key로 설정하지 않는 경우도 많다.**
+
+하지만 분명한 것은 데이터의 **참조 무결성(Referential Integrity)**를 완벽하게 지켜야 하는 서비스(은행, 학적 관리 서비스 등)에서는 논리적 Foreign Key를 반드시 물리적 Foreign Key로 설정해야 한다. 100%의 정확성이 요구되는 서비스에서 참조 무결성이 깨져버린다면 최악의 상황이 될 것이기 때문이다.
+
+## Foreign Key를 삭제하는 방법
+
+한 번 설정한 Foreign Key는 필요가 없어진 경우 삭제할 수도 있고, 삭제하고 다른 Foreign Key를 걸 수도 있다.
+
+Foreign Key를 삭제하기 전에 우선 테이블에 어떤 Foreign Key가 있는지 확인해 볼 수 있다.
+
+이전에 언급된 `SHOW CREATE TABLE` 문을 활용하면 된다. 이를 통해서 Foreign Key 제약사항의 이름을 확인하면 된다.
+
+그리고 Foreign Key를 삭제하려면 이렇게 쓰면 된다.
+
+```sql
+ALTER TABLE 테이블명
+	DROP FOREIGN KEY ForeignKey_이름;  # DROP CONSTRAINT ForeignKey_이름 으로 적어주어도 잘 삭제된다.
+```
+
+## 데이터베이스의 설계사항, 스키마
+
+데이터베이스에 어떤 테이블들이 있고, 각 테이블의 컬럼 구조와 각 컬럼의 데이터 타입 및 속성이 어떻게 되고, 테이블 간의 관계는 어떻게 되는 지 등과 같은, **데이터베이스에 관한 모든 설계사항**을 스키마(Schema)라고 한다.
+
+스키마는 실무에서 정말 자주 사용되는 용어 중 하나이다.
+
+어떤 데이터베이스를 새롭게 구축해야할 때는 가장 처음 '스키마'를 짜야한다. 그리고 스키마를 짜는 것을 데이터베이스 모델링 또는 데이터베이스 디자인 이라고 한다.
+
+데이터베이스라는 건 결국 첫 설계가 향후에 환경 변화에 맞춰 데이터베이스를 수정할 때 얼마나 더 유연하고 편리하게 할 수 있는지에 큰 영향을 미치게 된다. 즉, 처음부터 스키마를 잘 짜는 게 중요하다.
+
+스키마에는 두 가지 종류가 있다.
+
+### 개념적 스키마 (Conceptual Schema)
+
+위에서 설명한 내용이 개념적 스키마에 해당하는 내용이다.
+
+하나의 조직, 하나의 기관, 하나의 서비스 등에서 필요로 하는 데이터베이스 설계사항을 의미한다.
+
+보통 스키마 라고 하면 이 개념적 스키마를 의미한다.
+
+### 물리적 스키마 (Physical Schema)
+
+물리적 스키마는 전혀 다른 의미의 스키마로, 데이터를 실제로 컴퓨터의 저장장치에 어떤 방식으로 저장할 지를 결정하는 스키마이다. 예를 들어, 만약 member 라는 테이블이 있고 그 안에 id, name, age 등의 컬럼이 있을 때 각 컬럼의 값들을 어떤 방식으로 저장할 지에 관한 설계사항이다. 그래서 물리적 스키마는 저장 스키마(Storage Schema), 내부 스키마(Internal Schema)라고도 한다.
+
+사실 물리적 스키마는 일반 개발자나 사용자가 다룰 일이 업삳. **MySQL, Oracle과 같은 DBMS를 만드는 개발자들이 다루는 개념**이다. 똑같은 개념적 스키마라도 DBMS에 따라 그 물리적 스키마가 전혀 다를 수 있다. 같은 데이터라도 컴퓨터에 실제로 어떻게 저장할 지는 DBMS에 따라 다르기 때문이다. 바로 이 물리적 스키마 부분에서 각 DBMS의 장단점, 특성들이 드러나게 되는 것이다.
+
+일반적으로는 스키마가 개념적 스키마를 의미한다는 것을 잘 기억하면 된다. 그런데 위의 스키마에 관한 내용은 모두 스키마에 관한 일반론적인 설명이다. 스키마라는 단어의 의미에 혼동을 주는 요소가 하나 있는데, 각 DBMS들의 사용 설명서를 읽어보면, 제각각 스키마라는 단어를 조금씩 다르게 사용하고 있다는 것이다.
+
+일단 MySQL 에서는 스키마를 그냥 Database와 같은 의미로 혼용하고 있다.
+
+Oracle에서 스키마는 하나의 사용자가 만든 각종 객체(테이블, 뷰 등)의 집합을 의미한다.
+
+스키마라는 단어를 '데이터베이스 설계사항'으로 이해하고, 혹시라도 다른 의미로 사용되는 것 같은 경우에는 특정 DBMS에서만 가지는 의미가 아닐 지 한 번 직접 찾아보면 될 것이다.
+
+## Foreign Key로 빠르게 파악하는 테이블 간의 관계
+
+각 Foreign Key가 무슨 테이블에 있고, 어느 테이블의 어느 컬럼을 참조하는지를 파악하면 테이블 간의 관계, 나아가 데이터 저장 현황을 빠르게 파악할 수 있다.
+
+만약 물리적 Foreign Key로 별도로 설정하지 않아서 논리적 Foreign Key만 존재하는 상황이라면 해당 데이터베이스의 스키마에 관한 문서, 도면, 파일 등을 참고하는 게 좋다. 비록 물리적 Foreign Key로 설정하지 않았더라도 논리적 Foreign Key는 스키마를 짜는 데이터베이스 모델링 단게에서 모두 고려되기 때문이다.
+
+만약 이미 운영 중인 데이터베이스를 맡게 된다면 이런 Foreign Key들을 빨리 파악하는 것이 중요하다.
+
+데이터베이스에 데이터가 어떤 식으로 저장되고 있는지 파악한다면, 그 후로는 데이터를 더 잘 저장하고 관리할 수 있을 것이다. 데이터를 조회 및 분석할 때 좋은 결과를 얻기 위해서는, 애초에 필요한 데이터를 잘 저장하고 관리할 수 있어야 한다.
+
 </details>
