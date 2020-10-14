@@ -1,6 +1,7 @@
 본 정리 자료는 **코드잇에서 파이썬 모듈과 패키지 토픽**을 수강하며 배운 지식을 정리한 내용입니다.
 
 [코드잇 파이썬 모듈과 패키지 토픽](https://www.codeit.kr/courses/python-intermediate/topics/python-module-and-package)
+<<<<<<< HEAD
 
 <details>
   <summary>1. 모듈</summary>
@@ -705,3 +706,5 @@ if __name__ == '__main__':
 <details>
   <summary>3. 외부 패키지 사용하기</summary>
 </details>
+=======
+>>>>>>> fc856d554e41d2d331e4e815e0020a8cf59faa7d
