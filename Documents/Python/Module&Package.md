@@ -700,6 +700,498 @@ if __name__ == '__main__':
 
 <details>
   <summary>2. 패키지</summary>
+
+# 패키지
+
+## 패키지란?
+
+패키지는 모듈들을 모아 놓은 디렉토리를 뜻한다.
+
+예를 들어 평면 도형의 면적을 구해 주는 area 모듈과, 입체 도형의 부피를 구해 주는 volume 모듈을 모아서 shapes 패키지를 만들었다고 하자. shapes 패키지의 구조는 다래와 같다.
+
+```
+shapes/
+    __init__.py
+    area.py
+    volume.py
+```
+
+shapes/area.py
+
+```python
+PI = 3.14
+
+# 원의 면적을 구해 주는 함수
+def circle(radius):
+    return PI * radius * radius
+
+# 정사각형의 면적을 구해 주는 함수
+def square(length):
+    return length * length
+```
+
+shapes/volume.py
+
+```python
+PI = 3.14
+
+# 구의 부피를 구해 주는 함수
+def sphere(radius):
+    return (4/3) * PI * radius * radius * radius
+
+# 정육면체의 부피를 구해 주는 함수
+def cube(length):
+    return length * length * length
+```
+
+패키지는 일반 디렉토리와 똑같은데 안에 `__init__.py` 라는 파일이 있다.
+
+### 패키지 임포트
+
+모듈과 비슷하게 패키지 안에 있는 내용을 가져올 때도 `import` 키워드를 사용한다.
+
+### `import <package.module>`
+
+run.py
+
+```python
+import shapes.volume
+
+print(shapes.volume.cube(3))
+```
+
+이렇게 패키지 안에 있는 모듈을 가져올 수 있다.
+
+패키지나 모듈 안에 있는 것은 항상 . 을 이용해서 접근한다.
+
+### `import <package>`
+
+run.py
+
+```python
+import shapes
+
+print(shapes.volume.cube(3)) # 오류
+```
+
+이렇게 패키지 자체를 임포트할 수도 있는데, 그러면 **패키지 안에 있는 내용들은 임포트되지 않는다** (패키지 안에 있는 모듈도 같이 임포트하려면 패키지의 init 파일을 활용해야 한다). 그래서 위 코드는 오류가 난다.
+
+참고로 `import ...` 방식을 써서는 모듈의 함수나 변수를 바로 가져올 수 없다.
+
+run.py
+
+```python
+import shapes.volume.cube # 오류
+```
+
+`import ...` 방식으로는 패키지나 모듈만 임포트할 수 있다.
+
+### `from <package> import <module(s)>`
+
+run.py
+
+```python
+from shapes import volume
+print(volume.cube(3))
+```
+
+`from ... import ...` 방식도 패키지에 쓸 수 있다. 패키지 안의 모듈을 바로 가져올 수도 있고
+
+### `from <package.module> import <member(s)>`
+
+모듈 안에 있는 변수나 함수를 가져올 수도 있다.
+
+run.py
+
+```python
+from shapes.volume import cube
+
+print(cube(3))
+```
+
+### `as` 키워드
+
+그리고 임포트 문 뒤에 `as` 키워드를 써서 임포트하는 것의 이름을 바꿔줄 수 있다.
+
+run.py
+
+```python
+import shapes.volume as vol
+
+print(vol.cube(3))
+```
+
+## `__init__` 파일
+
+### shapes 패키지의 구조
+
+```
+shapes/
+    __init__.py
+    area.py
+    volume.py
+```
+
+shapes/area.py
+
+```python
+PI = 3.14
+
+# 원의 면적을 구해 주는 함수
+def circle(radius):
+    return PI * radius * radius
+
+# 정사각형의 면적을 구해 주는 함수
+def square(length):
+    return length * length
+```
+
+shapes.volume.py
+
+```python
+PI = 3.14
+
+# 구의 부피를 구해 주는 함수
+def sphere(radius):
+    return (4/3) * PI * radius * radius * radius
+
+# 정육면체의 부피를 구해 주는 함수
+def cube(length):
+    return length * length * length
+```
+
+### `__init__` 파일이란?
+
+패키지 안에는 `__init__.py` 라는 파일이 있다. init 파일은 '이 폴더는 파이썬 패키지다' 라고 말해주는 파일이다.
+
+파이썬 3.3 이전 버전에서는 init 파일이 필수였다. 디렉토리 안에 init 파일이 없으면 디렉토리가 패키지로 인식되지 않아서 패키지를 임포트할 수 없었다.
+
+파이썬 3.3 이후 버전부터는 init 파일이 필수가 아니게 됐지만 파이썬 하위 버젼과의 호환성과 패키지의 명확성을 위해 항상 패키지 안에 init 파일을 만들어 주는 것이 권장된다.
+
+init은 initialize 를 줄인 것인데, 이 단어는 초기화를 뜻한다. 우리가 처음으로 패키지나 패키지 안에 있는 어떤 것을 임포트하면 가장 먼저 패키지의 init 파일에 있는 코드가 실행된다.
+
+### `__init__` 파일에서 임포트 사용하기
+
+패키지를 임포트하면 기본적으로 패키지 안에 있는 내용은 임포트되지 않는다. 패키지를 임포트할 때 패키지 안에 있는 내용도 함께 임포트하고 싶다면 init 파일을 활용해야 한다.
+
+init 파일에 패키지와 함께 임포트하고 싶은 것들을 써 주면 된다.
+
+shapes/**init**.py
+
+```python
+from shapes import area, volume`
+```
+
+그러면 이제 shapes 패키지를 임포트하면 area와 volume 모듈도 임포트 된다. init 파일에서 임포트하는 것은 패키지 안으로 임포트된다고 생각하면 된다. 이렇게 임포트된 area와 volume 모듈은 아래와 같이 접근할 수 있다.
+
+run.py
+
+```python
+import shapes
+
+print(shapes.area.circle(2))
+print(shapes.volume.sphere(2))
+```
+
+그리고 모듈 대신 모듈의 함수들을 직접 임포트할 수도 있다.
+
+`shapes/__init__.py`
+
+```python
+from shapes.area import circle, square
+```
+
+그러면 이 함수들을 아래와 같이 접근할 수 있다.
+
+run.py
+
+```python
+import shapes
+
+print(shapes.circle(2))
+print(shapes.square(3))
+```
+
+shapes 패키지 안에서 함수들을 직접 가져왔기 때문에 area를 건너뛸 수 있는 것이다. init 파일에서 임포트 되는 것은 항상 package. 으로 접근할 수 있다. 위 처럼 호출 방식을 바꿔주는 것은 유용하게 쓰일 때도 있다.
+
+### `__init__ 파일에서 변수 정의하기`
+
+상수값 PI는 area 모듈에서도 쓰이고 volume 모듈에서도 쓰인다. PI처럼 패키지에 있는 여러 모듈이 필요로 하는 것들은 각 모듈에서 정의하지 않고 패키지 안에서 한 번만 정의해 주는 게 좋다. 똑같은 걸 여러 번 정의하는 건 비효율적이고 실수로 하나를 잘못 정의하면 프로그램에 오류가 나기 때문이다.
+
+PI를 패키지 안에서 한 번만 정의해 주려면 (즉, 패키지 레벨에서 정의해 주려면) PI를 shapes 패키지의 init 파일에서 정의해 주면 된다.
+
+`shapes/__init__.py`
+
+```python
+PI = 3.14
+```
+
+그리고 패키지 안에 있는 모듈에서는 PI를 임포트하면 된다.
+
+shapes/area.py
+
+```python
+from shapes import PI
+...
+```
+
+shapes/volume.py
+
+```python
+from shapes import PI
+...
+```
+
+PI 같은 상수뿐만이 아니라 여러 모듈에서 필요한 변수, 함수 또는 객체는 패키지의 init 파일에서 정의해 주는 게 좋다.
+
+그리고 패키지의 init 파일에서 정의되는 것들은 패키지 밖에서도 사용할 수 있다.
+
+run.py
+
+```python
+# 1) PI 직접 임포트
+from shapes import PI
+PI
+
+# 2) 패키지 임포트 후 shapes. 으로 접근
+import shapes
+shapes.PI
+```
+
+## `__all__` 특수 변수
+
+### `import *`
+
+모듈을 임포트할 때 `from <module> import *` 를 하면 모듈의 모든 내용이 임포트 된다.
+
+하지만 모듈 대신 패키지에 `from <package> import *` 를 하면 패키지 안에 있는 게 아무것도 임포트 되지 않는다.
+
+### `__all__` 특수 변수
+
+`__all__` 특수 변수는 우리가 `import *` 를 했을 때 임포트 대상에서 어떤 것들을 가져와야 하는지를 정해 주는 변수이다. 임포트 대상에서 내용 전체를 가져오라고 했을 때, '전체' 가 무엇인지 정의해 주는 것이다. `__all__`은 모듈에도 적용되고 패키지에도 적용된다.
+
+### `__all__` 과 모듈
+
+모듈의 `__all__` 은 모듈에 해당하는 파일에서 정의한다. 예를 들어 area.py에 아래와 같은 코드를 추가해 주면:
+
+shapes/area.py
+
+```python
+# __all__ 정의
+__all__ = ['circle', 'square']
+
+...
+```
+
+`from shapes.area import *` 를 했을 때 area 모듈의 모든 내용이 임포트 되지 않고 circle과 square 함수만 임포트 된다.
+
+### `__all__` 과 패키지
+
+패키지의 `__all__`은 패키지에 해당하는 init 파일에서 정의한다. 예를 들어 shapes 패키지의 init 파일에 아래와 같은 코드를 추가해 주면:
+
+`shapes/__init__.py`
+
+```python
+# __all__ 정의
+__all__ = ['area', 'volume']
+```
+
+이제 `from shapes import *` 를 하면 area 모듈과 volume 모듈이 임포트 된다.
+
+`__all__` 을 사용하면 패키지나 모듈에 `import *` 를 했을 때 어떤 것들이 임포트 되는지를 제어할 수 있다.
+
+그래도 여전히 `import *` 만 봐서는 정확히 어떤 것들이 임포트 되는지를 알 수 없기 때문에 `import *` 는 프로그램에서 정의되는 이름들, 즉 네임스페이스를 완벽히 이해하고 있을 때만 사용하는 것이 추천된다.
+
+## 서브 패키지
+
+### 서브 패키지란?
+
+패키지 안에는 모듈도 있을 수 있고 다른 패키지들이 있을 수도 있다.
+
+패키지 안에 또 다른 패키지가 있을 때, 안에 있는 패키지를 **서브패키지**라고 한다.
+
+### mymath 패키지 구조
+
+```
+mymath/
+    shapes/
+        __init__.py
+        area.py
+        volume.py
+    stats/
+        __init__.py
+        average.py
+        spread.py
+```
+
+mymath/shapes/area.py
+
+```python
+PI = 3.14
+
+# 원의 면적을 구해 주는 함수
+def circle(radius):
+    return PI * radius * radius
+
+# 정사각형의 면적을 구해 주는 함수
+def square(length):
+    return length * length
+```
+
+mymath/shapes/volume.py
+
+```python
+PI = 3.14
+
+# 구의 부피를 구해 주는 함수
+def sphere(radius):
+    return (4/3) * PI * radius * radius * radius
+
+# 정육면체의 부피를 구해 주는 함수
+def cube(length):
+    return length * length * length
+```
+
+mymath/stats/average.py
+
+```python
+# 데이터의 평균을 구해 주는 함수
+def data_mean(data):
+    return sum(data) / len(data)
+
+# 데이터의 중앙값을 구해 주는 함수
+def data_median(data):
+    data.sort()
+    n = len(data)
+    if n % 2 == 0:
+        # 데이터 개수가 짝수면 중앙에 위치한 두 값의 평군을 구함
+        # [a, b, c, d, e, f] -> median = (c+d) / 2
+        return (data[n/2] + data[(n/2)-1]) / 2
+    else:
+        # [a, b, c, d, e] -> median = c
+        return data[(n-1)/2]
+```
+
+myath/stats/spread.py
+
+```python
+# 데이터의 범위를 구해 주는 함수
+def data_range(data):
+    return max(data) - min(data)
+```
+
+shapes 패키지와 stats 패키지는 서브패키지라고 할 수 있다.
+
+서브패키지도 결국 패키지이기 때문에 지금까지 익힌 임포트 방식들을 사용하면 된다.
+
+### 임포트 총정리
+
+### `import ...`
+
+run.py
+
+```python
+# 패키지 임포트
+import mymath
+
+# 서브패키지 임포트
+import mymath.shapes
+
+# 모듈 임포트
+import mymath.shapes.area
+
+# 모듈 안에 있는 변수나 함수는 이 방식으로 임포트 할 수 없음
+import mymath.shapes.area.circle # 오류
+```
+
+그냥 `import` 뒤에 가져오고 싶은 모듈이나 패키지를 써 주면 된다. 하지만 모듈 안에 있는 변수나 함수는 이 방식으로 임포트할 수 없다.
+
+그리고 (서브)패키지를 임포트할 때는 패키지와 같이 임포트하고 싶은 걸 피키지의 init 파일에 적어줘야 한다.
+
+### `from ... import ...`
+
+run.py
+
+```python
+# 패키지 안에 있는 패키지 임포트
+from mymath import shapes
+
+# 패키지 안에 있는 모듈 임포트
+from mymath.shapes import area
+
+# 모듈 안에 있는 함수 임포트
+from mymath.shapes.aera import circle
+
+# 임포트 뒤에는 . 을 쓸 수 없음
+from mymath import shapes.area # 오류
+```
+
+`from` 뒤에는 모듈이나 패키지가 올 수 있다. `import` 뒤에는 모듈이나 패키지 안에서 가져오고 싶은 걸 써준다. `import` 뒤에는 . 을 쓸 수 없다.
+
+### `as` 키워드
+
+항상 임포트 문 뒤에 `as` 키워드를 써서 임포트하는 것의 이름을 바꿔 줄 수 있다.
+
+## 상대 경로 임포트
+
+mymath 패키지의 구조와 그 안의 (서브 패키지 안의) 모듈들의 코드는 앞서 표기된 것과 동일하다.
+
+임포트를 하는 곳의 위치를 기준으로 임포트 하려는 것의 위치를 상대적으로 표현하는 걸 **상대 경로 임포트**라고 한다. 반대로 우리가 계속해 왔던 것처럼 임포트하려는 것의 경로를 다 풀어서 써 주는 것은 **절대 경로 임포트**라고 한다.
+
+상대 경로 임포트는 항상 `.` 아니면 `..` 으로 시작한다. `.` 은 현재 패키지 안을 뜻하고, `..` 은 상위 패키지 안을 뜻한다.
+
+예를 들어 shaeps 패키지의 init 파일의 기준으로는 현재 패키지가 mymath/shapes 이고 상위 패키지는 mymath 일 것이다.
+
+### 1. shapes 패키지의 init 파일에서 패키지 안에 있는 모듈들 가져오기:
+
+`mymath/shapes/__init__.py`
+
+```python
+# 절대 경로 임포트
+from mymath.shapes import area, volume
+
+# 상대 경로 임포트
+from . import area, volume
+```
+
+상대 경로가 훨씬 더 간결하다.
+
+임포트 문이 의미하는 것도 명확하다: 현재 패키지에서 area, volume 모듈을 임포트 하라는 뜻
+
+### 2. stats 패키지의 init 파일에서 패키지의 모듈들 안에 있는 함수들 모두 가져오기:
+
+`mymath/stats/__init__.py`
+
+```python
+# 절대 경로 임포트
+from mymath.stats.average import *
+from mymath.stats.spread import *
+
+# 상대 경로 임포트
+from .average import *
+from .spread import *
+```
+
+첫 번째 예시와 비슷하게 상대 경로를 사용할 때 임포트 문이 더 간결해졌고 의미하는 것도 명확하다: 현재 패키지의 average, spread 모듈에서 모든 내용을 다 가져오라는 뜻
+
+### 3. area 모듈에서 average 모듈에 있는 `data_mean` 함수 가져오기
+
+프로그램을 만들다 보면 이렇게 패키지 안에서 다른 패키지에 있는 것이 필요할 때도 있다.
+
+mymath/shapes.area.py
+
+```python
+# 절대 경로 임포트
+from mymath.stats.average import data_mean
+
+# 상대 경로 임포트
+from ..stats.average import data_mean
+```
+
+이번에는 상대 경로를 봐서는 average 모듈이 정확히 어디에 있는지, 패키지 구조가 어떻게 되는지 파악하기가 힘들다.
+
+상대 경로가 복잡해지는 경우 (주로 `..` 을 쓰는 경우)에는 그냥 절대 경로를 쓰는 것이 좋다.
+
 </details>
 
 <details>
