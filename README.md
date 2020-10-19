@@ -28,6 +28,8 @@
 
 - [**파이썬 모듈과 패키지**](https://github.com/SeongjaePark/TIL/blob/master/Documents/Python/Module&Package.md)
 
+- [**[서적] 깔끔한 파이썬 탄탄한 백엔드(저자: 송은우)**](https://github.com/SeongjaePark/TIL/blob/master/Documents/Python/SoundBackend.md)
+
 ### Database
 
 - [SQL](https://github.com/SeongjaePark/TIL/blob/master/Documents/Database/SQL/SQL.md)
