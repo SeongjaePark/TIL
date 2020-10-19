@@ -40,3 +40,426 @@ ping 엔드포인트는 주로 API 서버가 현재 운행되고 있는지 아�
 - 백엔드 API 개발 입문에서 중요한 것은 먼저 기본적인 개념을 먼저 잘 이해하고, 그러고 난 후 API 코드의 전체적인 구조에 대해서 이해하는 것이 핵심이다. API의 개념을 잘 이해해서 구조를 잘 잡고 나면 그 다음은 필요한 비즈니스 로직을 함수를 통해 구현하기만 하면 된다. API 코드의 전체적인 구조가 일단 잡히면 그 다음부터는 엔드포인트들, 즉 함수들을 구현하는 것이 개발의 대부분이다. 함수를 구현하는 것은 개념적이나 구조적으로는 어려울 것이 없다.
 - API를 개발하기 위해 필수적인 기본 개념들 중 가장 중요한 것 하나가 바로 HTTP다 왜냐하면 API는 기본적으로 HTTP 통신에 기반을 두고 있기 때문이다.
 </details>
+
+<details>
+  <summary>Chapter 4. HTTP의 구조 및 핵심 요소</summary>
+
+# Chapter 4 HTTP의 구조 및 핵심 요소
+
+프론트엔드 시스템과 백엔드 API 시스템은 일반적으로 HTTP 프로토콜을 기반으로 통신한다.
+
+# HTTP
+
+HTTP는 HyperText Transfer Protocol의 약자로, 웹상에서 서로 다른 서버 간에 하이퍼텍스트 문서, 즉 HTML을 서로 주고받을 수 있도록 만들어진 프로토콜, 통신 규약임
+
+# HTTP 통신 방식
+
+HTTP 통신 방식에는 2가지 특징이 있음.
+
+1. HTTP의 요청(request)와 응답(response) 방식임
+2. stateless임
+
+## 1) HTTP 요청과 응답
+
+HTTP는 기본적으로 요청과 응답의 구조로 되어 있음
+
+클라이언트가 먼저 HTTP 요청을 서버에 보내면 서버는 요청을 처리한 후 결과에 따른 HTTP 응답을 클라이언트에게 보냄으로써 하나의 HTTP 통신이 됨
+
+그러므로 백엔드 API 시스템의 엔드포인트 구현도 기본적으로 HTTP 요청을 인풋으로 받아서 HTTP 응답을 아웃풋으로 리턴하는 구조로 구현하게 됨
+
+Flask가 HTTP 부분을 자동으로 처리해 주기 때문에, Flask를 사용하면 개발자는 최대한 일반 함수를 구현하듯이 엔드포인트를 구현할 수 있다.
+
+## 2) stateless
+
+HTTP 통신은 "stateless"다.
+
+stateless라는 말 그대로 상태(state)가 없다는 뜻으로, HTTP 통신에서는 상태의 개념이 존재하지 않는다.
+
+클라이언트와 서버는 HTTP 통신을 여러 번 주고받는 것이 일반적인데, HTTP 프로토콜에서는 동일한 클라이언트와 서버가 주고받은 HTTP 통신들이라도 서로 연결되어 있지 않다.
+
+즉, 각각의 HTTP 통신은 독립적이며 그 전에 처리된 HTTP 통신에 대해서 전혀 알지 못한다. 그래서 HTTP 프로토콜은 stateless라고 하는 것이다.
+
+HTTP 프로토콜이 stateless 이기 때문에 서버 디자인이 훨씬 간단해지고 효과적인 장점이 있다.
+
+- HTTP 통신들의 상태를 서버에서 저장할 필요가 없으므로 여러 다른 HTTP 통신 간의 진행이나 연결 상태의 처리나 저장을 구현 및 관리하지 않아도 되기 때문이다.
+- 오직 각각의 HTTP 요청에 대해 독립적으로 응답만 보내 주면 된다.
+
+다만 단점은 stateless 이기 때문에 HTTP 요청을 보낼 때는 해당 요청을 처리하기 위해 필요한 모든 데이터를 매번 포함시켜여 요청을 보내야 한다는 점이다.
+
+- 예를 들어, 어떤 HTTP 요청을 처리하기 위해서 해당 사용자가 로그인이 되어야 한다고 가정 해보자.
+- 해당 사용자가 이미 그 전의 HTTP 통신을 통해서 로그인을 한 상태라고 하더라도 HTTP는 stateless 이기 때문에 새로 보내는 HTTP 통신에서는 해당 사용자가 그 전 HTTP 통신에서 로그인했다는 사실을 알지 못한다.
+- 그러므로 새로운 HTTP 요청을 보낼 때 해당 사용자의 로그인 사실 여부를 포함시켜서 보내야 한다.
+- 사용자의 로그인 사실 여부를 포함시켜서 HTTP 요청을 보내기 위해서는 클라이언트가 사용자의 로그인 사실 여부를 기억하고 있어야 한다.
+
+이러한 점들을 해결하기 위해서 쿠키(cookie)나 세션(session) 등을 사용하여 HTTP 요청을 처리할 때 필요한 진행 과정이나 데이터를 저장한다.
+
+- 쿠키(cookie)는 웹 브라우저가 웹사이트에서 보내온 정보를 저장할 수 있도록 하는 조그마한 파일을 말한다. 웹 브라우저는 쿠키라고 하는 파일을 사용해서 필요한 정보를 저장한다.
+- 세션(session)은 쿠키와 마찬가지로 HTTP 통신상에서 필요한 데이터를 저장할 수 있게 하는 매커니즘이다. 쿠키는 웹 브라우저, 즉 클라이언트 측에서 데이터를 저장하는 반면에 세션은 웹 서버에서 데이터를 저장한다.
+
+# HTTP 요청 구조
+
+HTTP 요청 메시지는 크게 다음의 세 부분으로 구성되어 있다.
+
+1. Start Line
+2. Headers
+3. Body
+
+예시:
+
+```
+POST /payment-sync HTTP/1.1   #  Start Line
+
+Accept: application/json           # Headers
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 83
+Content-Type: application/json
+Host: intropython.com
+User-Agent: HTTPie/0.9.3
+
+{                                 # Body
+	"imp_uid": "imp_123456789,
+	"merchant_uid": "order_id_82373532",
+	"status": "paid"
+}
+```
+
+cf) HTTP 요청과 응답 메시지의 모든 부분을 직접 구현할 필요는 없다. Flask(혹은 Django 등의 다른 웹 프레임워크)가 거의 대부분을 알아서 처리해 준다. 일반적으로 개발자가 직접 지정해야 하는 부분은 HTTP 메소드와 status code, 몇 개의 헤더 정보, 그리고 body 부분이다 하지만 그래도 HTTP 응답과 요청의 구조와 내용을 이해는 하고 있어야 한다.
+
+## 1. Start Line
+
+이름 그대로 HTTP 요청의 시작줄임.
+
+예를 들어, "search" 엔드포인트에 GET HTTP 요청을 보낸다면 해당 HTTP 요청의 start line은 다음과 같다.
+
+`GET /search HTTP/1.1`
+
+start line은 세 부분으로 구성되어 있다.
+
+### **1) HTTP 메소드**
+
+- 해당 HTTP 요청이 의도하는 액션(action)을 정의하는 부분
+- 서버로부터 어떤 데이터를 받고자 한다면 GET 요청을 보내고, 서버에 새로운 데이터를 저장하고자 한다면 POST 요청을 보내는 식
+- GET, POST, PUT, DELETE, OPTION 등 여러 메소드들이 있음. 그 중 GET과 POST가 가장 널리 쓰임
+
+### **2) Request target**
+
+- 해당 HTTP 요청이 전송되는 목표 주소
+- "search" 엔드포인트에 보내는 HTTP 요청의 경우 request target은 "/search"가 됨
+
+### **3) HTTP version**
+
+- 해당 요청의 HTTP 버젼을 나타냄
+- 현재 "1.0", "1.1", 그리고 "2.0"이 있음
+- 버젼을 명시하는 이유는 HTTP 버젼에 따라 HTTP 요청 메시지의 구조나 데이터가 약간씩 다를 수 있으므로 서버가 받은 요청의 HTTP version에 맞추어서 응답을 보낼 수 있도록 하기 위함임
+
+## 2. Header
+
+start line 다음에 나오는 부분은 헤더(header)임
+
+헤더 정보는 HTTP 요청 그 자체에 대한 정보를 담고 있음. ex) HTTP 요청 메시지의 전체 크기(Content-Length)
+
+헤더는 파이썬의 dictionary처럼 key와 value로 되어 있음. `key:value` 로 표현됨
+
+### **다양한 헤더의 종류**
+
+- **Host**
+  - 요청이 전송되는 target의 호스트의 URL 주소를 알려줌
+  - 예: Host: google.co
+- **User-Agent**
+  - 요청을 보내는 클라이언트에 대한 정보: ex) 웹 브라우저에 대한 정보
+- **Accept**
+  - 해당 요청이 받을 수 있는 응답(response) body 데이터 타입을 알려줌
+  - MIME (Multipurpose Internet Mail Extension) type이 value로 지정됨. 예를 들어 JSON 데이터 타입을 요청하는 경우에는 application/json MIME type을 value로 지정해 주면 됨. 모든 데이터 타입을 다 허용하는 경우는 \*/ \*로 지정해주면 됨
+  - API에서 자주 사용되는 MIME type: application/json, application/octet-stream, text/csv, text/html, image/jpeg, image/png, text/plain, application/xml
+  - 예: Accept: \*/\*
+- **Connection**
+  - 해당 요청이 끝난 후에 클라이언트와 서버가 계속해서 네트워크 연결을 유지할 것인지 아니면 끊을 것인지에 대해 알려 줌
+  - HTTP 통신에서 서버 간에 네트워크 연결하는 과정이 다른 작업에 비해 시간이 걸리는 부분이므로 HTTP 요청 때마다 네트워크 연결을 새로 만들지 않고 HTTP 요청이 계속되는 한 처음 만든 연결을 재사용하는 것이 선호되는데, 이에 관한 정보를 전달하는 헤더임
+  - connection 헤더의 값이 keep-alive 이면 앞으로도 계속해서 HTTP 요청을 보낼 예정이므로 네트워크 연결을 유지하라는 뜻임
+  - 값이 close 라고 지정되면 더 이상 HTTP 요청을 보내지 않을 것이므로 네트워크 연결을 닫아도 된다는 뜻임
+  - 예: Connection: keep-alive
+- **Content-Type**
+  - HTTP 요청이 보내는 메시지 body의 타입을 알려 줌
+  - Accept 헤더와 마찬가지로 MIME type이 사용됨.
+  - 예: Content-Type: application/json
+- **Content-Length**
+  - HTTP 요청이 보내는 메시지 body의 총 사이즈를 알려 줌
+  - 예: Content-Length: 257
+
+## 3. Body
+
+HTTP 요청 메시지에서 body 부분은 HTTP 요청이 전송하는 데이터를 담고 있는 부분임. 전송하는 데이터가 없다면 body 부분은 비어 있게 됨
+
+# HTTP 응답 구조
+
+HTTP 응답 메시지의 구조도 요청 메시지와 마찬가지로 크게 세 부분으로 구성되어 있음
+
+1. Status Line
+2. Headers
+3. Body
+
+예시
+
+```
+HTTP/1.1 404 Not Found     # Status Line
+
+Connection: close          # Headers
+Content-Length: 1573
+Content-TYpe: text/html; charset=UTF-8
+Date: Mon, 19 Oct 2020 09:53:05 GMT
+
+<!DOCTYPE html>           # Body
+###HTML 내용
+```
+
+## 1. Status Line
+
+HTTP 응답 메시지의 상태를 간략하게 요약하여 알려 주는 부분
+
+HTTP 요청의 start line과 마찬가지로 status line도 세 부분으로 구성되어 있다
+
+### **1) HTTP Version**
+
+- 사용되고 있는 HTTP 버젼
+
+### **2) Status Code**
+
+- HTTP 응답 상태를 미리 지정되어 있는 숫자로 된 코드로 나타냄
+- 예: 요청이 정상적으로 처리된 경우 - 200
+
+### **3) Status Text**
+
+- HTTP 응답 상태를 간략하게 글로 설명해 주는 부분
+- 예: 요청이 정상적으로 처리된 경우 - OK
+
+**Status Line** **예시**
+
+```
+HTTP/1.1 404 Not Found
+```
+
+## 2. Header
+
+HTTP 요청의 헤더 부분과 동일. 다만 HTTP 응답에서만 사용되는 헤더 값들이 있다.
+
+예를 들어, HTTP 응답에는 User-Agent 헤더 대신에 Server 헤더가 사용됨
+
+## 3. Body
+
+HTTP 요청 메시지의 body와 동일. 요청 메시지와 마찬가지로 전송하는 데이터가 없다면 body 부분은 비어있게 됨.
+
+# 자주 사용되는 HTTP 메소드
+
+## GET
+
+- POST 메소드와 함께 가장 자주 사용되는 메소드
+- 어떤 데이터를 서버로부터 요청할 때 주로 사용
+- 데이터의 생성이나 수정, 그리고 삭제 등의 변경 사항 없이 단순히 데이터를 받아 오는 요청이 주로 GET 메소드로 요청됨
+- 해당 HTTP 요청의 body가 비어 있는 경우가 많음
+
+## POST
+
+- GET 메소드와 함께 가장 자주 사용되는 메소드
+- 데이터를 생성하거나 수정 및 삭제 요청할 때 사용
+
+## OPTIONS
+
+- 주로 특정 엔드포인트에서 허용하는 메소드들이 무엇이 있는지 알고자 할 때 사용
+- 엔드포인트는 허용하는 HTTP 메소드가 지정되도록 되어 있으며, 허용하지 않는 HTTP 메소드의 요청이 들어오면 **405 Method Not Allowed** 응답을 보내게 됨
+- 예: ping 엔드포인트에 OPTIONS 요청을 보내면 받는 응답
+
+```
+HTTP/1.0 200 OK
+
+Allow: GET, HEAD, OPTIONS
+Content-Length: 0
+Content-Type: text/html; charset=utf-8
+Date: Mon, 19 Oct 2020 14:18:26 GMT
+Server: Werkzeug/1.0.1 Python/3.7.9
+```
+
+ping 엔드포인트르 구현할 때 GET 메소드만 허용하도록 구현했는데 HEAD OPTIONS 메소드까지 허용되어 있음. Flask가 자동으로 HEAD와 OPTIONS 요청에 대한 응답을 구현해주기 때문. 개발자가 직접 OPTIONS 메소드에 대한 처리를 구현하지 않아도 됨
+
+## PUT
+
+- 데이터를 새로 생성할 때 사용 (POST와 비슷한 의미)
+- POST와 중복되는 의미이므로 데이터를 새로 생성하는 HTTP 요청을 보낼 때 굳이 PUT을 사용하지 않고 모든 데이터 생성 및 수정 관련한 요청은 다 POST로 통일해서 사용하는 시스템이 많아지고 있음
+
+## DELETE
+
+- 데이터 삭제 요청을 보낼 때 사용
+- PUT과 마찬가지로, POST에 밀려서 잘 사용되지 않음
+
+# 자주 사용되는 HTTP Status Code와 Text
+
+## 200 OK
+
+- HTTP 요청이 문제 없이 성공적으로 잘 처리 되었을 때 보내는 status code
+
+## 301 Moved Permanently
+
+- HTTP 요청을 보낸 엔드포인트의 URL 주소가 바뀌었다는 것을 나타냄
+- 301 status code의 HTTP 응답은 Location 헤더가 포함되는 것이 일반적인데, Location 헤더에 해당 엔드포인트의 새로운 주소가 포함되어 나옴
+- 301 요청을 받은 클라이언트는 Location 헤더의 엔드포인트의 새로운 주소에 해당 요청을 다시 보내게 됨. 이러한 과정을 "redirection" 이라고 함.
+
+```
+HTTP/1.1 301 Moved Permanently
+Location: http://www.example.org/index.asp
+```
+
+## 400 Bad Request
+
+- HTTP 요청이 잘못된 요청일 때 보냄
+- 주로 요청에 포함된 인풋 값들이 잘못된 경우 사용
+- 예: 사용자의 전화번호를 저장하는 HTTP 요청인데 전화번호에 숫자가 아닌 글자가 포함되었을 경우
+
+## 401 Unauthorized
+
+- 해당 요청을 보내는 주체(사용자 혹은 클라이언트)의 신분(credential) 확인이 요구되는 경우에 이를 확인할 수 없었을 때 보냄
+- 주로 해당 HTTP 요청을 보내는 사용자가 로그인이 필요한 경우 401 응답을 보냄
+
+## 403 Forbidden
+
+- 요청을 보내는 주체가 해당 요청에 대한 권한이 없음을 나타냄
+- 예: 비용을 지불한 사용자만 볼 수 있는 데이터에 대한 HTTP 요청을 보낸 사용자가 아직 비용을 지불하지 않은 상태일 경우
+
+## 404 Not Found
+
+- HTTP 요청을 보내고자 하는 URL이 존재하지 않을 떄 보냄
+- 예: "해당 페이지를 찾을 수 없습니다" 라는 메시지가 적인 페이지 = 404 페이지
+
+## 500 Internal Server Error
+
+- 내부 서버 오류가 발생했다는 것을 알려 줌
+- HTTP 요청을 받은 서버에서 해당 요청을 처리하는 과정에서 서버 오류가 나서 해당 요청을 처리할 수 없을 때 사용
+
+# API 엔드포인트 아키텍처 패턴
+
+API의 엔드포인트 구조를 구현하는 널리 알려진 패턴에는 크게 2가지가 있음
+
+- REST 방식: 가장 널리 사용되는 API 엔드포인트 아키텍처 패턴임.
+- GraphQL: 페이스북이 개발한 기술로 비교적 최근에 나온 기술
+
+## RESTful HTTP API
+
+REST(Representational State Transfer)ful HTTP API
+
+API에서 전송하는 리소스를 URI(Uniform Resource Identifier)로 표현하고 해당 리소스에 행하고자 하는 의도를 HTTP 메소드로 정의하는 방식
+
+각 엔드포인트는 처리하는 리소스를 표현하는 고유의 URI 주소를 가지고 있으며, 해당 리소스에 행할 수 있는 행위를 표현하는 HTTP 메소드를 처리할 수 있게 됨
+
+예: 사용자 정보를 리턴하는 "/users" 라는 엔드포인트에서 사용자 정보를 받아 오는 HTTP 요청은 다음과 같이 표현할 수 있음
+
+```
+HTTP GET /users
+GET /users
+```
+
+새로운 사용자를 생성하는 엔드포인트는 URI를 "/user/로 정하고 HTTP 요청은 다음과 같이 표현할 수 있음
+
+```
+POST /user
+{
+	"name"  : "박성재"
+	"email" : "1234@gmail.com"
+```
+
+이러한 구조로 설계된 API를 RESTful API라고 함
+
+### 장점
+
+자기 설명력(self-descriptiveness)
+
+- 엔드포인트의 구조만 보더라도 해당 엔드포인트가 제공하는 리소스와 기능을 파악할 수 있음
+- API를 구현하다 보면 엔드포인트의 수가 많아지면서 엔드포인트의 역할고 기능 파악이 쉽지 않은데, REST 방식으로 구현하면 구조가 훨씬 직관적이며 간단해짐
+
+## GraphQL
+
+REST 방식으로 구현해도 여전히 구조적으로 생기는 문제들이 있음.
+
+가장 자주 생기는 문제는 API의 구조가 특정 클라이언트에 맞추어져서 다른 클라이언트에서 사용하기에 적합하지 않게 된다는 점임
+
+REST 방식의 API에서는 클라이언트들이 API가 엔드포인트들을 통해 구현해 놓은 틀에 맞추어 사용해야 하다 보니 그 틀에서 벗어나는 사용은 어려워 진다.
+
+이러한 문제를 해결하기 위해서 페이스북은 GraphQL을 만들게 된다.
+
+GraphQL은
+
+- 엔드포인트가 오직 하나
+- 엔드포인트에 클라이언트가 필요한 것을 정의해서 요청
+- 기존 REST 방식의 API와 반대(서버가 정의한 틀에서 클라이언트가 요청하는 것이 아니라, 클라이언트가 필요한 것을 서버에 요청하는 방식)
+
+### 예시
+
+아이디가 1인 사용자의 정보와 그의 친구들의 이름 정보를 API로부터 받아와야 하는 경우
+
+REST 방식 API - 아래와 같이 두 번의 HTTP 요청을 보내야 함
+
+```
+GET /users/1
+GET /users/1/friends
+```
+
+위의 요청을 한 번의 HTTP 요청으로 줄이기 위해서는 아래와 같이 보내야 함
+
+```
+GET /users/1?include=friends.name
+```
+
+둘 다 비효율적이고 불필요하게 복잡함.
+
+만일 사용자 정보들 중 다 필요하지 않고 이름만 필요하든가 혹은, 친구들의 이름 외에도 친구들의 이메일도 필요하다면 HTTP 요청은 더 복잡해질 것임
+
+GraphQL을 사용하면 아래와 같이 HTTP 요청을 보내면 됨
+
+```
+POST /graphql
+
+{
+	user(id: 1) {
+		name
+		age
+		friends {
+			name
+		}
+	}
+}
+```
+
+만일 사용자 정보는 이름만 필요하고, 대신 친구들의 이름과 이메일이 필요한 경우
+
+```
+POST /graphql
+
+{
+	user(id: 1) {
+		name
+		friends {
+			name
+			email
+		}
+	}
+}
+```
+
+GraphQL은 장점이 많지만, REST에 비해서는 나온 지 오래 되지 않은 기술이므로 REST 만큼은 널리 사요되고 있지 않음. 그에 비해 REST는 알려진 지 오래 되었으므로 이미 여러 시스템에서 사용되고 있음
+
+# 4장 정리
+
+- HTTP 통신은 요청과 응답으로 이루어져 있음. 클라이언트가 HTTP 요청을 보내면 서버는 해당 요청에 대한 응답을 보내는 것이 하나의 HTTP 통신임
+- HTTP 통신은 stateless 임. 클라이언트와 서버는 통신을 여러 번 주고받는 것이 일반적인데, HTP 프로토콜에서는 동일한 클라이언트와 서버가 주고 받은 HTTP 통신들이라도 서로 연결되어 있지 않음. 즉, 각각의 HTTP 통신은 독립적이며, 그 전에 처리된 HTTP 통신에 대해서 전혀 알지 못함
+- HTTP 요청 메시지는 크게 세 부분으로 구성되어 있음
+  - Start Line
+  - Header
+  - Body
+- HTTP 응답 메시지도 세 부분으로 구성되어 있음
+  - Status Line
+  - Header
+  - Body
+- 자주 사용되는 HTTP 메소드에는 GET, POST, OPTIONS, PUT, DELETE 등이 있음
+- 자주 사용되는 HTTP 응답 코드와 응답 텍스트에는 200 OK, 301 Moved Permanently, 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 500 Internal Server Error 등이 있음
+- API 엔드포인트 아키텍쳐 패턴 중 가장 널리 사용되는 패턴은 REST임. REST는 엔드포인트의 고유 주소(URI)와 허용하는 HTTP 메소드를 통해서 제공하는 리소스와 기능을 알 수 있게 해줌으로써 클라이언트가 API를 더 쉽게 이해하고 사용할 수 있게 해줌
+- GraphQL은 REST보다 더 유연한 엔드포인트 구조를 구현할 수 있지만, REST 보다는 아직 널리 사용되고 있지 않음
+
+</details>
