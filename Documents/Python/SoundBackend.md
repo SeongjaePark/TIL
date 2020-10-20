@@ -463,3 +463,253 @@ GraphQL은 장점이 많지만, REST에 비해서는 나온 지 오래 되지 �
 - GraphQL은 REST보다 더 유연한 엔드포인트 구조를 구현할 수 있지만, REST 보다는 아직 널리 사용되고 있지 않음
 
 </details>
+
+<details>
+  <summary>Chapter 5. 본격적으로 API 개발하기</summary>
+
+# Chapter 5. 본격적으로 API 개발하기
+
+구현할 API 시스템은 미니터(미니 트위터)
+
+# 미니터의 기능
+
+- 회원가입
+- 로그인
+- 트윗(tweet)
+- 다른 회원 팔로우하기
+- 다른 회원 언팔로우 하기
+- 타임라인(해당 사용자와 사용자가 팔로우하는 사용자들의 트윗들)
+
+실제 트위터처럼 많은 수의 동시 접속이나 HTTP 요청 처리 속도를 고려한 구현은 포함하지 않음
+
+# 회원가입
+
+사용자에게 이름, 이메일, 비밀번호 등의 기본적인 회원 정보를 HTTP 요청을 통해 받은 후 시스템상에 저장
+
+- id
+- name
+- email
+- password
+- profile
+
+## 회원가입 기능 구현 엔드포인트
+
+```python
+from flask import Flask, jsonify, request # 1
+
+app = Flask(__name__)
+app.users = {} # 2
+app.id_count = 1 # 3
+
+@app.route("/sign-up", methods=['POST']) # 4
+def sign_up():
+	new_user = request.json # 5
+	new_user["id"] = app.id_count # 6
+	app.users[app.id_count] = new_user # 7
+	app.id_count = app.id_count + 1 # 8
+
+	return jsonify(new_user) # 9
+```
+
+1. 필요한 Flask의 모듈들 임포트
+   - request를 통해 사용자가 HTTP 요청을 통해 전송한 JSON 데이터를 읽어들일 수 있음.
+   - jsonify는 dictionary 객체를 JSON으로 변환하여 HTTP 응답으로 보낼 수 있게 됨
+2. 새로 가입한 사용자를 저장할 dictionary를 users 라는 변수에 정의
+   - 키(key) = 사용자 아이디, 값(value) = dictionary에 저장되어 있는 사용자 정보가 될 것임
+3. 회원가입하는 사용자의 id 값을 저장하는 변수
+   - id는 1부터 시작하며 새로운 사용자가 회원가입을 할 때마다 id 값이 하나씩 증가
+   - CF) 엄밀히 말하면 문제가 있을 수 있음. 만일 HTTP 요청들이 동시에 전송될 경우 id 값이 잘못 지정될 가능성이 있음. 이를 예방하기 위해서 atomic increment operation(여러 스레드가 동시에 값을 증가시킬 수 없고, 한 번에 한 스레드만 값을 증가시키는 것)을 사용해야 함.
+   - 그러나 미니터에서 데이터베이스에 데이터를 저장할 것이고, id 값은 데이터베이스에서 자동 생성 해준다. atomic 연산은 API 개발 입문과는 직접 관련 X. 개인적으로 알아보기
+4. route 데코레이터를 사용해서 엔드포인트 정의
+   - 엔드포인트의 고유 주소는 "/sign-up"으로 정의하고, HTTP 메소드는 POST로 함
+5. HTTP 요청을 통해 전송된 회원 정보를 읽어 들임
+   - request는 엔드포인트에 전송된 HTTP 요청 정보(헤더, body 등)를 저장하고 있음
+   - request.json은 해당 HTTP 요청을 통해 전송된 JSON 데이터를 파이썬 dictionary 형태로 변환해 줌
+6. HTTP 요청으로 전송된 회원가입 정보에 id 값을 더해 줌
+7. 회원가입하는 사용자의 정보를 #2 에서 생성한 dictionary에 저장
+8. id_count, 즉 id 값에 1을 더해 줌.
+   - 다음 회원 id 값이 이미 회원가입한 사용자들의 id 값과 겹치지 않게 함
+9. 회원가입한 사용자의 정보를 JSON 형태로 전송함
+   - jsonify를 사용해 dictionary를 JSON 형태로 변환
+   - status code는 200이 됨. 원래는 status code도 지정해 주어야 하지만, 만일 지정해 주지 않으면 디폴트 값으로 200이 리턴 됨
+
+## 실행
+
+터미널을 열고 해당 파일이 있는 디렉토리로 이동 후 파이썬 가상 환경 활성화 후 Flask 실행
+
+```
+(api) [api] FLASK_ENV=development FLASK_APP=app.py flask run
+
+ * Serving Flask app "app.py" (lazy loading)
+ * Environment: development
+ * Debug mode: on
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 270-073-916
+```
+
+FLASK_ENV는 Flask가 실행되는 개발 스테이지를 뜻함
+
+- "developement"로 정해 놓으면 debug mode가 실행됨. debug mode가 실행되면 코드가 수정될 때마다 Flask가 자동으로 재실행되어 수정된 코드가 반영되도록 해줌
+
+## 회원가입 요청 보내기
+
+httpie를 사용하여 터미널에서 회원가입 HTTP 요청 보내기
+
+```
+(api) [api] http -v POST localhost:5000/sign-up name=박성재 email=1234@gmail.com password=test1234
+
+POST /sign-up HTTP/1.1
+Accept: application/json, */*;q=0.5
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 81
+Content-Type: application/json
+Host: localhost:5000
+User-Agent: HTTPie/2.2.0
+
+{
+    "email": "1234@gmail.com",
+    "name": "박성재",
+    "password": "test1234"
+}
+
+HTTP/1.0 200 OK
+Content-Length: 104
+Content-Type: application/json
+Date: Tue, 20 Oct 2020 07:41:27 GMT
+Server: Werkzeug/1.0.1 Python/3.7.9
+
+{
+    "email": "1234@gmail.com",
+    "id": 1,
+    "name": "박성재",
+    "password": "test1234"
+}
+```
+
+httpie를 사용해서 POST로 JSON 데이터를 보내는 것은 아주 간단함.
+
+- HTTP 요청을 보내는 엔드포인트 주소 다음에 field=value 의 형태로 보내면 됨
+- 예를 들어 "name" 필드의 값을 "박성재"로 JSON 데이터 형태로 전송하기 위해서는 name=박성재 라고 지정해 주면 됨
+
+# 300자 제한 트윗 올리기
+
+메인 기능인 300자 제한 트윗 글 올리기 엔드포인트 구현
+
+- 사용자는 300자를 초과하지 않는 글을 올릴 수 있음
+- 만일 300자를 초과하면 엔드포인트는 400 Bad Request 응답을 보내야 함
+- 사용자가 300자 이내의 글을 전송하면 엔드포인트는 사용자의 글을 저장하고 있어야 하고 사용자의 타임라인 엔드포인트를 통해서 읽을 수 있어야 함
+
+## Tweet 엔드포인트를 호출할 때 전송하는 JSON 데이터
+
+```
+{
+	"id" : 1,                    # 1
+	"tweet" : "My First Tweet"   # 2
+}
+```
+
+1. 트윗을 보내는 사용자의 아이디
+2. 트윗 내용
+
+## 트윗 엔드포인트 구현
+
+```python
+app.tweets = []   # 1
+
+@app.route('/tweet', methods=['POST']) # 2
+def tweet():
+	payload = request.json
+	user_id = int(payload['user_id'])
+	tweet = payload['tweet'] # 3
+
+	if user_id not in app.users:   # 4
+		return '사용자가 존재하지 않습니다', 400
+
+	if len(tweet) > 300:   # 5
+		return '300자를 초과했습니다', 400
+
+	app.tweets.append({
+		'user_id' : user_id,
+		'tweet' : tweet
+		})
+
+	return '', 200
+```
+
+1. 사용자들의 트윗들을 저장할 디렉토리. key는 사용자 아이디
+   - key는 사용자 아이디, value는 사용자들의 트윗을 담고 있는 리스트
+2. 엔드포인트의 주소는 "/tweet", HTTP 메소드는 POST
+3. HTTP 요청으로 전송된 JSON 데이터에서 "tweet" 필드를 읽어 들임
+4. 만일 해당 사용자 아이디가 존재하지 않으면 400 Bad Request 오류 메시지를 전송함
+5. 만일 해당 사용자의 트윗이 300자를 넘었으면 "300자를 초과했습니다"라는 메시지와 함께 400 Bad Request 응답을 보냄
+6. HTTP 요청으로 전송된 JSON 데이터에서 사용자 아이디를 읽어 들임
+7. 해당 사용자 아이디와 트윗을 딕셔너리로 생성해서 app.tweets 리스트에 저장함.
+   - 이후 타임라인 엔드포인트에서 app.tweets 리스트를 읽어 들임
+
+## 실행
+
+```
+(api) [api] http -v POST localhost:5000/tweet id=1 tweet="My First Tweet"
+
+POST /tweet HTTP/1.1
+Accept: application/json, */*;q=0.5
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 38
+Content-Type: application/json
+Host: localhost:5000
+User-Agent: HTTPie/2.2.0
+
+{
+    "id": "1",
+    "tweet": "My First Tweet"
+}
+
+HTTP/1.0 400 BAD REQUEST
+Content-Length: 38
+Content-Type: text/html; charset=utf-8
+Date: Tue, 20 Oct 2020 09:19:12 GMT
+Server: Werkzeug/1.0.1 Python/3.7.9
+
+사용자가 존재하지 않습니다
+```
+
+사용자가 생성이 안 되어서 400 Bad Request 오류가 난다.
+
+회원가입 엔드포인트를 통해 사용자를 추가한 뒤 다시 시도해 보자
+
+- 이미 사용자를 생성했다고 하더라도 만일 API가 재실행되면 기존에 생성했던 사용자 및 데이터들은 전부 지워짐
+- 아직 데이터베이스에 데이터들을 저장하는 것이 아니라 메모리 상에서만 저장하는 것이므로 서버가 재실행되는 순간 메모리 상의 데이터들은 전부 지워짐
+
+```
+(api) [api] http -v POST localhost:5000/tweet id=1 tweet="My First Tweet"
+
+POST /tweet HTTP/1.1
+Accept: application/json, */*;q=0.5
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 38
+Content-Type: application/json
+Host: localhost:5000
+User-Agent: HTTPie/2.2.0
+
+{
+    "id": "1",
+    "tweet": "My First Tweet"
+}
+
+HTTP/1.0 200 OK
+Content-Length: 0
+Content-Type: text/html; charset=utf-8
+Date: Tue, 20 Oct 2020 09:23:51 GMT
+Server: Werkzeug/1.0.1 Python/3.7.9
+```
+
+200 OK 응답이 오면 정상적으로 구현된 것임
+
+# 팔로우와 언팔로우 엔드포인트
+
+</details>
