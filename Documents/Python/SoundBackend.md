@@ -974,7 +974,7 @@ Server: Werkzeug/1.0.1 Python/3.7.9
 - 사용자들의 트윗은 app.tweets 리스트에 저장되어 있음
 - app.tweets 리스트에서 해당 사용자와 사용자가 팔로우하는 사용자들의 트윗들을 찾은 후에 전송하면 됨
 
-```json
+```python
 @app.route("/timeline/<int:user_id>", methods=["GET"])   # 1
 def timeline(user_id):   # 2
 	if user_id not in app.users:
@@ -1002,7 +1002,7 @@ def timeline(user_id):   # 2
 
 ## 실행
 
-```json
+```
 (api) [api] http -v GET localhost:5000/timeline/1
 
 GET /timeline/1 HTTP/1.1
