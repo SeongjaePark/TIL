@@ -1308,4 +1308,157 @@ NoSQL 데이터베이스라고도 불리며, 비관계형 타입의 데이터를
 
 미니터 API 시스템은 관계형 데이터베이스를 사용해 구현할 것임
 
+# SQL
+
+SQL(Structured Query Language)은 MySQL 같은 관계형 데이터베이스에서 데이터를 읽거나 생성 및 수정하기 위해서 사용하는 언어임.
+
+기본적으로 CRUD라고 하여, 데이터를 Create(생성), Read(읽기), Update(수정), Delete(삭제)하는 기능을 제공하는 관계형 데이터베이스 시스템 전용 언어임.
+
+SQL에는 여러 구문이 있지만, 그 중에서도 기본적으로 `SELECT`, `INSERT`, `UPDATE`, `DELETE`, 그리고 `JOIN` 은 필수적으로 이해해야 함.
+
+(SQL 기본 구문은 따로 공부하고 정리한 TIL이 있으므로 생략)
+
+### 참고
+
+INSERT INTO 테이블명 (컬럼명1, 컬럼명2)... VALUES (값1, 값2) 구문 사용시 VALUES 뒤에 여러 개의 괄호와 쉼표를 사용해서 한 번에 여러 로우를 추가해줄 수 있음.
+
+JOIN의 디폴트 행위는 INNER JOIN임
+
+# API에 데이터베이스 연결하기
+
+## 미니터 API의 DB 스키마
+
+### users 테이블
+
+- id
+- name
+- email
+- profile
+- hashed_password (암호화된 비밀번호)
+
+### user_follow_list 테이블
+
+사용자들이 다른 사용자들을 팔로우하는 리스트 저장. many to many 관계, users 테이블에 id를 통해 외부 키로 연결
+
+- user_id
+- follow_user_id
+
+### tweets 테이블
+
+사용자들의 트윗들을 저장한 테이블. users 테이블과 one to many 관계(한 사용자가 여러 트윗 가능). users 테이블에 id를 통해 외부 키로 연결
+
+- id
+- user_id
+- tweets
+
+## MySQL 실행
+
+```bash
+mysql.server start # MySQL 실행
+
+mysql.server status # 현재 실행 여부 확인
+
+mysql.server stop # 실행 정지
+```
+
+## MySQL 사용
+
+```bash
+mysql -u root -p
+```
+
+- -u 옵션: MySQL에 접속할 사용자의 아이디를 명시하는 옵션
+- -p 옵션: 비밀번호를 직접 입력하겠다고 명시하는 옵션
+
+## 데이터베이스 생성
+
+```sql
+CREATE DATABASE miniter; # 미니터 데이터베이스 생성
+
+USE miniter; # 미니터 데이터베이스 사용 선언
+```
+
+## 테이블 생성
+
+```sql
+	CREATE TABLE users(
+	id INT NOT NULL AUTO_INCREMENT,   # 1
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    hashed_password VARCHAR(255) NOT NULL,
+    profile VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,   # 2
+    updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,   # 3
+    PRIMARY KEY(id),   # 4
+    UNIQUE KEY email (email)   # 5
+);
+
+CREATE TABLE users_follow_list(
+	user_id INT NOT NULL,
+    follow_user_id INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY(user_id, follow_user_id),
+    CONSTRAINT users_follow_list_user_id_fkey FOREIGN KEY (user_id)
+    REFERENCES users(id),   # 6
+    CONSTRAINT users_follow_list_follow_user_id_fkey FOREIGN KEY (follow_user_id)
+    REFERENCES users(id)
+);
+
+CREATE TABLE tweets(
+	id INT NOT NULL AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    tweet VARCHAR(300) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY(id),
+    CONSTRAINT tweets_user_id_fkey FOREIGN KEY (user_id)
+    REFERENCES users(id)
+);
+```
+
+1. `NOT NULL`, `AUTO_INCREMENT`
+   1. `NOT NULL`의 뜻은 해당 컬럼은 null 값이 될 수 없다는 뜻. 해당 컬럼은 항상 값이 있어야 함.
+   2. `AUTO_INCREMENT` 를 명시해 주면 해당 컬럼의 값이 자동으로 1씩 증가됨. 주로 id 값을 자동 생성하기 위해서 사용됨
+2. `DEFAULT CURRENT_TIESTAMP` 의 뜻은 만일 해당 컬럼의 값이 없으면 디폴트 값으로 현재 시간(timestamp) 값을 사용하라는 뜻임.
+   - 주로 created_at 처럼 해당 값이 생성된 시점을 기록하는 컬럼에 사용됨. 일일이 created_at 값을 지정해주지 않아도 데이터베이스가 자동으로 생성해 주므로 편리함
+3. `ON UPDATE CURRENT TIEMSTAMP`의 뜻은 만일 해당 로우의 값이 수정되면 해당 컬럼의 값을 수정이 이루어진 시간의 값으로 자동 생성해 준다는 뜻임. 로우가 언제 업데이트 되었는지 자동으로 기록되므로 편리함
+4. `PRIMARY KEY` 구문을 통해 고유 키로 사용될 컬럼을 정해 줌.
+   - 고유 키는 한 개의 컬럼으로 정할 수 도 있지만 여러 컬럼을 정할 수도 있음.
+   - 여러 컬럼을 고유 키로 정해주면 해당 컬럼 값들을 합한 값이 고유 키가 됨.
+5. `UNIQUE KEY`의 뜻은 해당 컬럼의 값이 중복되는 로우가 없어야 한다는 뜻
+   - 이메일의 경우 이미 등록된 이메일로 중복된 등록이 되면 안 되기 때문에 `UNIQUE KEY` 구문을 사용해 시스템적으로 방지해 둘 수 있어서 편리하고 안전함
+6. `CONTRAINT ... FOREIGN KEY ... REFERENCES ...` 구문을 통해 외부 키를 설정할 수 있음
+   - user_follow_list 테이블과 tweets 테이블 둘 다 users 테이블에 외부 키를 통해 연결됨.
+
+### `SHOW TABLES` 명령어를 통해 테이블 생성 확인
+
+```bash
+mysql> SHOW TABLES;
++-------------------+
+| Tables_in_miniter |
++-------------------+
+| tweets            |
+| users             |
+| users_follow_list |
++-------------------+
+3 rows in set (0.00 sec)
+```
+
+### `EXPLAIN 테이블명` 명령어를 통해 더 자세한 내용 확인 가능
+
+```bash
+mysql> EXPLAIN tweets;
++------------+--------------+------+-----+-------------------+-------------------+
+| Field      | Type         | Null | Key | Default           | Extra             |
++------------+--------------+------+-----+-------------------+-------------------+
+| id         | int          | NO   | PRI | NULL              | auto_increment    |
+| user_id    | int          | NO   | MUL | NULL              |                   |
+| tweet      | varchar(300) | NO   |     | NULL              |                   |
+| created_at | timestamp    | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
++------------+--------------+------+-----+-------------------+-------------------+
+```
+
+### MySQL 종료
+
+`exit` 을 치면 MySQL을 종료하고 터미널로 돌아갈 수 있음.
+
 </details>
