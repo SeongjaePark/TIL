@@ -712,4 +712,446 @@ Server: Werkzeug/1.0.1 Python/3.7.9
 
 # 팔로우와 언팔로우 엔드포인트
 
+미니터에서 중요한 부분중 하나가
+
+- 다른 트위터들을 팔로우(혹은 언팔로우)하고,
+- 팔로우하는 사용자들의 글과 사진을 타임라인에서 볼 수 있는 기능
+
+팔로우 혹은 언팔로우 하고 싶은 사용자의 아이디를 HTTP 요청으로 보내면 API에서 해당 요청을 처리하는 방식으로 구현
+
+## 팔로우 엔드포인트에 전송할 JSON 데이터
+
+```json
+{
+  "id": 1,
+  "folow": 2
+}
+```
+
+- id : 해당 사용자의 아이디
+- follow : 팔로우하고자 하는 사용자의 아이디
+
+## 언팔로우 엔드포인트에 전송할 JSON 데이터
+
+```json
+{
+  "id": 1,
+  "unfollow": 2
+}
+```
+
+- id : 해당 사용자의 아이디
+- unfollow : 언팔로우 하고자 하는 사용자의 아이디
+
+## 팔로우 엔드포인트 구현
+
+```python
+@app.route("/follow", methods=["POST"])
+def follow():
+	payload = request.json
+	user_id = int(payload["id"])   # 1
+	user_id_to_follow = int(payload["follow"])   # 2
+
+	if user_id not in app.users or user_id_to_follow not in app.users:   # 3
+		return "사용자가 존재하지 않습니다", 400
+
+	user = app.users[user_id]   # 4
+	user.setdefault("follow", set()).add(user_id_to_follow)   # 5
+
+	return jsonify(user)
+```
+
+1. HTTP 요청으로 전송된 JSON 데이터에서 해당 사용자의 아이디를 읽어 들임
+2. HTTP 요청으로 전송된 JSON 데이터에서 해당 사용자가 팔로우할 사용자의 아이디를 읽어 들임
+3. 만일 해당 사용자나 팔로우할 사용자가 존재하지 않는다면 400 Bad Request 응답을 보냄
+4. app.users 딕셔너리에서 해당 사용자 아이디를 사용해서 해당 사용자의 데이터를 읽어 들임
+5. #4 에서 읽어 들인 사용자의 정보를 담고 있는 딕셔너리가 이미 "follow"라는 필드를 가지고 있다면, 즉 이미 사용자가 다른 사용자를 팔로우한 적이 있다면, 사용자의 "follow" 키와 연결되어 있는 set에 팔로우하고자 하는 사용자 아이디를 추가함.
+   - 만일 이번에 처음 다른 사용자를 팔로우하는 것이라면 사용자의 정보를 담고 있는 딕셔너리에 "follow" 라는 키를 empty set과 연결하여 추가함
+   - 이렇게 키가 조재하지 않으면 디폴트 값을 저장하고, 만일 키가 이미 존재하면 해당 값을 읽어 들이는 기능을 `setdefault` 를 사용하여 구현함. `setdefault` 는 굉장히 유용한 딕셔너리의 기능임
+
+### SET 사용
+
+팔로우 엔드포인트 구현 시 해당 사용자가 팔로우하는 다른 사용자들의 아이디를 저장하는 자료구조로써 set을 사용함.
+
+list를 사용하지 않고 set을 사용하는 이유는 만일 이미 팔로우하고 있는 사용자를 팔로우하는 요청이 왔을 경우에도 동일한 사용자 아이디가 여러 번 저장되지 않게 해주기 때문. 따라서 팔로우하고자 하는 사용자 아이디를 이미 팔로우하고 있지 않은 지에 대한 확인이 굳이 필요 없음.
+
+중복된 사용자 아이디가 존재할 수 없으므로 언팔로우할 때도 굉장히 편리함
+
+## 실행
+
+```
+(api) [api] http -v POST localhost:5000/follow id=1 follow=2
+
+POST /follow HTTP/1.1
+Accept: application/json, */*;q=0.5
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 26
+Content-Type: application/json
+Host: localhost:5000
+User-Agent: HTTPie/2.2.0
+
+{
+    "follow": "2",
+    "id": "1"
+}
+
+HTTP/1.0 500 INTERNAL SERVER ERROR
+Connection: close
+Content-Type: text/html; charset=utf-8
+Date: Tue, 20 Oct 2020 14:20:58 GMT
+Server: Werkzeug/1.0.1 Python/3.7.9
+X-XSS-Protection: 0
+...
+...
+raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type set is not JSON serializable
+```
+
+팔로우 엔드포인트에 HTTP 요청을 보내면 위와 같은 오류가 발생한다.
+
+팔로우하는 사용자 아이디들을 저장하는 자료구조로 사용하는 set를 파이썬의 json 모듈이 JSON으로 변경하지 못하기 때문임. list는 JSON으로 변경될 수 있지만 set는 변경하지 못함
+
+문제 해결을 위해서는 커스텀 JSON 인코더(custom JSON encoder)를 구현해서 디폴트 JSON 인코더에 덮어 씌워야 함. 직접 커스텀 JSON 인코더를 통해서 set를 list로 변경해 줌으로써 JSON으로 문제 없이 변경될 수 있도록 해줘야 함.
+
+## 커스텀 JSON 인코더 구현
+
+```python
+from flask.json import JSONEncoder   # 1
+
+class CustomJSONEncoder(JSONEncoder):   # 2
+	def default(self, obj):   # 3
+		if isinstance(obj, set):   # 4
+			return list(obj)
+
+		return JSONEncoder.default(self, obj)   # 5
+
+app.json_encoder = CustomJSONEncoder   # 6
+```
+
+1. flask.json 모듈에서 `JSONEncoder` 클래스를 임포트함
+   - `JSONEncoder` 클래스를 확장해서 커스텀 인코더 구현하기 위함
+2. `JSONEncoder` 클래스를 부모 클래스로 상속 받는 `CustomJSONENcoder` 클래스 정의
+3. `JSONEncoder` 클래스의 `default` 메소드를 확장(over-write)함.
+   - `default` 메소드에서 set인 경우 list로 변경해줘야 함
+4. JSON으로 변경하고자 하는 객체(obj)가 set인 경우 list로 변경해서 리턴
+5. 객체가 set이 아닌 경우는 본래 `JSONEncoder` 클래스의 `default` 메소드 호출해서 리턴
+6. `CustomJSONEncoder` 클래스를 Flask의 디폴트 JSON 인코더로 지정
+   - 이렇게 하면 `jsonify` 함수가 호출될 때마다 `JSONEncoder`가 아닌 `CustomJSONEncoder` 클래스가 사용됨
+
+위 코드를 추가하고 시스템 재시작한 후 "follow" 엔드포인트를 호출하면 정상적으로 HTTP 응답이 옴
+
+```
+(api) [api] http -v POST localhost:5000/follow id=1 follow=2
+
+POST /follow HTTP/1.1
+Accept: application/json, */*;q=0.5
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 26
+Content-Type: application/json
+Host: localhost:5000
+User-Agent: HTTPie/2.2.0
+
+{
+    "follow": "2",
+    "id": "1"
+}
+
+HTTP/1.0 200 OK
+Content-Length: 130
+Content-Type: application/json
+Date: Tue, 20 Oct 2020 14:37:43 GMT
+Server: Werkzeug/1.0.1 Python/3.7.9
+
+{
+    "email": "1234@gmail.com",
+    "follow": [
+        2
+    ],
+    "id": 1,
+    "name": "박성재",
+    "password": "test1234"
+}
+```
+
+## 언팔로우 엔드포인트 구현
+
+팔로우 엔드포인트 구현과 거의 유사함
+
+차이점은 set에 사용자 아이디를 추가하는 것이 아니라 삭제하는 것임
+
+```python
+@app.route("/unfollow", methods=["POST"])
+def unfollow():
+	payload = request.json
+	user_id = int(payload["id"])
+	user_id_to_unfollow = int(payload["unfollow"])   # 1
+
+	if user_id not in app.users or user_id_to_unfollow not in app.users:   # 2
+		return "사용자가 존재하지 않습니다", 400
+
+	user = app.users[user_id]
+	user.setdefault("follow", set()).discard(user_id_to_unfollow)   # 3
+
+	return jsonify(user)
+```
+
+1. 언팔로우할 사용자 아이디를 HTTP 요청으로 전송된 데이터에서 읽어 들임
+2. 팔로우 엔드포인트와 마찬가지로 해당 사용자 아이디 혹은 언팔로우할 사용자 아이디가 존재하지 않으면 400 Bad Request 응답을 보냄
+3. 언팔로우하고자 하는 사용자 아이디를 set에서 삭제함
+   - `remove` 메소드를 사용하지 않고 `discard` 메소드를 사용하는 이유는, `remove` 의 경우 만일 없는 값을 삭제하려고 하면 오류를 일으키지만 `discard` 메소드는 삭제하고자 하는 값이 있으면 삭제를 하고 없으면 무시하기 때문
+   - 때문에 굳이 삭제하고자 하는 사용자 아이디가 실제로 set에 존재하는지를 확인하는 로직을 구현하지 않아도 됨
+
+## 실행
+
+```
+(api) [api] http -v POST localhost:5000/unfollow id=1 unfollow=2
+
+POST /unfollow HTTP/1.1
+Accept: application/json, */*;q=0.5
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 28
+Content-Type: application/json
+Host: localhost:5000
+User-Agent: HTTPie/2.2.0
+
+{
+    "id": "1",
+    "unfollow": "2"
+}
+
+HTTP/1.0 200 OK
+Content-Length: 121
+Content-Type: application/json
+Date: Tue, 20 Oct 2020 14:49:58 GMT
+Server: Werkzeug/1.0.1 Python/3.7.9
+
+{
+    "email": "1234@gmail.com",
+    "follow": [],
+    "id": 1,
+    "name": "박성재",
+    "password": "test1234"
+}
+```
+
+200 OK를 통해 제대로 실행된 것을 확인할 수 있음
+
+리턴된 사용자의 JSON 데이터를 살펴보면 "follow" 필드에 존재하던 사용자 아이디가 삭제된 것을 확인할 수 있음
+
+# 타임라인 엔드포인트
+
+- 해당 사용자의 트윗들, 그리고 팔로우하는 사용자들의 트윗들을 리턴해 주는 엔드포인트
+- 데이터의 수정 없이 받아오기만 함 - GET 메소드 사용
+
+## 타임라인 엔드포인트가 리턴하는 JSON 데이터
+
+```json
+{
+	"user_id" : 1,   # 1
+	"timeline" : [   # 2
+		{
+			"user_id" : 2,   # 3
+			"tweet" : "Hello, World!"   # 4
+		},
+		{
+			"user_id" : 1,
+			"tweet" : "MY First tweet!!:
+		}
+	]
+}
+```
+
+1. 해당 사용자의 아이디
+2. 해당 사용자와 사용자가 팔로우하는 사용자들의 트윗 리스트
+3. 해당 트윗을 올린 사용자 아이디
+4. 트윗 내용
+
+## 타임라인 엔드포인트 구현
+
+- 사용자들의 트윗은 app.tweets 리스트에 저장되어 있음
+- app.tweets 리스트에서 해당 사용자와 사용자가 팔로우하는 사용자들의 트윗들을 찾은 후에 전송하면 됨
+
+```json
+@app.route("/timeline/<int:user_id>", methods=["GET"])   # 1
+def timeline(user_id):   # 2
+	if user_id not in app.users:
+		return "사용자가 존재하지 않습니다", 400
+
+	follow_list = app.users[user_id].get("follow", set())   # 3
+	follow_list.add(user_id)    # 4
+	timeline = [tweet for tweet in app.tweets if tweet["user_id"] in follow_list] # 5
+
+	return jsonify({
+		"user_id" : user_id,
+		"timeline" : timeline
+	})   # 6
+```
+
+1. `<int:user_id>` 부분은 엔드포인트 주소에 해당 사용자의 아이디를 지정할 수 있게 해줌
+   - 예) "/timeline/1" 이 경우 타임라인 엔드포인트에 user_id 인자에 int 값으로 1이 지정되어 엔드포인트를 구현한 함수인 timeilne에 전달됨
+2. 타임라인 엔드포인트를 구현하는 함수에서 user_id 를 인자로 받고 있음
+   1. # 1 에서 지정된 엔드포인트 주소를 통해서 받는 값이며 해당 사용자의 아이디임
+3. 먼저 해당 사용자가 팔로우하는 사용자들 리스트를 읽어 들임.
+   - 만일 사용자가 다른 사용자를 팔로우한 적이 없는 경우 follow 필드가 존재하지 않을 수도 있음. 그런 경우에는 empty set을 리턴함
+4. 팔로우하는 사용자 리스트에 해당 사용자의 아이디도 추가하여 자신의 트윗도 볼 수 있도록 함
+5. 전체 트윗 중 해당 사용자와 사용자가 팔로우하는 사용자들의 트윗들만 읽어 들임
+6. 사용자 아이디와 함께 타임라인을 JSON 형태로 리턴
+
+## 실행
+
+```json
+(api) [api] http -v GET localhost:5000/timeline/1
+
+GET /timeline/1 HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Host: localhost:5000
+User-Agent: HTTPie/2.2.0
+
+HTTP/1.0 200 OK
+Content-Length: 319
+Content-Type: application/json
+Date: Wed, 21 Oct 2020 04:13:48 GMT
+Server: Werkzeug/1.0.1 Python/3.7.9
+
+{
+    "timeline": [
+        {
+            "tweet": "My First Tweet",
+            "user_id": 1
+        },
+        {
+            "tweet": "길동이의 첫 트윗",
+            "user_id": 2
+        },
+        {
+            "tweet": "실력 있는 개발자가 되자",
+            "user_id": 1
+        }
+    ],
+    "user_id": 1
+}
+```
+
+HTTP 요청을 통해 id가 1인 사용자의 타임라인을 불러와 봤다
+
+주의할 점은, 타임라인을 불러들이기 전 사용자 생성, 사용자 트윗 생성, 사용자 팔로우가 선행되어야 한다는 것
+
+# 전체 코드
+
+지금까지 구현한 엔드포인트들을 합친 코드
+
+책의 깃허브 리포지토리에서도 확인할 수 있음 ([https://github.com/rampart81/python-backend-book/tree/master/chapter5](https://github.com/rampart81/python-backend-book/tree/master/chapter5))
+
+```python
+from flask import Flask, jsonify, request
+from flask.json import JSONEncoder
+
+'''
+Default JSON encoder는 set을 JSON으로 변환 불가
+따라서 커스텀 인코더를 작성하여 set을 list로 변환해서
+JSON으로 변환 가능하게 해줘야 함.
+'''
+class CustomJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, set):
+            return list(obj)
+
+        return JSONEncoder.default(self, obj)
+
+app = Flask(__name__)
+
+app.id_count = 1
+app.users = {}
+app.tweets = []
+app.json_encoder = CustomJSONEncoder
+
+@app.route("/ping", methods=["GET"])
+def ping():
+    return "pong"
+
+@app.route("/sign-up", methods=["POST"])
+def sign_up():
+    new_user = request.json
+    new_user["id"] = app.id_count
+    app.users[app.id_count] = new_user
+    app.id_count = app.id_count + 1
+
+    return jsonify(new_user)
+
+@app.route("/tweet", methods=["POST"])
+def tweet():
+    payload = request.json
+    user_id = int(payload["id"])
+    tweet = payload["tweet"]
+
+    if user_id not in app.users:
+        return "사용자가 존재하지 않습니다", 400
+
+    if len(tweet) > 300:
+        return "300자를 초과했습니다", 400
+
+    app.tweets.append({
+        "user_id" : user_id,
+        "tweet" : tweet
+        })
+
+    return '', 200
+
+@app.route("/follow", methods=["POST"])
+def follow():
+    payload = request.json
+    user_id = int(payload["id"])
+    user_id_to_follow = int(payload["follow"])
+
+    if user_id not in app.users or user_id_to_follow not in app.users:
+        return "사용자가 존재하지 않습니다", 400
+
+    user = app.users[user_id]
+    user.setdefault("follow", set()).add(user_id_to_follow)
+
+    return jsonify(user)
+
+@ app.route("/unfollow", methods=["POST"])
+def unfollow():
+    payload = request.json
+    user_id = int(payload["id"])
+    user_id_to_unfollow = int(payload["unfollow"])
+
+    if user_id not in app.users or user_id_to_unfollow not in app.users:
+        return "사용자가 존재하지 않습니다", 400
+
+    user = app.users[user_id]
+    user.setdefault("follow", set()).discard(user_id_to_unfollow)
+
+    return jsonify(user)
+
+@app.route("/timeline/<int:user_id>", methods=["GET"])
+def timeline(user_id):
+    if user_id not in app.users:
+        return "사용자가 존재하지 않습니다", 400
+
+    follow_list = app.users[user_id].get("follow", set())
+    follow_list.add(user_id)
+    timeline = [tweet for tweet in app.tweets if tweet["user_id"] in follow_list]
+
+    return jsonify({
+        "user_id" : user_id,
+        "timeline" : timeline
+        })
+```
+
+# 5장 정리
+
+- 데이터를 수정하는 기능의 엔드포인트는 POST 메소드를 사용함
+- 데이터를 읽어 들이는 기능의 엔드포인트는 GET 메소드를 사용함
+- POST 엔드포인트에 데이터를 전송할 때는 body에 JSON 형식으로 데이터를 전송함
+- URL에 인자(parameter)를 전송하고 싶을 때는 <type:value> 형식으로 URL을 구성함
+  - 예를 들어, int 값의 사용자 아이디를 URL에 포함시켜 받고 싶을 때는 다음과 같이 주소를 구성하면 됨: /timeline/<int:user_id>
+- 중복된 값이 없어야 하는 데이터라면 set을 사용하고 순서나 순차가 중요하다면 list를 사용. 키와 값을 표현해야 하는 데이터의 경우는 딕셔너리를 사용
+
 </details>
