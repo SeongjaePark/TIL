@@ -1158,7 +1158,7 @@ def timeline(user_id):
 <details>
 <summary>Chapter 6. 데이터베이스</summary>
 
-# Chapter 7 데이터베이스
+# Chapter 6 데이터베이스
 
 앞서 구현한 API 사용 시 불편한 점은 API가 재시작될 때마다 모든 데이터가 없어졌다는 것임
 
