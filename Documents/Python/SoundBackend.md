@@ -1461,4 +1461,329 @@ mysql> EXPLAIN tweets;
 
 `exit` 을 치면 MySQL을 종료하고 터미널로 돌아갈 수 있음.
 
+## SQLAlchemy
+
+파이썬 코드에서 DB와 연결하기 위해서 사용할 수 있는 다양한 라이브러리가 있는데 그 중 SQLAlchemy 라는 라이브러리가 파이썬에서 가장 널리 쓰이는 라이브러리 중 하나임. 이를 통해 파이썬 코드에서 데이터베이스에 연결해서 SQL을 실행시킬 수 있음
+
+SQLAlchemy는 ORM(Object Relational Mapper)임.
+
+- ORM이란 관계형 데이터베이스의 테이블들을 프로그래밍 언어의 클래스로 표현할 수 있게 해주는 것을 말함.
+- 즉, 클래스를 사용해서 테이블들을 표현하고 데이터를 저장, 읽기, 업데이트 등을 할 수 있게 해줌
+
+### SQLAlchemy 설치
+
+```bash
+pip install sqlalchemy
+```
+
+SQLAlchemy에서 MySQL을 사용하기 위해서는 MySQL용 DBAPI 또한 설치해야 함. DBAPI는 DB를 사용하기 위한 API임.
+
+MySQL용 DBAPI는 여러 가지가 있는데, 그 중 MySQL의 공식 파이썬 DBAPI인 MySQL-Connector 설치
+
+```bash
+pip install mysql-connector-python
+```
+
+### SQLAlchemy 사용 예시
+
+```python
+from sqlalchemy import create_engiene, text # 1
+
+db = {
+	'user' : 'root',
+	'password' : 'test1234',
+	'host' : 'localhost',
+	'port' : '3306',
+	'database' : 'miniter'
+} # 2
+
+db_url = f"mysql+mysqlconnector://{db['user']}:{db['password']}@{db['host']}:{db['port']}/{db['database']}?charset=utf8" # 3
+db = create_engiene(db_url, encoding = 'utf-8', max_overflow = 0) # 4
+
+params = {'name' : '박성재'}
+rows = db.execute(text("SELECT * FROM users WHERE name = :name"), params).fetchall() # 5
+
+for row in rows: # 6
+	print(f"name : {row['name']}")
+	print(f"email : {row['email']}")
+```
+
+1. sqlalchemy 모듈에서 필요한 함수 임포트
+   - `create_engine`: 데이터베이스에 연결
+   - `text`: 실행할 SQL을 만듦
+2. 데이터베이스에 연결하기 위한 접속 정보
+   - 데이터베이스에 접속할 사용자 아이디, 비밀번호, 접속할 데이터베이스 시스템의 주소, 그리고 DB명 등이 필요함
+3. 데이터베이스 접속 정보를 사용해 DB URL을 구성함.
+   - DB URL을 사용해서 실제 데이터베이스에 접속할 수 있음
+   - 마치 URL을 사용해 웹사이트에 접속하는 것과 같은 개념
+4. sqlalchemy의 `create_engiene` 함수를 통해서 db_url에 명시된 데이터베이스에 접속
+   - `create_engiene` 함수는 Engine 객체를 리턴함. 연결된 데이터베이스의 SQL 실행을 Engine 객체를 사용해서 할 수 있음.
+   - 여기서는 Engine 객체를 db 변수에 저장했음.
+5. Engine의 `execute` 메소드를 통해 SQL을 데이터베이스에 전송해 실행함.
+   - 여기서는 users 테이블에서 이름이 "박성재"인 사용자의 데이터를 읽어 들이는 SQL 구문 실행
+   - `execute` 메소드는 크게 2가지 parameter를 받음: SQL 구문, SQL 구문에 필요한 인자들의 값
+     - SQL 구문에 필요한 인자들은 딕셔너리 형태로 보내야 함.
+     - `text` 함수에 넘겨진 sQL에 만일 `:` 이 포함되어 있으면 `:` 다음에 오는 단어와 동일한 키를 사용해 딕셔너리에서 읽어 들여 치환함.
+     - 여기서 `SELECT * FROM users WHERE name = :name` 이 `SELECT * FROM users WHERE name = '박성재'` 로 변경되는 것임
+   - `execute` 메소드는 ResultProxy 객체를 리턴하는데 ResultProxy의 `fetchall` 메소드를 사용해 실제 데이터들을 리스트의 형태로 리턴함
+6. 위에서 읽어들인 데이터들을 for loop를 사용해 각 로우를 읽어 들여 원하는 컬럼의 값을 출력함.
+   - 각 로우는 딕셔너리처럼 사용할 수 있으며(실제로 딕셔너리는 아님), 컬럼 이름이 키 값으로 사용됨.
+
+# SQLAlchemy를 사용하여 API와 데이터베이스 연결하기
+
+## 데이터베이스의 연결 정보를 저장할 파일 만들기 (설정 파일)
+
+config.py
+
+```python
+db = {
+    'user' : 'root', # 1
+    'password' : 'test1234', # 2
+    'host' : 'localhost', # 3
+    'port' : '3306', # 4
+    'database' : 'miniter' # 5
+}
+DB_URL = f"mysql+mysqlconnector://{db['user']}:{db['password']}@{db['host']}:{db['port']}/{db['database']}?charset=utf8"
+```
+
+1. 데이터베이스에 접속할 사용자 아이디
+2. 사용자의 비밀번호
+3. 접속할 데이터베이스의 주소
+   - 지금은 같은 컴퓨터에 설치되어 있는 데이터베이스에 접속하므로 localhost로 지정.
+   - 만일 외부 서버에 설치되어 있는 데이터베이스에 접속해야 한다면 해당 서버의 주소를 지정해 주어야 함
+4. 접속한 데이터베이스의 포트 넘버
+   - 관계형 데이터베이스는 주로 3306 포트를 통해 연결됨
+   - API나 사이트와 마찬가지로 데이터베이스도 네트워크를 통해 연결되는 시스템이므로 당연히 포트 정보가 필요함
+5. 실제 사용할 데이터베이스 이름
+
+### 설정 파일을 따로 만드는 이유
+
+1. 설정 정보를 따로 관리함으로써 민감한 개인 접속 정보를 노출하지 않아도 됨
+   - .gitignore 파일에 [config.py](http://config.py) 파일을 지정해 놓음으로써 이 파일이 git 리포지토리에 포함되지 않게 함으로써 개인정보 노출을 막음
+2. 각 환경과 설정에 맞는 설정 파일을 적용할 수 있게 됨.
+   - 각 개발 호스트 혹은 서버에 맞는 config.py를 설정하게 함으로써 각 환경에 적합한 설정을 적용하도록 함
+
+## 데이터베이스 설정 정보 읽어들이기
+
+[app.py](http://app.py) 파일을 수정하여 [config.py](http://config.py) 파일에서 DB 설정 정보를 읽어들여 데이터베이스와 연결.
+
+```python
+from sqlalchemy import create_engine, text
+
+def create_app(test_config = None): # 1
+    app = Flask(__name__)
+
+    if test_config is None: # 2
+        app.config.from_pyfile('config.py')
+    else:
+        app.config.update(test_config)
+
+    database = create_engine(app.config['DB_URL'], encoding = utf-8, max_overflow = 0) # 3
+    app.database = database # 4
+
+		return app # 5
+```
+
+1. `create_app` 함수 정의
+   - Flask가 `create_app` 이라는 이름의 함수를 자동으로 팩토리(factory) 함수로 인식해서 해당 함수를 통해서 Flask를 실행시킴.
+   - `create_app` 함수는 `test_config` 를 인자로 받는데, 이는 단위 테스트(unit test)를 실행시킬 때 테스트용 데이터베이스 등의 테스트 설정 정보를 적용하기 위함임.
+2. 만일 `test_config` 인자가 None 이면 [config.py](http://config.py) 파일에서 설정을 읽어 들임
+   - 만일 `test_confing` 인자가 None이 아니라면, 즉 `test_config` 의 값이 설정되어 들어왔다면 `test_config` 의 설정을 적용시킴
+3. sqlalchemy의 `create_engine` 함수를 사용해 데이터베이스와 연결함
+4. `create_engine` 함수를 통해 생성한 Engine 객체를 Flask 객체에 저장함으로써 `create_app` 함수 외부에서 도 데이터베이스를 사용할 수 있게 함
+5. Flask 객체를 리턴함.
+   - `create_app` 이라는 함수는 Flask가 자동인지해서 Flask 객체를 찾아서 실행할 수 있게 함
+
+이제는 `create_app` 함수 안에서 엔드포인트들을 구현할 것임. 엔드포인트 구현 시 sqlalchemy를 사용해서 MySQL DB에 연결하여 데이터를 DB에 저장 및 읽어들이도록 할 것임.
+
+## 회원가입 엔드포인트
+
+```python
+@app.route('/sign-up', methods=['POST'])
+def sign_up():
+    new_user = request.json
+    new_user_id = app.database.execute(text(""" # 1
+        INSERT INTO users (
+            name,
+            email,
+            profile,
+            hashed_password
+        ) VALUES (
+            :name,
+            :email,
+            :profile,
+            :password
+        )
+    """), new_user).lastrowid # 2
+
+    row = app.database.execute(text(""" # 3
+        SELECT
+            id,
+            name,
+            email,
+            profile
+        FROM users
+        WHERE id = :user_id
+    """), {
+        'user_id' :new_user_id
+    }).fetchone()
+
+    created_user = { # 4
+        'id' : row['id'],
+        'name' : row['name'],
+        'email' : row['email'],
+        'profile' : row['profile']
+    } if row else None
+
+    return jsonify(created_user)
+```
+
+1. HTTP 요청을 통해 전달받은 회원 가입 정보를 DB에 저장
+   - `app.database`는 SQLAlchemy를 통해 MySQL DB에 연결된 객체임. `app.database` 를 통해 원하는 SQL 구문을 해당 DB에 실행하게 됨.
+2. SQL 구문에 사용될 실제 데이터들은 HTTP 요청(request)에서 읽어 들인 데이터를 그대로 사용함
+   - HTTP 요청을 통해 전송된 JSON 데이터의 구조가 # 1 의 SQL에서 필요한 필드를 모두 포함하고 이씨 때문임.
+   - 만일 필드 이름이 다르거나 필드가 부재인 경우 오류가 나게 됨.
+   - 새로 사용자가 생성되면, 새로 생성된 사용자의 id를 `lastrowid` 를 통해 읽어 들임
+3. 새로 생성한 사용자의 정보를 DB에서 읽어 들임
+4. 읽어 들인 새 사용자의 정보를 딕셔너리로 변환해서 결국에 JSON 형식으로 HTTP 응답으로 보낼 수 있도록 함.
+
+## tweet 엔드포인트
+
+저장해야 하는 데이터를 HTTP 요청을 통해서 받아서 DB에 저장하면 됨
+
+```python
+@app.route('/tweet', methods=['POST'])
+def tweet():
+		user_tweet = request.json
+    tweet = user_tweet['tweet']
+
+    if len(tweet) > 300:
+        return '300자를 초과했습니다', 400
+
+    app.database.execute(text(""" #1
+        INSERT INTO tweets (
+            user_id,
+            tweet
+        ) VALUES (
+            :id,
+            :tweet
+        )
+    """), user_tweet) #2
+
+    return '', 200
+```
+
+1. HTTP 요청을 통해 전달받은 트윗 데이터를 DB에 저장함
+2. SQL 구문을 통해 `INSERT` 될 트윗 데이터는 HTTP 요청을 통해 전송된 JSON을 그대로 사용함
+
+## follow 엔드포인트 직접 구현해보기
+
+```python
+@app.route('/follow', methods=['POST'])
+def follow():
+    user_follow = request.json
+
+    app.database.execute(text("""
+        INSERT INTO users_follow_list (
+            user_id,
+            follow_user_id
+        ) VALUES (
+            :id,
+            :follow
+        )
+    """), user_follow)
+
+    return '', 200
+```
+
+## timeline 엔드포인트
+
+timeline 엔드포인트는 `SELECT` 구문을 사용함.
+
+이번에는 데이터를 저장하는 것이 아니라 DB에 있는 데이터들을 읽어 들여 JSON 형태로 변환하여 HTTP 응답으로 보냄.
+
+```python
+@app.route('/timeline/<int:user_id>', methods=['GET'])
+def timeline(user_id):
+    rows = app.database.execute(text(""" #1
+        SELECT
+            t.user_id,
+            t.tweet
+        FROM tweets AS t
+        LEFT OUTER JOIN users_follow_list AS ufl
+        ON ufl.user_id = :user_id
+        WHERE (t.user_id = :user_id)
+            OR (t.user_id = ufl.follow_user_id)
+    """), {
+        'user_id' : user_id
+    }).fetchall()
+
+    timeline = [{ #2
+        'user_id' : row['user_id'],
+        'tweet' : row['tweet']
+    } for row in rows]
+
+    return jsonify({ #3
+        'user_id' : user_id,
+        'timeline' : timeline
+    })
+```
+
+1. `SELECT` 구문과 `JOIN` 구문을 사용해서 해당 사용자의 트윗들과 해당 사용자가 팔로우하는 사용자들의 트윗들을 DB에서 읽어 들임
+   - 여기서 `LEFT OUTER JOIN` 을 활용해서 혹시라도 해당 사용자가 팔로우하는 사용자가 없더라도 해당 사용자의 트윗만이라도 읽어들일 수 있게 함.
+   - 읽어 들이는 로우의 수가 여럿일 것이므로 `fetchall` 메소드를 사용해서 전부 다 읽어 들임
+2. 읽어 들인 트윗 리스트를 딕셔너리들을 품은 리스트 형태로 변환
+   - 즉 하나 하나의 로우를 딕셔너리로 변환하여 전체를 리스트에 담는 것
+3. 변환한 딕셔너리 리스트를 JSON 형태로 HTTP 응답으로 보냄
+
+막상 이렇게 엔드포인트 구현을 하니 두 테이블이 조인되는 과정에서 해당 사용자가 팔로우하는 대상이 여럿일 경우 해당 **사용자 자신의 트윗이 중복**하여 나타났다.
+
+이를 방지하기 위해 다음과 같이 **서브쿼리**와 **병합 연산**을 이용하여 다시 코드를 짜봤다.
+
+그리고, tweets 테이블의 creaetd_at 컬럼을 이용하여 트윗이 생성된 시간순으로 정렬해 타임라인에 생성 시간이 더 빠른 트윗 순으로 나타나도록 해 보았다.
+
+```python
+
+@app.route('/timeline/<int:user_id>', methods=['GET'])
+def timeline(user_id):
+    rows = app.database.execute(text("""
+        SELECT
+            t.user_id,
+            t.tweet,
+						t.created_at
+        FROM tweets AS t
+        LEFT OUTER JOIN users_follow_list AS ufl
+        ON ufl.user_id = :user_id
+        WHERE t.user_id = ufl.follow_user_id
+				UNION
+				(
+				SELECT
+					t.user_id,
+					t.tweet,
+					t.created_at
+				FROM tweets AS t
+				WHERE t.user_id = :user_id
+				)
+				ORDER BY created_at ASC
+    """), {
+        'user_id' : user_id
+    }).fetchall()
+
+    timeline = [{
+        'user_id' : row['user_id'],
+        'tweet' : row['tweet']
+    } for row in rows]
+
+    return jsonify({
+        'user_id' : user_id,
+        'timeline' : timeline
+    })
+```
+
+이후 실행시켜 확인해 보니, 더 이상 자기 자신의 트윗이 중복되어 나타나지 않았다.
+
+이를 통해 서브쿼리와 병합 연산을 다시 한 번 연습해볼 수 있었다.
+
+다만, 이 경우 데이터 조회에 걸리는 시간이 추가될 수 있다는 점을 고려하고, 이 SQL 문이 목적 달성을 위한 최선인지 앞으로 SQL 구문을 더 사용해 보고 자료를 찾아보며 고민해 봐야할 것 같다.
+
 </details>
