@@ -1431,7 +1431,7 @@ FROM item LEFT OTUER JOIN stock
 ON item.id = stock.item_id;
 ```
 
-`ON [item.id](http://item.id) = stock.item_id`
+`ON item.id = stock.item_id`
 
 - item 테이블의 id 컬럼과 stock 테이블의 item_id 컬럼에서 값을 비교하여 서로 값이 같은 값끼리 가로로 연결하라는 뜻이다.
 
@@ -1598,7 +1598,7 @@ ON old.id = new.id;
 
 이렇게 LEFT OUTER JOIN을 활용하여 item을 기준으로 조인하면, item 테이블에만 있고 item_new 테이블에는 누락되어 있는 상품을 확인할 수 있다. 해당 상품은 new_id, new_name 컬럼의 값이 NULL로 나타나게 된다.
 
-item 테이블에만 있는 상품만 따로 보고 싶을 경우, 맨 아래에 `WHERE [new.id](http://new.id) IS NULL` 구문을 추가해주면 된다.
+item 테이블에만 있는 상품만 따로 보고 싶을 경우, 맨 아래에 `WHERE new.id IS NULL` 구문을 추가해주면 된다.
 
 ## item_new 테이블에만 있는 정보 확인하기
 
@@ -1617,7 +1617,7 @@ ON old.id = new.id;
 
 RIGHT OUTER JOIN을 사용하여 item 테이블에는 없고 item_new 테이블에 추가된 상품을 확인한다.
 
-item_new에 새롭게 추가된 상품만 따로 보고싶을 경우, 맨 아래에 `WHERE [old.id](http://old.id) IS NULL` 구문을 추가해주면 된다.
+item_new에 새롭게 추가된 상품만 따로 보고싶을 경우, 맨 아래에 `WHERE old.id IS NULL` 구문을 추가해주면 된다.
 
 ## 두 테이블 모두에 포함되어 있는 정보 확인하기
 
@@ -1679,7 +1679,7 @@ USING(id)
 
 현재 item 테이블의 **id** 컬럼과 item_new 테이블의 **id** 컬럼을 기준으로 조인하고 있는데, 이렇게 두 테이블에서 조인 조건으로 사용되는 컬럼들의 이름이 같으면 그냥 USING이라고 쓰고 그 안에 컬럼 이름을 쓰는 것도 허용된다.
 
-이 상황에서는 `ON [old.id](http://old.id) = [new.id](http://new.id)` 와 `USING(id)` 의 의미가 같은 것이다.
+이 상황에서는 `ON old.id = new.id` 와 `USING(id)` 의 의미가 같은 것이다.
 
 # USING 더 알아보기
 
