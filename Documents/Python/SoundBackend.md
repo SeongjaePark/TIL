@@ -1219,14 +1219,14 @@ users 테이블과 tweets 테이블은 사용자의 id를 기준으로 열결되
   - 테이블 A의 여러 로우가 테이블 B의 여러 로우와 연결되는 관계
   - 예: 사용자들 사이의 팔로잉과 팔로워 관계
 
-### 정규화
+### 화
 
 정보를 여러 테이블에 나누어서 저장하는 이유
 
 - 하나의 테이블에서 필요한 모든 정보를 다 넣으면 동일한 정보들이 여러 테이블에 불필요하게 중복되어 저장됨
   - 그러면 불필요하게 더 많은 디스크를 사용하게 됨
   - 반면 외부 키를 사용하여 사용하면 단순 키 값만 저장하면 되므로 디스크 공간을 훨씬 효율적으로 사용할 수 있게 됨
-- 관계형식으로 데이터베이스 구조를 잡지 않고 필요한 데이터를 테이블에 저장하게 되면 잘못도니 데이터가 저장될 가능성이 높아짐
+- 관계형식으로 데이터베이스 구조를 잡지 않고 필요한 데이터를 테이블에 저장하게 되면 잘못된 데이터가 저장될 가능성이 높아짐
   - 외부 키를 사용하면 서로 같은 데이터이지만 오타나 스펠링 등의 이유로 부분적으로 오류가 생겨서 틀린 데이터가 생기는 문제가 없어지게 됨
 
 이렇게 중복을 최소화하도록 데이터를 구조화하는 프로세스를 정규화 혹은 노멀리제이션(normalization)이라고 함. 관계형 데이터베이스에서는 정규화가 굉장히 중요한 부분임
@@ -1785,5 +1785,196 @@ def timeline(user_id):
 이를 통해 서브쿼리와 병합 연산을 다시 한 번 연습해볼 수 있었다.
 
 다만, 이 경우 데이터 조회에 걸리는 시간이 추가될 수 있다는 점을 고려하고, 이 SQL 문이 목적 달성을 위한 최선인지 앞으로 SQL 구문을 더 사용해 보고 자료를 찾아보며 고민해 봐야할 것 같다.
+
+## unfollow 엔드포인트 직접 구현해보기
+
+```python
+@app.route('/unfollow', methods=['POST'])
+def unfollow():
+    user_unfollow = request.json
+
+    app.database.execute(text("""
+        DELETE FROM users_follow_list
+            WHERE (user_id = :id)
+                AND (follow_user_id = :unfollow)
+    """), user_unfollow)
+
+    return '', 200
+```
+
+## 전체 코드
+
+DB에 SQL을 실행하는 로직들을 따로 함수로 만들고 각 엔드포인트에서 필요한 함수들을 호출하는 형태로 변환.%
+
+SQL을 실행하는 함수들에서 `current_app` 이 사용되는데, 이는 `create_app` 함수에서 생성된 app 변수를 `create_app` 함수 외부에서도 사용할 수 있게 해줌
+
+```python
+from flask import Flask, jsonify, request, current_app
+from sqlalchemy import create_engine, text
+
+def insert_user(user):
+    return current_app.database.execute(text("""
+        INSERT INTO users (
+            name,
+            email,
+            profile,
+            hashed_password
+        ) VALUES (
+            :name,
+            :email,
+            :profile,
+            :password
+        )
+    """), user).lastrowid
+
+def get_user(user_id):
+    user = current_app.database.execute(text("""
+        SELECT
+            id,
+            name,
+            email,
+            profile
+        FROM users
+        WHERE id = :user_id
+    """), {
+        'user_id' : user_id
+    }).fetchone()
+
+    return {
+        'id' : user['id'],
+        'name' : user['name'],
+        'email' : user['email'],
+        'profile' : user['profile']
+    } if user else None
+
+def insert_tweet(user_tweet):
+    current_app.database.execute(text("""
+        INSERT INTO tweets (
+            user_id,
+            tweet
+        ) VALUES (
+            :id,
+            :tweet
+        )
+    """), user_tweet)
+
+def insert_follow(user_follow):
+    current_app.database.execute(text("""
+        INSERT INTO users_follow_list (
+            user_id,
+            follow_user_id
+        ) VALUES (
+            :id,
+            :follow
+        )
+    """), user_follow)
+
+def insert_unfollow(user_unfollow):
+    current_app.database.execute(text("""
+        DELETE FROM users_follow_list
+        WHERE ufl.user_id = :id
+            AND follow_user_id = :unfollow
+    """), user_unfollow)
+
+def get_timeline(user_id):
+    timeline = current_app.database.execute(text("""
+        SELECT
+            t.user_id,
+            t.tweet,
+            t.created_at
+        FROM tweets AS t
+        LEFT OUTER JOIN users_follow_list AS ufl
+        ON ufl.user_id = :user_id
+        WHERE t.user_id = ufl.follow_user_id
+        UNION
+        SELECT
+            t.user_id,
+            t.tweet,
+            t.created_at
+        FROM tweets AS t
+        WHERE t.user_id = :user_id
+        ORDER BY created_at
+    """), {
+        'user_id' : user_id
+    }).fetchall()
+
+    return [{
+        'user_id' : tweet['user_id'],
+        'tweet' : tweet['tweet']
+    } for tweet in timeline]
+
+def create_app(test_config = None):
+    app = Flask(__name__)
+
+    if test_config is None:
+        app.config.from_pyfile("config.py")
+    else:
+        app.config.update(test_config)
+
+    database = create_engine(app.config['DB_URL'], encoding = 'utf-8', max_overflow = 0)
+    app.database = database
+
+    @app.route('/ping', methods=['GET'])
+    def ping():
+        return 'pong'
+
+    @app.route('/sign-up', methods=['POST'])
+    def sign_up():
+        new_user = request.json
+        new_user_id = insert_user(new_user)
+        created_user = get_user(new_user_id)
+
+        return jsonify(created_user)
+
+    @app.route('/tweet', methods=['POST'])
+    def tweet():
+        user_tweet = request.json
+        tweet = user_tweet['tweet']
+
+        if len(tweet) > 300:
+            return '300자를 초과했습니다', 400
+
+        insert_tweet(user_tweet)
+
+        return '', 200
+
+    @app.route('/follow', methods=['POST'])
+    def follow():
+        user_follow = request.json
+        insert_follow(user_follow)
+
+        return '', 200
+
+    @app.route('/unfollow', methods=['POST'])
+    def unfollow():
+        user_unfollow = request.json
+        insert_unfollow(user_unfollow)
+
+        return '', 200
+
+    @app.route('/timeline/<int:user_id>', methods=['GET'])
+    def timeline(user_id):
+
+        return jsonify({
+            'user_id' : user_id,
+            'timeline' : get_timeline(user_id)
+        })
+
+    return app
+```
+
+# 6장 정리
+
+- 데이터베이스 시스템은 데이터를 저장 및 보존하는 시스템임. DB에 저장되어 있는 데이터를 조회할 수 있고, 새로운 데이터를 저장할 수도 있고, 기존의 데이터를 업데이트할 수 도 있음
+- DB 시스템은 크게 2종류로 분류된다. 관계형 DB 시스템 (RDBMS), 그리고 "NoSQL"로 불리우는 비관계형(Non-relational) DBMS다.
+- 관계형 DB에서 테이블들의 상호 관련성
+  - one to one
+  - one to many
+  - many to many
+- 관계형 DB에서 외래 키(foreign key)를 사용해서 테이블들을 연결하여 데이터 값의 중복을 최소화하게 데이터를 구조화하는 프로세스를 정규화라고 함
+- 관계형 DB에서 트랜잭션은 일련의 작업들이 마치 하나의 작업처럼 취급되어서 모두 다 성공하거나 아니면 모두 다 실패하는 것을 말함
+- SQL은 MySQL 같은 관계형 DB에서 데이터를 읽거나 생성 및 수정하기 위해 사용하는 언어임
+- sqlalchemy 라이브러리를 사용해서 파이썬 코드에서 DB에 연결하여 SQL을 실행시킬 수 있음
+- Flask는 `create_app` 이라는 이름의 함수를 자동으로 팩토리 함수로 인식해서 해당 함수를 통해 Flask를 실행시킴
 
 </details>
