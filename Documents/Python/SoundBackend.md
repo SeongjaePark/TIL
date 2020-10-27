@@ -1978,3 +1978,235 @@ def create_app(test_config = None):
 - Flask는 `create_app` 이라는 이름의 함수를 자동으로 팩토리 함수로 인식해서 해당 함수를 통해 Flask를 실행시킴
 
 </details>
+
+<details>
+  <summary>Chatper 7. 인증</summary>
+
+# Chapter 7 인증
+
+## 인증이 필요한 이유
+
+### private API
+
+사용할 수 있는 사용자 혹은 클라이언트를 제한해야 하므로 당연히 인증 엔드포인트를 구현해야 함
+
+### public API
+
+사용 횟수 제한, 남용 방지, 사용자 통계 등의 이유로 인증 엔드포인트를 대부분 필요로 함
+
+## 인증 절차
+
+1. 사용자 가입 절차를 통해 아이디와 비밀번호 생성
+2. 가입한 사용자의 아이디와 비밀번호를 DB에 저장. 비밀번호는 암호화해서 저장
+3. 사용자가 본인의 아이디와 비밀번호 입력 (로그인)
+4. 사용자가 입력한 비밀번호를 암호화한 후, 그 값을 이미 암호화 되어서 DB에 저장된 비밀번호와 비교
+5. 비밀번호가 일치하면 로그인 성공
+6. 로그인에 성공하면 백엔드 API 서버는 access token을 프론트엔드 혹은 클라이언트에게 전송
+7. 프론트엔드 서버는 로그인 성공 후 다음부터는 해당 사용자의 access token을 첨부해서 request를 서버에 전송함으로써 매번 로그인하지 않아도 되도록 함
+
+## 사용자 비밀번호 암호화
+
+### 암호화의 이유
+
+사용자의 비밀번호는 절대 본래의 비밀번호 값 그대로 DB에 저장하지 않음!
+
+그 이유는 외부 해킹 또는 내부 인력에 의해 DB에 노출되었을 경우에 사용자의 정보가 노출되는 것을 막기 위해서임
+
+### 암호화 방식
+
+일반적으로 단방향 해시 함수(one-way hash function)가 쓰임
+
+- 이름에서 알 수 있듯이 복호화(decryption) 할 수 없는 암호화 알고리즘임
+- 사용자의 비밀번호를 DB에 저장할 때는 복호화할 목적으로 저장하지 않고, 온전히 본래의 비밀번호 값을 알지 못하도록 방지하는 데에 목적이 있는 것
+
+password 와 password2 와 같이 비슷한 비밀번호를 암호화하게 되면 원본의 비밀번호 값은 굉장히 비슷하지만, 암호화된 해시 함수 값은 완전히 다르게 되는데, 이러한 효과를 **애벌런시 효과**(avalanche effect)라고 함. 원본 값과 해시 값 사이에 직접적인 연관성이나 패턴이 없도록 하여 원본 값을 추론하는 것을 어렵게 만들도록 함
+
+### `hashlib` 모듈
+
+파이썬에서는 `hashlib` 모듈을 사용해서 단방향 해시 함수를 통해 값들을 암호화할 수 있음
+
+```python
+import hashlib # 1
+m = hashlib.sha256() # 2
+m.update(b"test password") # 3
+m.hexdigest() # 4
+# 0b47c69b1033498d5f33f5f7d97bb6a3126134751629f4d0185c115db44c094e
+```
+
+1. `hashlib` 모듈 임포트.
+2. `sha256` 암호 알고리즘 선택
+3. 암호화하고자 하는 값을 인자로 설정해서 `update` 메소드 호출
+   - `update` 메소드는 바이트 값을 받으므로 b prefix를 스트링 앞에 붙여서 바이트로 변환해 줌
+4. 암호화된 값을 hex(16진수) 값으로 읽어 들임
+
+## bcrypt 암호 알고리즘
+
+단방향 해시 알고리즘도 취약점이 있고, 충분히 해킹 가능하다.
+
+가장 널리 사용되는 단방향 해시 암호 알고리즘 해킹 방법은 **rainbow attack**
+
+- 미리 임의의 문자열들의 해시 값들을 계산해 놓은 테이블은 rainbow table 이라는 테이블을 먼저 생성해 놓은 후 해시 값을 역추적해서 본래 값을 찾아내는 해킹 방법.
+- 해시함수의 실행 속도가 굉장히 빠르므로 충분히 구현 가능한 방법
+  - 해시 함수는 본래 패스워드를 저장하기 위한 것이 아니라, 짧은 시간에 데이터를 검색하기 위해 설계된 것이기 때문. (딕셔너리나 세트 자료구조에 해시가 쓰임)
+
+### salting
+
+요리에서 음식에 간을 맞추기 위해 소금을 더하듯이, 실제 비밀번호 이외에 추가적으로 랜덤 데이터를 더해서 해시 값을 계산하는 방법.
+
+해커가 실제 어느 부분이 비밀번호 값이고, 어느 부분이 랜덤 값인지 알 수가 없게 됨. 따라서 rainbow attack 처럼 미리 해시 값들을 계싼해서 해킹하는 공격들을 무효화시킬 수 있음
+
+### 키 스트레칭
+
+기존의 단방향 해시 알고리즘들의 실행 속도가 너무 빠르다는 취약점을 보완하기 위한 방법
+
+단방향 해시 값을 계산한 후 그 해시 값을 또 해시하고, 이를 여러 번 반복하는 방법
+
+일반적인 장비로 1초에 50억 개 이상의 해시 함수를 실행시킬 수 있다고 하면, 이 방법을 적용하면 동일한 장비에서 1초에 5번 정도만 가능하다고 함. GPU를 사용하더라도 수백에서 수천 번 정도만 실행 가능
+
+### bcrypt
+
+salting과 키 스트레칭을 구현한 해시 함수 중 가장 널리 사용되는 것이 bcrypt
+
+bcrypt는 처음부터 비밀번호를 단방향 암호화하기 위해 만들어짐 해시 함수임
+
+외부 라이브러리 설치: `pip install bcrypt`
+
+**bcrypt 사용**
+
+```python
+import bcrypt # 1
+bcrypt.hashpw(b'secret password', bcrypt.gensalt()) # 2
+# b'$2b$12$ViZ0qxKGtPsdjuP5QelQW.1QLikHfLd7QozBnx8CVLECZPUx9qf3m'
+bcrypt.hashpw(b'secret password, bcrypt.gensalt()).hex() # 3
+# '24326224313224455352587837364c5730534e36586d53463271384b4f72334364716634687976506b497a476561774444665a2f7745494f42777971'
+```
+
+1. bcrypt 라이브러리 임포트
+2. bcrypt 라이브러리의 `hashpw` 메소드를 호출하여 해시화 수행.
+   - `hashpw` 메소드는 2개의 인자를 받음
+   - 하나는 해시화 하고자 하는 값(byte 타입)
+   - 나머지 하나는 salt 값. `gensalt` 메소드를 통해 salt 값 생성. 개발자조차 어떤 salt 값이 쓰였는지 알지 못하도록 함
+3. 2와 동일하나, 결괏값을 바이트가 아니라 hex(16진수) 값으로 생성
+
+## access token
+
+사용자가 로그인에 성공하면 백엔드 API 서버는 access token 이라고 하는 데이터를 프론트엔드에 전송한다.
+
+그리고 프론트 엔드에서는 해당 사용자의 access token을 HTTP에 첨부해서 서버에 전송한다.
+
+### access token을 사용하는 이유
+
+HTTP는 stateless 이기 때문에 각각의 HTTP 통신은 독립적이어서 이전에 어떤 HTTP 통신들이 실행됐는지 모른다. 때문에 로그인 정보를 HTTP 요청에 첨부해서 보내야 API 서버에서 해당 사용자가 이미 로그인 된 상태라는 것을 알 수 있다.
+
+access token 은 바로 이 로그인 정보를 담고 있는 것이다.
+
+## JWT
+
+access token 을 생성하는 여러 가지 방법이 있는데, 가장 널리 사용되는 것 중 하나가 JWT(JSON Web Token). 이름 그대로 JSON 데이터를 token으로 변환하는 방식임
+
+백엔드 API 서버는 전송받은 사용자 아이디와 비밀번호를 확인하는 절차를 거친 후 인증이 되면 해당 사용자의 아이디를 다음과 같은 JSON 형태로 생성함
+
+```json
+{
+	user_id = 1
+}
+```
+
+로그인한 사용자 아이디를 JSON 형태로 저장함으로써 어느 사용자가 이미 로그인한 상태인 지를 알 수 있도록 하는 것임
+
+하지만 이 정보를 HTTP로 네트워크상에서 주고받아야 하므로 JSON 데이터를 token 데이터로 변환시켜서 HTTP 응답을 보냄
+
+access token을 받은 프론트엔드는 쿠키 등에 access token을 저장하고 있다가 해당 사용자를 위한 HTTP 요청을 백엔드 서버 API에 보낼 때 access token을 첨부해서 보냄. 그러면 백엔드에서는 프론트엔드로부터 받은 access token을 복호화해서 JSON 데이터를 얻어서 로그인한 사용자의 아이디를 읽어 들임으로써 해당 사용자가 이미 로그인한 상태임을 확인
+
+### 왜 JSON 데이터를 토큰화 시켜서 사용해야 하는가?
+
+단순 JSON 데이터를 사용하면 해킹에 취약함
+
+누구나 JSON 데이터를 HTTP 요청에 첨부해서 전송할 수 있기 때문에 해당 사용자가 아니어도 해당 사용자로 인식될 수 있기 때문임
+
+JWT는 단순 데이터 전송 기능 이외에도 검증의 기능도 가지고 있음
+
+만약 누가 해킹 목적으로 가짜 JWT를 전송해도 백엔드 API 서버에서 자신이 생성한 JWT인지 아닌지를 확인할 수 있는 기능도 제공함
+
+## JWT 구조
+
+- header
+- payload
+- signature
+
+JWT의 일반적인 형태는 다음과 같음
+
+`xxxxx.yyyyy.zzzzz`
+
+x 부분은 헤더이고 y 부분은 payload이며, z 부분은 signature 임. 각 부분은 `.` 으로 분리되어 있음
+
+### header
+
+해더는 두 부분으로 되어 있으며, 사용되는 해시 알고리즘(hashing algorithm)와 토큰 타입(JWT)를 지정함
+
+```json
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+```
+
+헤더를 [Base64URL](https://ko.wikipedia.org/wiki/베이스64) 방식으로 코드화해서 JWT의 첫 부분을 구성함
+
+### payload
+
+payload 는 JWT를 통해 실제로 서버 간에 전송하고자 하는 데이터 부분임. HTTP 메시지의 body 부분과 비슷함
+
+```json
+{
+  "user_id": 2,
+  "exp": 1539517391
+}
+```
+
+payload도 Base64URL 코드화 되어서 JWT의 두 번째 부분을 구성함
+
+Base64URL은 코드화(encoding) 시키는 것이지 암호화(encryption)가 아니기에 누구나 복원 가능함
+
+그러므로 민감한 정보는 넣지 않는 것이 좋음
+
+### signature
+
+JWT가 원본 그대로라는 것을 확인할 때 사용되는 부분임
+
+signature는 Base64URL 코드화된 header와 payload, 그리고 JWT secret을 헤더에 지정된 암호 알고리즘으로 암호화하여 전송함(복호화 가능).
+
+프론트엔드가 JWT를 백엔드 API 서버로 전송하면 서버에서는 전송받은 JWT의 signature 부분을 복호화하여 서버에서 생성한 JWT가 맞는지를 확인함. (싸인과도 같은 것)
+
+이 signature 부분이 잘못되어 있으면 JWT를 누군가 임의적으로 바꾸거나 해킹의 목적으로 임의로 생성한 것이라고 간주
+
+JWT 사용시 조심해야 할 점은 signature 부분 외에 다른 부분들은 암호화가 아닌 Base64URL 코드화되어 있다는 것임. 누구나 원본 데이터를 볼 수 있는 부분이므로 민감한 데이터는 저장하지 않도록 해야 함
+
+## PyJWT
+
+파이썬에서 JWT를 생성하고 복호화할 수 있게 해주는 라이브러리
+
+설치: `pip install PyJWT`
+
+**기본 사용법**
+
+```python
+import jwt # 1
+data_to_encode = {'some': 'payload'} # 2
+encryption_secret = 'secrete' # 3
+algorithm = 'HS256' # 4
+encoded = jwt.encode(data_to_encode, encryption_secret, algorithm=algorithm) # 5
+# b'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzb21lIjoicGF5bG9hZCJ9.j4hydZvraNFUqUHpXw0hYBN9qTRzbm9-yS9h5skNht0'
+jwt.decode(encoded, encryption_secret, algorithms=[algorithm]) # 6
+# {'some': 'payload'}
+```
+
+1. PyJWT 라이브러리의 jwt 모듈 임포트
+2. JWT의 payload 부분에 들어갈 JSON 데이터
+3. JWT의 signature 부분을 암호화할 때 사용할 비밀 키(secret key) 지정.
+   - 여기서는 아주 간단한 키를 사용했지만, 실제 시스템에서는 훨씬 복잡한 값을 사용하는 것이 권장됨
+4. JWT의 signature 부분을 암호화할 때 사용할 암호 알고리즘을 지정함
+5. JWT를 생성함
+6. 5에서 만들었던 JWT를 복호화하여 원본 payload 데이터를 읽어 들임
+
+</details>
