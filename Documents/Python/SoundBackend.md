@@ -2036,7 +2036,7 @@ m.hexdigest() # 4
 1. `hashlib` 모듈 임포트.
 2. `sha256` 암호 알고리즘 선택
 3. 암호화하고자 하는 값을 인자로 설정해서 `update` 메소드 호출
-   - `update` 메소드는 바이트 값을 받으므로 b prefix를 스트링 앞에 붙여서 바이트로 변환해 줌
+    - `update` 메소드는 바이트 값을 받으므로 b prefix를 스트링 앞에 붙여서 바이트로 변환해 줌
 4. 암호화된 값을 hex(16진수) 값으로 읽어 들임
 
 ## bcrypt 암호 알고리즘
@@ -2047,7 +2047,7 @@ m.hexdigest() # 4
 
 - 미리 임의의 문자열들의 해시 값들을 계산해 놓은 테이블은 rainbow table 이라는 테이블을 먼저 생성해 놓은 후 해시 값을 역추적해서 본래 값을 찾아내는 해킹 방법.
 - 해시함수의 실행 속도가 굉장히 빠르므로 충분히 구현 가능한 방법
-  - 해시 함수는 본래 패스워드를 저장하기 위한 것이 아니라, 짧은 시간에 데이터를 검색하기 위해 설계된 것이기 때문. (딕셔너리나 세트 자료구조에 해시가 쓰임)
+    - 해시 함수는 본래 패스워드를 저장하기 위한 것이 아니라, 짧은 시간에 데이터를 검색하기 위해 설계된 것이기 때문. (딕셔너리나 세트 자료구조에 해시가 쓰임)
 
 ### salting
 
@@ -2083,9 +2083,9 @@ bcrypt.hashpw(b'secret password, bcrypt.gensalt()).hex() # 3
 
 1. bcrypt 라이브러리 임포트
 2. bcrypt 라이브러리의 `hashpw` 메소드를 호출하여 해시화 수행.
-   - `hashpw` 메소드는 2개의 인자를 받음
-   - 하나는 해시화 하고자 하는 값(byte 타입)
-   - 나머지 하나는 salt 값. `gensalt` 메소드를 통해 salt 값 생성. 개발자조차 어떤 salt 값이 쓰였는지 알지 못하도록 함
+    - `hashpw` 메소드는 2개의 인자를 받음
+    - 하나는 해시화 하고자 하는 값(byte 타입)
+    - 나머지 하나는 salt 값. `gensalt` 메소드를 통해 salt 값 생성. 개발자조차 어떤 salt 값이 쓰였는지 알지 못하도록 함
 3. 2와 동일하나, 결괏값을 바이트가 아니라 hex(16진수) 값으로 생성
 
 ## access token
@@ -2146,8 +2146,8 @@ x 부분은 헤더이고 y 부분은 payload이며, z 부분은 signature 임. �
 
 ```json
 {
-  "alg": "HS256",
-  "typ": "JWT"
+	"alg": "HS256",
+	"typ": "JWT"
 }
 ```
 
@@ -2159,8 +2159,8 @@ payload 는 JWT를 통해 실제로 서버 간에 전송하고자 하는 데이�
 
 ```json
 {
-  "user_id": 2,
-  "exp": 1539517391
+	"user_id" : 2,
+	"exp" : 1539517391
 }
 ```
 
@@ -2180,7 +2180,7 @@ signature는 Base64URL 코드화된 header와 payload, 그리고 JWT secret을 �
 
 이 signature 부분이 잘못되어 있으면 JWT를 누군가 임의적으로 바꾸거나 해킹의 목적으로 임의로 생성한 것이라고 간주
 
-JWT 사용시 조심해야 할 점은 signature 부분 외에 다른 부분들은 암호화가 아닌 Base64URL 코드화되어 있다는 것임. 누구나 원본 데이터를 볼 수 있는 부분이므로 민감한 데이터는 저장하지 않도록 해야 함
+JWT  사용시 조심해야 할 점은 signature 부분 외에 다른 부분들은 암호화가 아닌 Base64URL 코드화되어 있다는 것임. 누구나 원본 데이터를 볼 수 있는 부분이므로 민감한 데이터는 저장하지 않도록 해야 함
 
 ## PyJWT
 
@@ -2204,7 +2204,7 @@ jwt.decode(encoded, encryption_secret, algorithms=[algorithm]) # 6
 1. PyJWT 라이브러리의 jwt 모듈 임포트
 2. JWT의 payload 부분에 들어갈 JSON 데이터
 3. JWT의 signature 부분을 암호화할 때 사용할 비밀 키(secret key) 지정.
-   - 여기서는 아주 간단한 키를 사용했지만, 실제 시스템에서는 훨씬 복잡한 값을 사용하는 것이 권장됨
+    - 여기서는 아주 간단한 키를 사용했지만, 실제 시스템에서는 훨씬 복잡한 값을 사용하는 것이 권장됨
 4. JWT의 signature 부분을 암호화할 때 사용할 암호 알고리즘을 지정함
 5. JWT를 생성함
 6. 5에서 만들었던 JWT를 복호화하여 원본 payload 데이터를 읽어 들임
@@ -2222,13 +2222,13 @@ import bcrypt # 1
 def sign_up():
 	new_user = request.json
 	new_user['password'] = bcrypt.hashpw(new_user['password'].encode('UTF-8'), bcrypt.gensalt()) # 2
-
+	
 	#생략
 ```
 
 1. bcrypt 모듈 임포트
 2. bcrypt 모듈을 사용해서 사용자의 비밀번호를 암호화 함
-   - bcrypt 모듈의 `hashpw` 함수는 스트링 값이 아닌 byte 값을 받으므로 사용자의 비밀번호를 UTF-8 인코딩으로 byte 변환해서 `hashpw` 함수에 넘겨주어 호출함
+    - bcrypt 모듈의 `hashpw` 함수는 스트링 값이 아닌 byte 값을 받으므로 사용자의 비밀번호를 UTF-8 인코딩으로 byte 변환해서 `hashpw` 함수에 넘겨주어 호출함
 
 ## 인증 엔드포인트 생성
 
@@ -2257,7 +2257,7 @@ def login():
 
 	if row and bcrypt.checkpw(password.encode('UTF-8'), row['hashed_password'].encode('UTF-8')): # 5
 		user_id = row['id']
-		payload = {
+		payload = { 
 			'user_id' : user_id
 			'exp' : datetime.utcnow() + timedelta(seconds = 60 * 60 * 24)
 		} # 6
@@ -2275,13 +2275,13 @@ def login():
 3. HTTP 요청으로 전송된 JSON body에서 사용자의 비밀번호를 읽어 들임
 4. 2에서 읽어 들인 사용자의 이메일을 사용하여 DB에서 해당 사용자의 암호화된 비밀번호를 읽어 들임
 5. 4에서 읽어 들인 사용자의 암호화된 비밀번호와 2에서 읽어 들인 사용자의 비밀번호가 일치하는 지 확인하는 부분
-   - 먼저, row가 None이면 해당 사용자가 존재하지 않는다는 뜻이므로 인증 허가를 안 해주면 됨
-   - 만일 사용자가 존재한다면 해당 사용자의 암호화된 비밀번호와 사용자가 전송한 비밀번호를 bcrypt 모듈의 `checkpw` 함수를 사용해서 동일한지 확인.
-   - `checkpw` 함수가 사용자의 비밀번호를 동일한 방식으로 암호화해서 이미 암호화되어 있는 비밀번호와 동일한 지를 확인해 줌
+    - 먼저, row가 None이면 해당 사용자가 존재하지 않는다는 뜻이므로 인증 허가를 안 해주면 됨
+    - 만일 사용자가 존재한다면 해당 사용자의 암호화된 비밀번호와 사용자가 전송한 비밀번호를 bcrypt 모듈의 `checkpw` 함수를 사용해서 동일한지 확인.
+    - `checkpw` 함수가 사용자의 비밀번호를 동일한 방식으로 암호화해서 이미 암호화되어 있는 비밀번호와 동일한 지를 확인해 줌
 6. 사용자의 비밀번호가 확인 되었으면 이제 JWT를 생성할 차례임
-   - 해당 사용자의 DB 상의 아이디에 해당하는 user_id, 그리고 해당 JWT의 유효기간 부분인 exp를 설정해 줌.
-   - 여기서는 JWT의 유효기간을 하루로 설정하였음
-   - JWT의 유효기간이 지나면 해당 JWT를 무효화가 되므로 새로 인증을 받아야 함
+    - 해당 사용자의 DB 상의 아이디에 해당하는 user_id, 그리고 해당 JWT의 유효기간 부분인 exp를 설정해 줌.
+    - 여기서는 JWT의 유효기간을 하루로 설정하였음
+    - JWT의 유효기간이 지나면 해당 JWT를 무효화가 되므로 새로 인증을 받아야 함
 7. 6에서 생성한 payload JSON 데이터를 JWT로 생성함
 8. 7에서 생성한 JWT를 HTTP 응답으로 전송함
 9. 만일 5에서 사용자가 존재하지 않거나 사용자의 비밀번호가 틀리면, Unauthorized 401 status의 HTTP 응답을 보냄.
@@ -2333,18 +2333,18 @@ def func(): # 8
 
 1. functools 모듈의 `wraps` decorator 함수 임포트
 2. decorator 함수 정의
-   - decorator 함수는 함수를 인자로 받아서 함수를 리턴하는 함수임
-   - 여기서는 `f` 라고 이름 지어진 함수를 인자로 받음
-   - 이 `f` 함수는 바로 해당 decorator 함수가 적용되는 함수가 됨
+    - decorator 함수는 함수를 인자로 받아서 함수를 리턴하는 함수임
+    - 여기서는 `f` 라고 이름 지어진 함수를 인자로 받음
+    - 이 `f` 함수는 바로 해당 decorator 함수가 적용되는 함수가 됨
 3. `wraps` decorator 함수를 적용함
-   - `wraps` decorator 함수를 꼭 적용해야만 decorator 함수를 만들 수 있는 것은 아님
-   - 하지만 `wraps` decorator 함수를 적용하면 부차적으로 생기는 이슈들을 해결해 줌(공식문서 참조)
+    - `wraps` decorator 함수를 꼭 적용해야만 decorator 함수를 만들 수 있는 것은 아님
+    - 하지만 `wraps` decorator 함수를 적용하면 부차적으로 생기는 이슈들을 해결해 줌(공식문서 참조)
 4. decorator 함수
-   - decorator 함수를 리턴해 줘야 하므로 nested 함수로 지정해 줌
-   - 함수의 인자가 \*args 와 \*\*kwargs 로 되어 있음!
-   - decorator 함수는 여러 다양한 함수에 적용될 수 있으므로 모든 형태의 인자들을 받을 수 있어야 함. 그러므로 \*args 와 \*\*kwargs 를 인자로 지정해 줘서 모든 형태의 인자를 받을 수 있도록 함
+    - decorator 함수를 리턴해 줘야 하므로 nested 함수로 지정해 줌
+    - 함수의 인자가 *args 와 **kwargs 로 되어 있음!
+    - decorator 함수는 여러 다양한 함수에 적용될 수 있으므로 모든 형태의 인자들을 받을 수 있어야 함. 그러므로 *args 와 **kwargs 를 인자로 지정해 줘서 모든 형태의 인자를 받을 수 있도록 함
 5. `f` 함수를 실행시켜 리턴해 줌.
-   - 즉, 해당 decorator 함수가 실행되고 난 후에 decorator가 적용된 함수를 호출해 주는 것
+    - 즉, 해당 decorator 함수가 실행되고 난 후에 decorator가 적용된 함수를 호출해 주는 것
 6. decorator 함수를 리턴해 줌
 7. 2에서 만든 decorator 함수를 8의 함수에 적용해 줌
 8. 2에서 만든 decorator 함수가 적용되는 함수
@@ -2364,7 +2364,7 @@ decorator 함수의 출력물이 먼저 출력되고, 그 다음에 `func` 함�
 ## 인증 decorator 함수
 
 1. 인증 엔드포인트를 통해 생성된 JWT access token
-2. 프론트엔드는 JWT access token을 HTTP 요청에서 "Authorization" 헤더에 포함시켜 보냄
+2. 프론트엔드는 JWT access token을  HTTP 요청에서 "Authorization" 헤더에 포함시켜 보냄
 3. 인증 decorator 함수는 전송된 HTTP 요청에서 "Authorization" 헤더 값을 읽어 들여서 JWT access token을 읽어 들임
 4. 인증 decorator 함수는 읽어 들인 JWT access token을 복호화해서 사용자 아이디를 읽어 들임으로써 해당 사용자의 로그인 여부를 결정함
 
@@ -2384,34 +2384,35 @@ def login_required(f): # 1
 				payload = None # 6
 
 			if payload is None: return Response(status=401) # 7
-
+			
 			user_id = payload['user_id'] # 8
 			g.user_id = user_id
 			g.user = get_user_info(user_id) if user_id else None
-
+		
 		else:
 			return Response(status = 401) # 9
-
+		
 		return f(*args, **kwargs)
 	return decorated_function
 
 ```
 
 1. `login_required` decorator 함수를 지정함
-   - `login_decorator` 함수가 적용된 함수는 해당 사용자가 로그인을 이미 한 상태에서만 실행될 수 있음
+    - `login_decorator` 함수가 적용된 함수는 해당 사용자가 로그인을 이미 한 상태에서만 실행될 수 있음
 2. functools 라이브러리의 `wraps` decorator 함수를 적용해서 decorator 함수를 구현함
 3. 전송된 HTTP 요청에서 "Authorization" 헤더 값을 읽어 들여 access token을 얻음
-4. authorization 헤더가 전송되었다면 access token을 복호화해서 payload JSON을 읽어 들이도록 함.
-   - 만일 access_token이 None이라면 authorization 헤더가 전송되지 않았다는 뜻이므로 인증 허가를 하지 않도록 함
+4. authorization 헤더가 전송되었다면 access token을 복호화해서 payload JSON을 읽어 들이도록 함. 
+    - 만일 access_token이 None이라면 authorization 헤더가 전송되지 않았다는 뜻이므로 인증 허가를 하지 않도록 함
 5. access token을 복호화 해서 payload JSON을 읽어 들임.
-   - jwt 모듈의 `decode` 함수는 JWT access token을 복호화할 뿐만 아니라, 토큰이 해당 백엔드 API 서버에서 생성된 토큰이 맞는지 확인하는 절차도 실행함.
-   - 이런 절차를 실행하기 위해서는 해당 JWT의 signature 부분을 암호화할 때 사용한 secret key가 필요함
-   - 여기서는 config에서 JWT_SECRET_KEY 필드 값을 읽어 들여 secret key를 읽어 들임 (login 엔드포인트에서 JWT 토큰을 생성할 때 사용한 동일한 secret key)
+    - jwt 모듈의 `decode` 함수는 JWT access token을 복호화할 뿐만 아니라, 토큰이 해당 백엔드 API 서버에서 생성된 토큰이 맞는지 확인하는 절차도 실행함.
+    - 이런 절차를 실행하기 위해서는 해당 JWT의 signature 부분을 암호화할 때 사용한 secret key가 필요함
+    - 여기서는 config에서 JWT_SECRET_KEY 필드 값을 읽어 들여 secret key를 읽어 들임 (login 엔드포인트에서 JWT 토큰을 생성할 때 사용한 동일한 secret key)
 6. 만일 exception이 일어나면 JWT를 복호화하는 데 문제가 있었다는 뜻임
 7. payload가 None이라는 것은 문제가 있다는 뜻이므로 Unauthorized 401 응답을 보냄
 8. JWT에서 복호화한 payload JSON에서 user_id를 읽어 들임.
-   - 그리고 해동 사용자 아이디를 사용해서 DB에서 사용자 정보도 읽어 들임
-   - `get_user_info` 함수는 주어진 사용자 아이디를 바탕으로 DB에서 사용자 정보를 읽어 들이는 함수
+    - 그리고 해동 사용자 아이디를 사용해서 DB에서 사용자 정보도 읽어 들임
+    - `get_user_info` 함수는 주어진 사용자 아이디를 바탕으로 DB에서 사용자 정보를 읽어 들이는 함수
+    - 참고: Flask의 g 객체는 스레드와 각각의 request 내에서만 값이 유효한 스레드 로컬 변수임. 사용자의 요청이 들어오더라도 각각의 request 내에서만 g 객체가 유효하기 때문에 사용자 ID를 저장해도 문제가 없음. `from flask import g` 필요
 9. 4에서 authorization 헤더가 전송되지 않은 경우 Unauthorized 401 응답을 보냄.
 
 ## 인증 decorator 적용하기
@@ -2424,7 +2425,16 @@ def login_required(f): # 1
 @app.route('/tweet', methods=['POST']) # 1
 @login_required #2
 def tweet():
-	#생략
+	user_tweet = request.json
+	user_tweet['id'] = g.user_id # 인증 데코레이터에서 읽어 들인 사용자 아이디
+	tweet = user_tweet['tweet']
+	
+	if len(tweet) > 300:
+		return '300자를 초과했습니다', 400
+
+	insert_tweet(user_tweet)
+
+	return '', 200
 
 @app.route('/follow', methods=['POST'])
 @login_required
@@ -2438,11 +2448,187 @@ def unfollow():
 ```
 
 1. `route` decorator를 먼저 적용시킴
-   - `route` 는 적용된 함수를 Flask 엔드포인트로 변경시켜 주는 decorator 함수이기 때문에 이 경우 `route` decorator 함수와 `login_required` decorator 함수까지 2 개의 decorator를 적용해야 함
-   - 이렇게 하나 이상의 decorator를 저굥시킬 때에는 순서가 중요한데, 먼저 적용하는 decorator가 먼저 실행되기 때문임
-   - 그러므로 이 경우 `route` decorator를 먼저 적용해서 해당 함수가 엔드포인트로 지정되도록 해주는 게 중요함
+    - `route` 는 적용된 함수를 Flask 엔드포인트로 변경시켜 주는 decorator 함수이기 때문에 이 경우 `route` decorator 함수와 `login_required` decorator 함수까지 2 개의 decorator를 적용해야 함
+    - 이렇게 하나 이상의 decorator를 저굥시킬 때에는 순서가 중요한데, 먼저 적용하는 decorator가 먼저 실행되기 때문임
+    - 그러므로 이 경우 `route` decorator를 먼저 적용해서 해당 함수가 엔드포인트로 지정되도록 해주는 게 중요함
 2. `route` decorator를 먼저 적용시킨 후 `login_required` decorator를 적용시켜 줌
 
-이제 tweet, follow, unfollow 엔드포인트에 `login_required` decorator를 적용시켰으니 해당 엔드포인트들을 실행시키기 위서는 먼저 로그인을 해야 함. 그렇지 않으면 Unauthorized 401 응답이 리턴 됨
+이제 tweet, follow, unfollow 엔드포인트에 `login_required` decorator를 적용시켰으니 해당 엔드포인트들을 실행시키기 위해서는 먼저 로그인을 해야 함. 그렇지 않으면 다음과 같이 Unauthorized 401 응답이 리턴 됨
+
+```python
+(api) [api] http -v POST localhost:5000/tweet id=7 tweet="안녕하세요 저는 서버 개발자 김서버입니다"
+
+POST /tweet HTTP/1.1
+Accept: application/json, */*;q=0.5
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 136
+Content-Type: application/json
+Host: localhost:5000
+User-Agent: HTTPie/2.2.0
+
+{
+    "id": "7",
+    "tweet": "안녕하세요 저는 서버 개발자 김서버입니다"
+}
+
+HTTP/1.0 401 UNAUTHORIZED
+Content-Length: 0
+Content-Type: text/html; charset=utf-8
+Date: Wed, 28 Oct 2020 03:29:53 GMT
+Server: Werkzeug/1.0.1 Python/3.7.9
+```
+
+따라서 먼저 로그인 엔드포인트를 호출해서 인증 절차를 거친 후 access token을 생성해야 함
+
+```python
+(api) [api] http -v POST localhost:5000/login email=serverk@gmail.com password=serverk1234
+
+POST /login HTTP/1.1
+Accept: application/json, */*;q=0.5
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 57
+Content-Type: application/json
+Host: localhost:5000
+User-Agent: HTTPie/2.2.0
+
+{
+    "email": "serverk@gmail.com",
+    "password": "serverk1234"
+}
+
+HTTP/1.0 200 OK
+Content-Length: 146
+Content-Type: application/json
+Date: Wed, 28 Oct 2020 03:32:43 GMT
+Server: Werkzeug/1.0.1 Python/3.7.9
+
+{
+    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo3LCJleHAiOjE2MDM5NDIzNjN9.WnxVef_YyrO0S6AV_Y5rMZiDCjJcnPeg7pJTFgJZ4Cw"
+}
+```
+
+로그인 엔드포인트를 사용해서 인가 절차를 거친 후 생성된 access token을 HTTP 요청의 authorization 헤더 값으로 지정해서 HTTP 요청을 전송해야 엔드포인트가 실행됨
+
+```python
+(api) [api] http -v POST localhost:5000/tweet tweet="안녕하세요 저는 서버 개발자 김서버입니다" "Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo3LCJleHAiOjE2MDM5NDIzNjN9.WnxVef_YyrO0S6AV_Y5rMZiDCjJcnPeg7pJTFgJZ4Cw"
+
+POST /tweet HTTP/1.1
+Accept: application/json, */*;q=0.5
+Accept-Encoding: gzip, deflate
+Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo3LCJleHAiOjE2MDM5NDIzNjN9.WnxVef_YyrO0S6AV_Y5rMZiDCjJcnPeg7pJTFgJZ4Cw
+Connection: keep-alive
+Content-Length: 125
+Content-Type: application/json
+Host: localhost:5000
+User-Agent: HTTPie/2.2.0
+
+{
+    "tweet": "안녕하세요 저는 서버 개발자 김서버입니다"
+}
+
+HTTP/1.0 200 OK
+Content-Length: 0
+Content-Type: text/html; charset=utf-8
+Date: Wed, 28 Oct 2020 03:45:39 GMT
+Server: Werkzeug/1.0.1 Python/3.7.9
+```
+
+더 이상은 /tweet 엔드포인트를 호출할 때 사용자 아이디를 지정해 주지 않아도 된다
+
+이는 `login_required` decorator 에서 이미 해당 사용자의 인증 절차를 거치면서 사용자 아이디를 읽어 들였고, /tweet 엔드포인트에서 그 정보를 g 객체를 통해 읽어들이는 부분을 추가했기 때문이다.
+
+이렇게 인증 절차를 통해서 해당 사용자의 정보를 얻는 것이 보안적으로 훨씬 더 안전하다. 이전의 트윗 엔드포인트에서는 누구나 사용자 id 부분을 임의로 정해서 트윗을 보낼 수 있었다면, 이제는 인증된 사용자만 본인의 계정으로 트윗을 보낼 수 있다.
+
+```python
+@app.route('/tweet', methods=['POST'])
+@login_required
+def tweet():
+	user_tweet = request.json
+	user_tweet['id'] = g.user_id # 1
+	tweet = user_tweet['tweet']
+
+	if len(tweet) > 300:
+		return '300자를 초과했습니다', 400
+
+	insert_tweet(user_tweet)
+
+	return '', 200
+```
+
+# 샘플 프론트엔드 시스템
+
+다음의 깃허브 리포지토리에서 샘플 프론트엔드 시스템 코드를 내려받자
+
+```
+https://github.com/Yeri-Kim/python-tutorial-frontend
+```
+
+다운받은 해당 디렉토리로 가서 다음의 파이썬 명령어를 실행하면 샘플 프론트엔드가 실행된다
+
+```bash
+python -m http.server
+```
+
+샘플 프론트엔드 시스템에서는 미니터 API가 로컬 호스트 5000번 포트에서 실행되고 있다고 가정함. API를 실행해 놓아야 함.
+
+샘플 프론트엔드와 연결시키기 위해서는 API에 몇 가지 추가할 것이 있음
+
+우선 API URL 도메인 주소와 프론트엔드 URL 도메인 주소가 달라서 생기는 문제인 CORS 문제를 해결해 줘야 함
+
+```bash
+pip install flask-cors
+```
+
+라이브러리를 설치하고, API에 다음과 같은 코드를 추가해야 함
+
+```bash
+from flask_cors import CORS # 임포트
+
+def create_app(test_config=None):
+	app = Flask(__name__)
+
+	CORS(app) # 추가한 부분
+```
+
+다음의 엔드포인트도 추가
+
+```bash
+@app.route('/timeline', methods['GET'])
+@login_required
+def user_timeline():
+	user_id = g.user_id
+
+	return jsonify({
+		'user_id': user_id,
+		'timeline': get_timeline(user_id)
+	})
+```
+
+이제 샘플 프론트엔드와 API를 모두 실행하고, 웹 브라우저 주소창에 [http://localhost:8000/sign-up.html](http://localhost:8000/sign-up.html) 주소로 접속하면 된다.
+
+그리고 다운 받은 프론트엔드를 실행할 때나 로그인할 때 오류가 나서 살펴보니, 파일명 signup.html 을 sign-up.html로 바꿔주고(혹은 주소창을 signup.html로)
+
+`login` 함수의 JSON 반환 부분에 user_id를 추가해주면 되더라
+
+```python
+return jsonify({
+	'user_id': user_id, # 추가한 부분	
+	'access_token': token.decode('UTF-8')
+})
+```
+
+## 7장 정리
+
+7장에서 알아본 것: 
+
+- 인증 절차는 대부분의 API들일 필요로 함
+- 사용자 비밀번호는 꼭 단방향 해시 암호화 해서 저장해야 함. 그리고 bcrypt와 같이 rainbow attack을 막아 주는 단방향 암호 알고리즘을 사용하는 것이 더욱 안전
+- HTTP 통신은 stateless이므로 해당 통신 전에 인증 절차를 거치는 통신이 있었는지에 대해 알 수 없음. 따라서 모든 HTTP 통신에 인증 여부 정보를 첨부해야 함. 이걸 가능케 해주는 것이 access_token
+- access token은 JWT(JSON Web Token)을 사용해서 생성. JWT를 생성할 때 조심해야 할 점은 민감한 사용자의 개인정보는 포함시키지 말아야 한다는 것!
+- 인증 절차를 엔드포인트에 적용시키기 위해서 decorator를 사용할 수 있음
+
+
 
 </details>
