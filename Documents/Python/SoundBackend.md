@@ -2726,4 +2726,36 @@ unit test의 단점을 UI test와 integration 테스트로 보완해야 함.
 
 unit test 70%, integration test 20%, UI test 10% 할당
 
+# pytest
+
+외부 라이브러리 pyteset 설치
+
+```
+pip install pytest
+```
+
+pytest는 파일 이름의 앞부분에 test\_ 라고 되어 있는 파일들만 테스트 파일로 인식하고 실행한다
+
+- test_example.py (O)
+- [example.py](http://example.py) (X)
+
+함수도 마찬가지로 함수 이름 앞부분에 test\_ 라고 되어 있는 함수들만 실제 unit test 함수로 인식하고 실행시킨다
+
+test_multiply_by_two.py
+
+```python
+def multiply_by_two(x):
+	return x * 2
+
+def test_multiply_by_two():   # 1
+	assert multiply_by_two(4) == 7   # 2
+```
+
+1. `multiply_by_two` 함수를 테스트하는 unit test 함수.
+2. `multiply_by_two(4)` 가 7을 리턴하는지 테스트함. 8을 리턴해야 정상이므로 실행하면 AssertionError 발생
+
+위와 같이 test_multiply_by_two.py 파일을 만들고 터미널에서 해당 디렉토리에서 pytest를 실행하면 오류가 난다. 어느 부분에 문제가 있는지 자세한 내용이 같이 나와 디버깅하기 수월하다.
+
+파일에서 문제가 되는 부분을 수정한 후 다시 pytest를 실행하면 unit test가 성공했다는 메시지가 나온다.
+
 </details>
