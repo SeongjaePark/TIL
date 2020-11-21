@@ -2820,6 +2820,7 @@ test_endpoints.py
 
 ```python
 from app import create_app   # 1
+import pytest
 
 @pytest.fixture # 2
 def api(): # 3
@@ -2843,5 +2844,27 @@ def api(): # 3
 6. `test_client` 함수를 호출해서 테스트용 클라이언트를 생성함
    - 테스트용 클라이언트를 사용해서 URI 기반으로 원하는 엔드포인트들을 호출할 수 있게 됨
 7. 6에서 호출한 test client를 리턴해 줌
+
+이제 생성된 test_client를 이용해서 /ping 엔드포인트를 테스트하는 코드를 구현한다.
+
+test_client를 통해서 GET 요청을 /ping URI에 보내면 된다.
+
+```python
+def test_ping(api):    # 1
+	resp = api.get('/ping')   # 2
+	assert b'pong' in resp.data   # 3
+```
+
+1. ping 엔드포인트를 테스트하는 함수.
+   - 여기서 중요한 것은 api 인자!
+   - pytest 커맨드를 실행해서 테스트들을 실행하기 때문에 test 함수들에 인자를 넘겨주어 실행할 수 없다.
+   - 하지만, pytest 함수가 동일한 이름을 가지고 있고, pytest fixture 데코레이터가 적용되어 있는 함수를 찾아서 해당 함수의 리턴 값을 인자에 적용시켜 주기 때문이다.
+   - 따라서 여기에서는 앞서 구현된 api 함수의 리턴 값, 즉 test client가 자동으로 적용되는 것이다.
+2. test client의 get 메소드를 통해서 가상의 GET 요청을 /ping URI와 연결되어 있는 엔드포인트에 보낸다.
+3. 2를 실행 후 리턴받은 응답(response)의 body에 "pong"이라는 텍스트가 포함되어 있는지 확인한다.
+   - 포함되어 있으면 정상적으로 작동한 것으로 간주하여 테스트 성공이고, 그렇지 않으면 실패한 것으로 간주도니다.
+   - 여기에 "pong"이라는 스트링 앞에 붙은 b는 해당 스트링을 _byte로 변환_ 해서 비교하는 것이다.
+
+이제 터미널에서 `pytest test_endpoints.py` 명령어를 실행하면 테스트가 성공하는 것을 확인할 수 있다.
 
 </details>
