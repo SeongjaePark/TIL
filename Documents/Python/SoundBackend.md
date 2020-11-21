@@ -2758,4 +2758,90 @@ def test_multiply_by_two():   # 1
 
 파일에서 문제가 되는 부분을 수정한 후 다시 pytest를 실행하면 unit test가 성공했다는 메시지가 나온다.
 
+# 미니터 API unit test
+
+unit test는 일반적으로 함수를 테스트하는 코드인데, Flask에서는 엔드포인트들이 함수로 구현되어 있기 때문에 unit test로 엔드포인트를 직접 테스트할 수 있다는 장점이 있다.
+
+unit test를 하기 위해 test_endpoints.py 라는 이름의 파일을 만들어서 unit test 코드를 구현하고, 테스트용 DB를 만들어 본다
+
+그리고 [config.py](http://config.py) 파일에 다음과 같은 내용 추가
+
+config.py
+
+```python
+test_db = {     # 1
+		'user' : 'test', # mysql 아이디
+		'password' : 'password',
+		'host' : 'localhost',
+		'port' : 3306,
+		'database' : 'test_db'
+}
+
+test_config = {   # 2
+		'DB_URL' : f"mysql+mysqlconnector://{test_db['user']}:{test_db['password']}@{test_db['host']}:{test_db['port']}/{test_db['database']}?charset=utf8"
+}
+```
+
+1. test 데이터베이스 접속 설정 지정
+2. 1의 지정해 준 test 데이터베이스 접속 설정을 기반으로 test 데이터베이스 접속 URL을 test_config 라는 딕셔너리에 지정
+
+이제 test_endpoints.py 에서 앞서 지정한 테스트 설정들을 읽어 들여 test 데이터베이스에 접속
+
+test_endpoints.py
+
+```python
+import config # 1
+
+from sqlalchemy import create_engine, text
+
+# 2
+database = create_engine(config.test_config['DB_URL'], encoding='utf-8', max_overflow=0)
+
+```
+
+1. config 파일을 임포트하여 테스트 설정 읽어 들이기
+2. 테스트 설정을 읽어 들여서 test DB에 접속
+
+이제 가장 간단한 엔드포인트인 ping 엔드포인트틀 테스트해봐야 하는데,
+
+ping 함수는 단순히 호출하는 것은 의미가 없고, ping 엔드포인트에 GET 요청을 보내야 의미 있는 실행이다.
+
+unit test 코드를 실행시키는 것이기 때문에 실제로 API 서버가 실행되지는 않는데, Flask에서는 unit test에서 엔드포인트를 테스트할 수 있는 기능을 제공한다.
+
+Flask에서 제공하는 `test_client` 함수를 사용해서 엔드포인트들을 그들의 URI를 통해 호출하고, 데이터도 전송할 수 있다.
+
+실제로 HTTP 전송을 하는 듯한 효과를 볼 수 있는데, 실제로 네트워크롤 통한 HTTP 전송을 하는 것은 아니고, 코드상에서(메모리에서만) 실행되는 것이다.
+
+`test_client` 메소드를 사용하기 위해서는 먼저 테스트할 flask application을 생성해야 한다.
+
+이미 구현한 미니터 API 코드로부터 `create_app` 함수를 임포트하면 된다.
+
+test_endpoints.py
+
+```python
+from app import create_app   # 1
+
+@pytest.fixture # 2
+def api(): # 3
+	app = create_app(config.test_config) # 4
+	app.config['TEST'] = True # 5
+	api = app.test_client() #  6
+
+	return api # 7
+```
+
+1. 미니터 API 소스 코드 파일인 [app.py](http://app.py) 파일에서 `create_app` 함수를 임포트
+2. pytest.fixture 데코레이터를 적용.
+   - 이 데코레이터가 중요하다.
+   - 이 데코레이터가 적용된 함수와 같은 이름의 인자(parameter)가 다른 test 함수에 지정되어 있으면 pytest가 알아서 같은 이름의 함수의 리턴 값을 해당 인자에 넣어 준다.
+3. fixture 함수 이름
+   - 함수의 이름이 중요
+   - 동일한 이름의 인자를 해당함수의 리턴 값으로 적용시켜 줌
+4. 1에서 임포트한 `create_app` 함수를 사용해서 테스트할 미니터 API 애플리케이션을 생성한다.
+   - 이때 설정을 test_config를 `create_app` 함수에 인자로 넘겨줌으로써 DB 등의 설정이 모두 테스트 설정이 적용되도록 함
+5. TEST 옵션을 `True` 로 설정해 줌으로써 Flask가 에러가 났을 경우 HTTP 요청 오류 부분은 핸들링하지 않음으로써 불필요한 오류 메시지는 출력되지 않게 함
+6. `test_client` 함수를 호출해서 테스트용 클라이언트를 생성함
+   - 테스트용 클라이언트를 사용해서 URI 기반으로 원하는 엔드포인트들을 호출할 수 있게 됨
+7. 6에서 호출한 test client를 리턴해 줌
+
 </details>
