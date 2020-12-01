@@ -2867,4 +2867,78 @@ def test_ping(api):    # 1
 
 이제 터미널에서 `pytest test_endpoints.py` 명령어를 실행하면 테스트가 성공하는 것을 확인할 수 있다.
 
+다음은 좀 더 복잡하고 POST 요청을 보내야 하는 /tweet 엔드포인트다.
+
+/tweet 엔드포인트를 통해 tweet을 생성하기 위해서는
+
+- 먼저, 사용자가 있어야 하고
+- 해당 사용자로 인증 절차를 걸친 후 access token을 받고
+- tweet 엔드포인트를 호출해야 한다
+
+test_tweet 함수 구현
+
+```python
+def test_tweet(api):
+    ## Create new test user   #1
+    new_user = {
+            'email' : 'test1234@gmail.com',
+            'password' : 'test password',
+            'name' : '시험용',
+            'profile' : 'test profile'
+            }
+
+    resp = api.post(
+            '/sign-up',
+            data = json.dumps(new_user),
+            content_type ='application/json'
+    )
+    assert resp.status_code == 200
+
+    ## Get the id of the new user    #2
+    resp_json = json.loads(resp.data.decode('utf-8'))
+    new_user_id = resp_json['id']
+
+    ## login   #3
+    resp = api.post(
+        '/login',
+        data = json.dumps({'email' : 'test1234@gmail.com',
+            'password' : 'test password'}),
+        content_type = 'application/json'
+    )
+    resp_json = json.loads(resp.data.decode('utf-8'))
+    access_token = resp_json['access_token']
+
+    ## tweet   #4
+    resp = api.post(
+        '/tweet',
+        data = json.dumps({'tweet' : "Hello World!"}),
+        content_type = 'application/json',
+        headers = {'Authorization' : access_token}
+    )
+    assert resp.status_code == 200
+
+    ## tweet 확인   #5
+    resp = api.get(f'/timeline/{new_user_id}')
+    tweets = json.loads(resp.data.decode('utf-8'))
+
+    assert resp.status_code == 200
+    assert tweet == {
+        'user_id' : 1,
+        'timeline' : [
+            {
+                'user_id' : 1,
+                'tweet' : "Hellow World!"
+            }
+        ]
+    }
+```
+
+1. tweet을 보낼 테스트 사용자를 먼저 생성한다. sign-up 엔드포인트를 호출해서 생성하며, 호출 후 응답(response)의 status code가 OK 200인지 확인한다
+2. 1에서 새로 생성한 사용자의 아이디를 1에서 받은 JSON 응답(response)에서 읽어 들인다. 나중에 /timeline 엔드포인트를 호출할 때 사용자 아이디가 필요하다
+3. /tweet 엔드포인트에 HTTP 요청을 전송하려면 access token이 필요하므로 /login 엔드포인트를 먼저 호출해서 access token을 읽어 들인다.
+   - 주의!!: 계속 에러가 떠서 확인해 보니, [config.py](http://config.py)의 test_config 부분에 JWT_SECRET_KEY를 추가해 줘야 한다. 이는 테스트 api를 생성할 때에는 config 방식이 달라지기 때문이다 (app.py 참고)
+4. /tweet 엔드포인트를 호출해 tweet을 생성한다. 3에서 생성한 access code를 "Authorization" 헤더에 첨부해서 request를 보낸다.
+5. 4에서 생성한 tweet이 정상적으로 생성되었는지를 확인하기 위해 timeline 엔드포인트를 호출해서 응답(response)을 확인한다. timeline 엔드포인트를 호출할 때 2에서 읽어 들인 사용자 아이디를 사용한다.
+   - 주의!!: 테스트 시 tweets = json.loads(resp.data.decode('utf-8')) 부분에서 계속 오류가 뜬다 json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
 </details>
