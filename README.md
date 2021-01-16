@@ -7,33 +7,11 @@
 ## 작성 규칙
 
 - 주제별로 분류하여 기록한다.
-- 꾸준한 학습을 지향하되 기계적인 일일커밋을 지양하기 위해 날짜는 기록하지 않는다.
+- 꾸준한 학습을 지향하되 기계적인 일일커밋을 지양하기 위해 ~~날짜는 기록하지 않는다.~~
+  - 2021년 1월 16일부로 Github TIL은 날짜별로 작성하고, **주제 별 내용 정리**는 [개인 velog](https://velog.io/@gndan4)에 기록하는 방식으로 변경
 - 폴더와 파일명은 영문으로 작성한다.
 - Reference를 명시한다.
 
 ---
 
-### iOS Programming
-
-- [**Naver BoostCourse iOS 프로그래밍을 위한 스위프트 기초**](https://github.com/SeongjaePark/TIL/blob/master/Documents/iOS%20Programming/swiftBasic.md)
-- [**Naver BoostCourse iOS 프로그래밍**](https://github.com/SeongjaePark/TIL/blob/master/Documents/iOS%20Programming/boostCourse.md)
-
-### CS 기초
-
-- [**Naver BoostCourse CS50 2019**](https://github.com/SeongjaePark/TIL/blob/master/Documents/CS50/CS50.md)
-
-### 파이썬(Python)
-
-- [**파이썬 자료구조**](https://github.com/SeongjaePark/TIL/blob/master/Documents/Python/DataStructure/DataStructure.md)
-
-- [**파이썬 모듈과 패키지**](https://github.com/SeongjaePark/TIL/blob/master/Documents/Python/Module&Package.md)
-
-- [**[서적] 깔끔한 파이썬 탄탄한 백엔드(저자: 송은우)**](https://github.com/SeongjaePark/TIL/blob/master/Documents/Python/SoundBackend.md)
-
-### Database
-
-- [SQL](https://github.com/SeongjaePark/TIL/blob/master/Documents/Database/SQL/SQL.md)
-
-### Crawling
-
-- [크롤링 관련 모듈](https://github.com/SeongjaePark/TIL/blob/master/Documents/Crawling/Crawling.md)
+### [TIL 2020](https://github.com/SeongjaePark/TIL/blob/master/2020/Documents)
