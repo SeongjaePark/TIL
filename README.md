@@ -16,4 +16,4 @@
 
 ### [TIL 2020](https://github.com/SeongjaePark/TIL/blob/master/2020/Documents)
 
-[2020.01.17](https://github.com/SeongjaePark/TIL/blob/master/2021/210117.md) - (ORM이란?)
+2020.01.17 - [ORM이란?](https://github.com/SeongjaePark/TIL/blob/master/2021/210117_ORM.md)
