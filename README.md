@@ -21,3 +21,5 @@
 2021.01.22 - [네트워크, 개략적으로 알아보기](https://github.com/SeongjaePark/TIL/blob/master/2021/210122_network_overview.md)
 
 2021.01.24 - [네트워크: 네트워크 기본 규칙](https://github.com/SeongjaePark/TIL/blob/master/2021/210124_network_basic_rule.md), [네트워크: 물리 계층](https://github.com/SeongjaePark/TIL/blob/master/2021/210124_network_physical_layer.md)
+
+2021.01.27 - [네트워크: 데이터 링크 계층](https://github.com/SeongjaePark/TIL/blob/master/2021/210127_network_data_link_layer.md)
