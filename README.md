@@ -31,3 +31,5 @@
 2021.02.07 - [네트워크: 네트워크의 전체 흐름](https://github.com/SeongjaePark/TIL/blob/master/2021/210207_network_network_overall_flow.md)
 
 2021.02.09 - [네트워크: 무선 랜](https://github.com/SeongjaePark/TIL/blob/master/2021/210209_network_wireless_LAN.md), [HTTP 메서드 및 상태 코드 정리](https://github.com/SeongjaePark/TIL/blob/master/2021/210209_network_HTTP_method_status_code.md)
+
+2021.02.16 - [알고리즘: 2차원 배열 순회, 부분 집합(비트 연산)](https://github.com/SeongjaePark/TIL/blob/master/2021/210216_algorithm_2darray_subset_bitwise_operation.md)
