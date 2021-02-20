@@ -35,3 +35,5 @@
 2021.02.16 - [알고리즘: 2차원 배열 순회, 부분 집합(비트 연산)](https://github.com/SeongjaePark/TIL/blob/master/2021/210216_algorithm_2darray_subset_bitwise_operation.md)
 
 2021.02.18 - [알고리즘: BOJ 2579: 계단 오르기](https://github.com/SeongjaePark/TIL/blob/master/2021/210218_algorithm_boj_2579.md)
+
+2021.02-20 - [OS: 운영체제의 큰 그림](https://github.com/SeongjaePark/TIL/blob/master/2021/210220_OS_oveview.md), [OS: 운영체제의 구조 - 시스템 콜](https://github.com/SeongjaePark/TIL/blob/master/2021/210220_OS_system_call.md), [OS: 운영체제 구조 - 시스템 콜](https://github.com/SeongjaePark/TIL/blob/master/2021/210220_OS_system_call.md), [OS: 운영체제 구조 - 사용자 모드와 커널 모드](https://github.com/SeongjaePark/TIL/blob/master/2021/210220_OS_user_mode_kernel_mode.md), [OS: 프로세스 스케쥴링](https://github.com/SeongjaePark/TIL/blob/master/2021/210220_OS_process_scheduling.md)
