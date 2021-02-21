@@ -39,3 +39,5 @@
 2021.02-20 - [OS: 운영체제의 큰 그림](https://github.com/SeongjaePark/TIL/blob/master/2021/210220_OS_oveview.md), [OS: 운영체제의 구조 - 시스템 콜](https://github.com/SeongjaePark/TIL/blob/master/2021/210220_OS_system_call.md), [OS: 운영체제 구조 - 시스템 콜](https://github.com/SeongjaePark/TIL/blob/master/2021/210220_OS_system_call.md), [OS: 운영체제 구조 - 사용자 모드와 커널 모드](https://github.com/SeongjaePark/TIL/blob/master/2021/210220_OS_user_mode_kernel_mode.md), [OS: 프로세스 스케쥴링](https://github.com/SeongjaePark/TIL/blob/master/2021/210220_OS_process_scheduling.md)
 
 2021.02-21 - [OS: 프로세스 스케쥴링 알고리즘 기본](https://github.com/SeongjaePark/TIL/blob/master/2021/210221_OS_process_scheduling_algorithm.md), [OS: 프로세스 상태와 스케쥴링](https://github.com/SeongjaePark/TIL/blob/master/2021/210221_OS_process_status_and_scheduling.md), [OS: 선점형과 비선점형 스케쥴러](https://github.com/SeongjaePark/TIL/blob/master/2021/210221_OS_preemptive_and_non_preemptive_scheduler.md)
+
+2021.02-22 - [OS: 인터럽트](https://github.com/SeongjaePark/TIL/blob/master/2021/210222_OS_interrupt.md)
