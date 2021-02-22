@@ -40,4 +40,4 @@
 
 2021.02.21 - [OS: 프로세스 스케쥴링 알고리즘 기본](https://github.com/SeongjaePark/TIL/blob/master/2021/210221_OS_process_scheduling_algorithm.md), [OS: 프로세스 상태와 스케쥴링](https://github.com/SeongjaePark/TIL/blob/master/2021/210221_OS_process_status_and_scheduling.md), [OS: 선점형과 비선점형 스케쥴러](https://github.com/SeongjaePark/TIL/blob/master/2021/210221_OS_preemptive_and_non_preemptive_scheduler.md)
 
-2021.02.22 - [OS: 인터럽트](https://github.com/SeongjaePark/TIL/blob/master/2021/210222_OS_interrupt.md), [알고리즘: BOJ 2579: 계단 오르기](https://github.com/SeongjaePark/TIL/blob/master/2021/210222_algorithm_boj_2579.md)
+2021.02.22 - [OS: 인터럽트](https://github.com/SeongjaePark/TIL/blob/master/2021/210222_OS_interrupt.md), [알고리즘: BOJ 2775: 부녀회장이 될테야](https://github.com/SeongjaePark/TIL/blob/master/2021/210222_algorithm_boj_2775.md)
