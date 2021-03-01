@@ -43,3 +43,5 @@
 2021.02.22 - [OS: 인터럽트](https://github.com/SeongjaePark/TIL/blob/master/2021/210222_OS_interrupt.md), [알고리즘: BOJ 2775: 부녀회장이 될테야](https://github.com/SeongjaePark/TIL/blob/master/2021/210222_algorithm_boj_2775.md)
 
 2021.02.23 - [OS: 프로세스 구조](https://github.com/SeongjaePark/TIL/blob/master/2021/210223_OS_process_structure.md)
+
+2021.03.01 - [알고리즘: BOJ 7576: 토마토](https://github.com/SeongjaePark/TIL/blob/master/2021/210301_algorithm_boj_7576.md)
