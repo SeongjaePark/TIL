@@ -47,3 +47,5 @@
 2021.03.01 - [알고리즘: BOJ 7576: 토마토](https://github.com/SeongjaePark/TIL/blob/master/2021/210301_algorithm_boj_7576.md)
 
 2021.03.07 - [OS: 가상 메모리](https://github.com/SeongjaePark/TIL/blob/master/2021/210307_OS_virtual_memory.md)
+
+2021.03.09 - [Django: 웹 프레임워크, 장고 기본 개념, Template, HTML Form, URL](https://github.com/SeongjaePark/TIL/blob/master/2021/210309_Django_basic_template.md)
