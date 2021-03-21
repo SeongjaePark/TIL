@@ -59,7 +59,7 @@ django에서는 MVC 패턴에서 M, V, C에 해당하는 요소를 각각 Model,
 asgi.py
 
 - django 3 버전에서 새로 생긴 파일
-- 비동기적인 웹서버와 연동할 때 사용하는 파일
+- 장고 어플리케이션이 비동기식 웹 서버와 연결 및 소통하는 것을 도움
 
 settings.py
 
@@ -68,10 +68,13 @@ settings.py
 
 url.py
 
+- 사이트의 url과 view의 연결을 지정
 - 사용자의 HTTP 요청을 받았을 때 요청을 적절한 view로 포워드 해줌
 
 wsgi.py
 
+- Web Server Gateway Interface
+- 장고 앱이 웹서버와 연결 및 소통하는 것을 도움
 - 배포할 때 사용
 
 ### 애플리케이션 폴더 내 파일
