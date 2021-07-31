@@ -61,3 +61,5 @@
 2021.04.20 - [알고리즘: 다익스트라 최단 거리 알고리즘](https://github.com/SeongjaePark/TIL/blob/master/2021/210420_algorithm_dijkstra_algorithm.md)
 
 2021.07.20 - [HTTP 완벽 가이드: 1장 HTTP 개관](https://github.com/SeongjaePark/TIL/blob/master/2021/210720_http_1_overview.md), [HTTP 완벽 가이드: 2장 URL과 리소스](https://github.com/SeongjaePark/TIL/blob/master/2021/210720_http_2_url&resource.md)
+
+2021.07.27 - [HTTP 완벽 가이드: 3장 HTTP 메시지](https://github.com/SeongjaePark/TIL/blob/master/2021/210720_http_3_http_message.md)
