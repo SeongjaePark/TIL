@@ -63,3 +63,5 @@
 2021.07.20 - [HTTP 완벽 가이드: 1장 HTTP 개관](https://github.com/SeongjaePark/TIL/blob/master/2021/210720_http_1_overview.md), [HTTP 완벽 가이드: 2장 URL과 리소스](https://github.com/SeongjaePark/TIL/blob/master/2021/210720_http_2_url&resource.md)
 
 2021.07.27 - [HTTP 완벽 가이드: 3장 HTTP 메시지](https://github.com/SeongjaePark/TIL/blob/master/2021/210720_http_3_http_message.md)
+
+2021.08.12 - [HTTP 완벽 가이드: 5장 웹 서버](https://github.com/SeongjaePark/TIL/blob/master/2021/210720_http_5_web_server.md)
